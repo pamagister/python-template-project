@@ -32,16 +32,18 @@ precommit: ## Format, test and check dependencies.
 
 .PHONY: fmt
 fmt:              ## Format code using black & isort.
-	uv run ruff format
+	uv run ruff format src/
+	uv run ruff format tests/
 	uv run isort src/
-	uv run black -l 100 src/
-	uv run black -l 100 tests/
+	uv run ruff format --check src/
+	uv run ruff format --check tests/
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
-	uv run flake8 src/
-	uv run black -l 100 --check src/
-	uv run black -l 100 --check tests/
+	uv run ruff check src/
+	uv run ruff check tests/
+	uv run ruff format --check src/
+	uv run ruff format --check tests/
 	uv run mypy --ignore-missing-imports src/
 
 .PHONY: test

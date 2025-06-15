@@ -6,8 +6,6 @@ import re
 from email.header import decode_header
 from email.utils import mktime_tz, parsedate_tz
 
-
-
 NAME = "python_template_project"
 
 """
@@ -17,6 +15,7 @@ pip install pyinstaller
 pyinstaller --onefile --windowed python_template_project_gui.py
 
 """
+
 
 class PythonProject:
     def __init__(
@@ -39,7 +38,6 @@ class PythonProject:
             "date": include_date,
             "subject": include_subject,
         }
-
 
     def convert(self):
         print(f"Command run successfully: {self.mbox_file}")
