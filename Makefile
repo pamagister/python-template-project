@@ -25,6 +25,9 @@ lock:           ## builds the uv.lock file and syncs the packages
 	uv lock
 
 .PHONY: precommit
+# install automatic pre-commit run locally:
+# uv pip install pre-commit # --> is usually configured in pyproject.toml
+# uv run pre-commit install # --> will setup .git\hooks\pre-commit if a .pre-commit-config.yaml exists
 precommit: ## Format, test and check dependencies.
 	$(MAKE) fmt
 	$(MAKE) test
@@ -66,6 +69,7 @@ clean:            ## Clean unused files.
 	@rm -rf .mypy_cache
 	@rm -rf build
 	@rm -rf dist
+	@rm -rf site
 	@rm -rf *.egg-info
 	@rm -rf htmlcov
 	@rm -rf .tox/
