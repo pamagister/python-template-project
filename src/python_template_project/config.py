@@ -90,7 +90,7 @@ class ConfigParameterManager:
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         with open(output_path, "w", encoding="utf-8") as f:
-            f.write("# python_template_project Configuration File\n")
+            f.write("# Configuration File\n")
             f.write("# This file was auto-generated. Modify as needed.\n\n")
 
             for param in PARAMETERS:
