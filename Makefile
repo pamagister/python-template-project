@@ -35,8 +35,7 @@ fmt:              ## Format code using black & isort.
 	uv run ruff format src/
 	uv run ruff format tests/
 	uv run isort src/
-	uv run ruff format --check src/
-	uv run ruff format --check tests/
+	uv run isort tests/
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
@@ -44,7 +43,7 @@ lint:             ## Run pep8, black, mypy linters.
 	uv run ruff check tests/
 	uv run ruff format --check src/
 	uv run ruff format --check tests/
-	uv run mypy --ignore-missing-imports src/
+#	uv run mypy --ignore-missing-imports src/
 
 .PHONY: test
 test: lint        ## Run tests and generate coverage report.

@@ -8,12 +8,11 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+
 import yaml
 
 from src.python_template_project.config import ConfigParameterManager
 from src.python_template_project.parameters import PARAMETERS
-from src.python_template_project import cli
 
 
 class TestGenericCLI(unittest.TestCase):
