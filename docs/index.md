@@ -1,8 +1,17 @@
+# Welcome to python-template-project
+
 A feature-rich Python project template designed for robustness and ease of use.
+
+[![Github CI Status](https://github.com/pamagister/mbox_converter/actions/workflows/main.yml/badge.svg)](https://github.com/pamagister/mbox_converter/actions)
+[![GitHub release](https://img.shields.io/github/v/release/pamagister/mbox_converter)](https://github.com/pamagister/mbox_converter/releases)
+[![Read the Docs](https://readthedocs.org/projects/mbox-gmail-converter/badge/?version=stable)](https://mbox-gmail-converter.readthedocs.io/en/stable/)
+[![License](https://img.shields.io/github/license/pamagister/mbox_converter)](https://github.com/pamagister/mbox_converter/blob/main/LICENSE)
+[![GitHub issues](https://img.shields.io/github/issues/pamagister/mbox_converter)](https://github.com/pamagister/mbox_converter/issues)
+[![PyPI](https://img.shields.io/pypi/v/mbox_converter)](https://pypi.org/project/mbox_converter/)
+
 
 This template provides a solid foundation for your next Python project, incorporating best practices for testing, automation, and distribution. It streamlines the development process with a comprehensive set of pre-configured tools and workflows, allowing you to focus on writing code.
 
----
 
 ## Features
 
@@ -17,4 +26,4 @@ This template provides a solid foundation for your next Python project, incorpor
     * Automatic generation of CLI API documentation.
 * **Documentation:** Configuration for publishing documentation on Read the Docs.
 * **Workflow Automation:** A `Makefile` is included to simplify and automate common development tasks.
-* **Minimalist GUI:** Comes with a basic GUI that includes an auto-generated settings menu based on your defined parameters.
+* **Minimalist GUI:** Comes with a basic GUI that in
