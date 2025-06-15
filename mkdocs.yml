@@ -1,7 +1,7 @@
 site_name: MBOX Converter
 site_url: !ENV READTHEDOCS_CANONICAL_URL
 site_description: A lightweight tool for converting and processing .mbox files
-repo_url: https://github.com/pamagister/mbox_converter
+repo_url: https://github.com/pamagister/python-template-projec
 repo_name: GitHub
 
 # See also:
