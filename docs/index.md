@@ -26,4 +26,4 @@ This template provides a solid foundation for your next Python project, incorpor
     * Automatic generation of CLI API documentation.
 * **Documentation:** Configuration for publishing documentation on Read the Docs.
 * **Workflow Automation:** A `Makefile` is included to simplify and automate common development tasks.
-* **Minimalist GUI:** Comes with a basic GUI that in
+* **Minimalist GUI:** Comes with a basic GUI that includes an auto-generated settings menu based on your defined parameters.
