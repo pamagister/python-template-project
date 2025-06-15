@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 import yaml  # type: ignore
 
@@ -8,7 +8,7 @@ from src.python_template_project.parameters import PARAMETERS
 
 
 class ConfigParameterManager:
-    def __init__(self, config_file: Optional[str] = None, **kwargs):
+    def __init__(self, config_file: str | None = None, **kwargs):
         """Initialize configuration from file and/or keyword arguments.
 
         Args:
@@ -69,7 +69,7 @@ class ConfigParameterManager:
             else:
                 json.dump(config_data, f, indent=2)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary."""
         return {param.name: getattr(self, param.name) for param in PARAMETERS}
 

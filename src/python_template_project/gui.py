@@ -2,8 +2,8 @@ import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
-from python_template_project.config import ConfigParameterManager
 from src.python_template_project.base import PythonProject
+from src.python_template_project.config import ConfigParameterManager
 
 
 class MboxConverterGui:
@@ -73,11 +73,6 @@ class MboxConverterGui:
             messagebox.showerror("Error", "Please select a valid .mbox file.")
             return
 
-        try:
-            max_days = int(self.max_days.get()) if self.max_days.get() else -1
-        except ValueError:
-            messagebox.showerror("Error", "Max Days must be a number.")
-            return
         config = ConfigParameterManager("config.yaml")
         parser = PythonProject(config)
 

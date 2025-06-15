@@ -5,7 +5,7 @@ It can generate config files, CLI modules, and documentation from the parameter 
 """
 
 from dataclasses import dataclass
-from typing import Any, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -15,9 +15,9 @@ class ConfigParameter:
     name: str
     default: Any
     type_: type
-    choices: Optional[List[str | bool]] = None
+    choices: list[str | bool] | None = None
     help: str = ""
-    cli_arg: Optional[str] = None
+    cli_arg: str | None = None
     required: bool = False
     is_cli: bool = True
 

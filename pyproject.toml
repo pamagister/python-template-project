@@ -59,7 +59,7 @@ select = [
     "C4",  # flake8-comprehensions
     "UP",  # pyupgrade
 ]
-ignore = ["E721", "UP015"]
+ignore = ["E721", "UP015", "B009", "B905"]
 
 [tool.ruff.format]
 quote-style = "double"
