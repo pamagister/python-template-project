@@ -1,0 +1,46 @@
+[project]
+name = "python-template-project"
+version = "0.1.0"
+description = "Feature-rich Python project template designed for robustness and ease of use."
+authors = [
+    {name = "pamagister"}
+]
+readme = "docs/index.md"
+requires-python = ">=3.10,<3.12"
+dependencies = [
+    "pyyaml>=6.0.2",
+]
+
+# Dev dependencies as optional dependencies
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.4.0",
+    "pytest-mock>=3.14.1",
+    "coverage>=7.8.2",
+    "flake8>=7.2.0",
+    "black>=25.1.0",
+    "isort>=6.0.1",
+    "pytest-cov>=6.1.1",
+    "mypy>=1.16.0",
+    "gitchangelog>=3.0.4",
+    "pyinstaller>=5.8",
+    "pre-commit>=4.2.0",
+    "ruff>=0.11.13"
+]
+
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-awesome-nav>=2.6.1",
+    "pygments>=2.19.1",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.poetry.scripts]
+mbox_converter = "mbox_converter.cli:main"
+mbox_gui = "mbox_converter.gui:run_gui"
+
+[tool.deptry]
+pep621_dev_dependency_groups = ["dev", "docs"]
