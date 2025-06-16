@@ -10,4 +10,5 @@
 nav:
   - index.md
   - getting-started
+  - cli
   - contributing
