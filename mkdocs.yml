@@ -13,7 +13,7 @@ repo_name: GitHub
 theme:
   name: readthedocs
   highlightjs: true
-  logo: _static/img/logo.svg
+  logo: _static/img/logo.png
   favicon: _static/img/favicon.png
   features:
     - navigation.instant

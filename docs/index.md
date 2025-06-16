@@ -30,13 +30,21 @@ This template provides a solid foundation for your next Python project, incorpor
 
 ## Getting started
 
-1. Create a new [github repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository).
-2. Clone [github repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the into your local file system.
-3. Install [uv package and project manager](https://docs.astral.sh/uv/getting-started/installation/).
-   ```pip install uv```
-5. Generate [a sample project](https://docs.astral.sh/uv/guides/projects/#creating-a-new-project) with uv
-6. Add and push the artifacts to your github repository
-7. Copy the content of this repository into your repository
+1. **Create** a new [github repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository).
+2. **Clone** [github repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the into your local file system.
+    ```bash
+    git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY
+    ```
+4. **Install** [uv package and project manager](https://docs.astral.sh/uv/getting-started/installation/)
+    ```bash
+    pip install uv
+    ```
+5. **Generate** [a sample project](https://docs.astral.sh/uv/guides/projects/#creating-a-new-project) with uv
+6. Add and **push** the artifacts to your github repository
+    ```bash
+    git push
+    ```
+8. Copy the content of this repository into your repository
 
 ## Troubleshooting
 
