@@ -1,3 +1,4 @@
+from ..config.config import ConfigParameterManager
 from ..parameters import POSITIONAL_ARGUMENT
 
 NAME = "python_template_project"
@@ -7,14 +8,13 @@ generate a gui application
 
 pip install pyinstaller
 pyinstaller --onefile --windowed python_template_project_gui.py
-
 """
 
 
 class PythonProject:
     def __init__(
         self,
-        config,
+        config: ConfigParameterManager,
     ):
         self.input = getattr(config, POSITIONAL_ARGUMENT)
         self.output = getattr(config, "output")

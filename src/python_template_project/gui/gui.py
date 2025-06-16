@@ -6,7 +6,7 @@ from ..config.config import ConfigParameterManager
 from ..core.base import PythonProject
 
 
-class MboxConverterGui:
+class MainGui:
     def __init__(self, root):
         self.root = root
         self.root.title("Mbox Converter")
@@ -86,7 +86,7 @@ class MboxConverterGui:
 def main():
     """Main entry point for the CLI application."""
     root = tk.Tk()
-    MboxConverterGui(root)
+    MainGui(root)
     root.mainloop()
 
 
