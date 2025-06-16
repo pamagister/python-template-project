@@ -7,8 +7,8 @@ Do not modify manually - regenerate using MboxConverterConfig.generate_cli_modul
 import argparse
 from pathlib import Path
 
-from src.python_template_project.base import PythonProject
-from src.python_template_project.config import ConfigParameterManager
+from python_template_project.config.config import ConfigParameterManager
+from python_template_project.core.base import PythonProject
 from src.python_template_project.parameters import PARAMETERS
 
 

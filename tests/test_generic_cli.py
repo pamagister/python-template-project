@@ -4,14 +4,11 @@ This test suite validates the integration between parameters.py, config.py, and 
 with various parameter combinations and edge cases.
 """
 
-import json
 import tempfile
 import unittest
 from pathlib import Path
 
-import yaml
-
-from src.python_template_project.config import ConfigParameterManager
+from python_template_project.config.config import ConfigParameterManager
 from src.python_template_project.parameters import PARAMETERS
 
 

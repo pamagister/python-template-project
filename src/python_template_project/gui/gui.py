@@ -2,8 +2,8 @@ import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
-from src.python_template_project.base import PythonProject
-from src.python_template_project.config import ConfigParameterManager
+from python_template_project.config.config import ConfigParameterManager
+from python_template_project.core.base import PythonProject
 
 
 class MboxConverterGui:
@@ -83,7 +83,14 @@ class MboxConverterGui:
             messagebox.showerror("Error", str(e))
 
 
-if __name__ == "__main__":
+def main():
+    """Main entry point for the CLI application."""
     root = tk.Tk()
-    gui = MboxConverterGui(root)
+    MboxConverterGui(root)
     root.mainloop()
+
+
+if __name__ == "__main__":
+    import sys
+
+    sys.exit(main())
