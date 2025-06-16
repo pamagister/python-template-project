@@ -91,17 +91,17 @@ release:          ## Create a new tag for release.
 	@CURRENT_VERSION=$$(cat src/VERSION)
 	IFS=. read -r MAJOR MINOR PATCH <<< "$$CURRENT_VERSION"
 	@NEXT_VERSION="$$MAJOR.$$MINOR.$$((PATCH + 1))"
-	@echo "Current version: $$CURRENT_VERSION"
-	@read -e -i "$$NEXT_VERSION" -p "Version? (provide the next x.y.z semver) : " TAG
-	@echo "$${TAG}" > src/VERSION
-	@uv run gitchangelog > HISTORY.md
-	@git add src/VERSION HISTORY.md
-	@git commit -m "release: version $${TAG} 🚀"
-	@echo "creating git tag : $${TAG}"
-	@git tag $${TAG}
-	@git push -u origin HEAD --tags
-	@echo "GitHub Actions will detect the new tag and release the new version."
-	@echo "Add modified files to commit and push them to main"
+	echo "Current version: $$CURRENT_VERSION"
+	read -e -i "$$NEXT_VERSION" -p "Version? (provide the next x.y.z semver) : " TAG
+	echo "$${TAG}" > src/VERSION
+	uv run gitchangelog > HISTORY.md
+	git add src/VERSION HISTORY.md
+	git commit -m "release: version $${TAG} 🚀"
+	echo "creating git tag : $${TAG}"
+	git tag $${TAG}
+	git push -u origin HEAD --tags
+	echo "GitHub Actions will detect the new tag and release the new version."
+	echo "Add modified files to commit and push them to main"
 
 .PHONY: docs
 docs:             ## Build and sync the documentation.
