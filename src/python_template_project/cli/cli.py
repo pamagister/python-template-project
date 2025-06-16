@@ -7,9 +7,9 @@ Do not modify manually - regenerate using MboxConverterConfig.generate_cli_modul
 import argparse
 from pathlib import Path
 
-from python_template_project.config.config import ConfigParameterManager
-from python_template_project.core.base import PythonProject
-from src.python_template_project.parameters import PARAMETERS
+from ..config.config import ConfigParameterManager
+from ..core.base import PythonProject
+from ..parameters import PARAMETERS
 
 
 def parse_arguments():

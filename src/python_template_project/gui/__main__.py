@@ -2,7 +2,7 @@
 
 import sys
 
-from python_template_project.gui.gui import main
+from .gui import main
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -2,7 +2,7 @@
 
 import sys
 
-from python_template_project.cli.cli import main
+from .cli import main
 
 if __name__ == "__main__":
     sys.exit(main())
