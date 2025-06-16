@@ -15,11 +15,11 @@ class PythonProject:
         self,
         config: ConfigParameterManager,
     ):
-        self.input = getattr(config, "input")
-        self.output = getattr(config, "output")
-        self.min_dist = getattr(config, "min_dist")
-        self.extract_waypoints = getattr(config, "extract_waypoints")
-        self.date_format = getattr(config, "date_format")
+        self.input = config.cli.input
+        self.output = config.cli.output
+        self.min_dist = config.cli.min_dist
+        self.extract_waypoints = config.cli.extract_waypoints
+        self.date_format = config.app.date_format
 
         self.input = input
 

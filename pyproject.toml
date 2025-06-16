@@ -11,6 +11,7 @@ dependencies = [
     "pydantic>=2.11.7",
     "pyyaml>=6.0.2",
 ]
+packages = [{ include = "python_template_project", from = "src" }]
 
 # Dev dependencies as optional dependencies
 [project.optional-dependencies]
@@ -40,8 +41,8 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.poetry.scripts]
-python-template-project = "python_template_project.cli.main:main"
-python-template-project-gui = "python_template_project.gui.main:main"
+python-template-project = "python_template_project.cli.cli:main"
+python-template-project-gui = "python_template_project.gui.gui:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

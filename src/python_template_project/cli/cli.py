@@ -2,9 +2,12 @@
 
 This file was generated from config.py parameter definitions.
 Do not modify manually - regenerate using ConfigParameterManager CLI generation methods.
+
+run cli: python -m python_template_project.cli
 """
 
 import argparse
+import traceback
 from pathlib import Path
 from typing import Any
 
@@ -49,7 +52,7 @@ Examples:
             }
 
             # Handle different parameter types
-            if param.choices:
+            if param.choices and not param.type_ == bool:
                 kwargs["choices"] = param.choices
 
             if param.type_ == int:
@@ -143,9 +146,11 @@ def main():
 
     except FileNotFoundError as e:
         print(f"Error: {e}")
+        traceback.print_exc()
         return 1
     except Exception as e:
         print(f"Unexpected error: {e}")
+        traceback.print_exc()
         return 1
 
 

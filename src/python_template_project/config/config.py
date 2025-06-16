@@ -30,6 +30,8 @@ class ConfigParameter:
     def __post_init__(self):
         if self.cli_arg is None and not self.required:
             self.cli_arg = f"--{self.name}"
+        if self.type_ is bool:
+            self.choices = [True, False]
 
 
 class CliConfig(BaseModel):
@@ -64,7 +66,6 @@ class CliConfig(BaseModel):
         name="extract_waypoints",
         default=True,
         type_=bool,
-        choices=[True, False],
         help="Extract starting points of each track as waypoint",
     )
 
