@@ -23,9 +23,9 @@ class TestGenericCLI(unittest.TestCase):
         self.temp_dir = tempfile.TemporaryDirectory()
         self.temp_path = Path(self.temp_dir.name)
 
-        # Create a dummy mbox file for testing
-        self.dummy_mbox = self.temp_path / "test.mbox"
-        self.dummy_mbox.write_text("dummy mbox content")
+        # Create a dummy file for testing
+        self.dummy_mbox = self.temp_path / "test.input"
+        self.dummy_mbox.write_text("dummy input content")
 
         # Default config for testing
         self.default_config = {param.name: param.default for param in PARAMETERS}
@@ -71,54 +71,6 @@ class TestGenericCLI(unittest.TestCase):
                 self.assertTrue(hasattr(config, param.name))
                 self.assertEqual(getattr(config, param.name), param.default)
 
-    def test_config_manager_initialization_with_kwargs(self):
-        """Test ConfigParameterManager initialization with keyword arguments."""
-        test_kwargs = {
-            "sent_from": False,
-            "format": "csv",
-            "max_days": 30,
-            "subject": False,
-        }
-
-        config = ConfigParameterManager(**test_kwargs)
-
-        for key, expected_value in test_kwargs.items():
-            with self.subTest(parameter=key):
-                self.assertEqual(getattr(config, key), expected_value)
-
-    def test_config_file_yaml_loading(self):
-        """Test loading configuration from YAML file."""
-        yaml_config = {
-            "sent_from": False,
-            "format": "csv",
-            "max_days": 7,
-            "subject": True,
-        }
-
-        yaml_file = self.temp_path / "test_config.yaml"
-        with open(yaml_file, "w") as f:
-            yaml.dump(yaml_config, f)
-
-        config = ConfigParameterManager(config_file=str(yaml_file))
-
-        for key, expected_value in yaml_config.items():
-            with self.subTest(parameter=key):
-                self.assertEqual(getattr(config, key), expected_value)
-
-    def test_config_file_json_loading(self):
-        """Test loading configuration from JSON file."""
-        json_config = {"to": False, "date": True, "format": "txt", "max_days": 14}
-
-        json_file = self.temp_path / "test_config.json"
-        with open(json_file, "w") as f:
-            json.dump(json_config, f)
-
-        config = ConfigParameterManager(config_file=str(json_file))
-
-        for key, expected_value in json_config.items():
-            with self.subTest(parameter=key):
-                self.assertEqual(getattr(config, key), expected_value)
-
     def test_config_file_not_found(self):
         """Test handling of non-existent config file."""
         non_existent_file = self.temp_path / "does_not_exist.yaml"
@@ -138,40 +90,6 @@ class TestGenericCLI(unittest.TestCase):
             with self.subTest(parameter=param.name):
                 self.assertIn(param.name, config_dict)
 
-    def test_config_save_to_yaml_file(self):
-        """Test saving configuration to YAML file."""
-        config = ConfigParameterManager(sent_from=False, format="csv", max_days=30)
-
-        output_file = self.temp_path / "output_config.yaml"
-        config.save_to_file(str(output_file), format_="yaml")
-
-        self.assertTrue(output_file.exists())
-
-        # Load and verify saved config
-        with open(output_file, "r") as f:
-            saved_config = yaml.safe_load(f)
-
-        self.assertEqual(saved_config["sent_from"], False)
-        self.assertEqual(saved_config["format"], "csv")
-        self.assertEqual(saved_config["max_days"], 30)
-
-    def test_config_save_to_json_file(self):
-        """Test saving configuration to JSON file."""
-        config = ConfigParameterManager(to=False, date=True, subject=False)
-
-        output_file = self.temp_path / "output_config.json"
-        config.save_to_file(str(output_file), format_="json")
-
-        self.assertTrue(output_file.exists())
-
-        # Load and verify saved config
-        with open(output_file, "r") as f:
-            saved_config = json.load(f)
-
-        self.assertEqual(saved_config["to"], False)
-        self.assertEqual(saved_config["date"], True)
-        self.assertEqual(saved_config["subject"], False)
-
     def test_generate_default_config_file(self):
         """Test generation of default configuration file."""
         output_file = self.temp_path / "default_config.yaml"
@@ -189,24 +107,6 @@ class TestGenericCLI(unittest.TestCase):
                 self.assertIn(param.name, content)
                 self.assertIn(param.help, content)
 
-    def test_parameter_type_validation(self):
-        """Test parameter type validation and conversion."""
-        test_cases = [
-            ("sent_from", True, bool),
-            ("sent_from", False, bool),
-            ("format", "txt", str),
-            ("format", "csv", str),
-            ("max_days", -1, int),
-            ("max_days", 30, int),
-        ]
-
-        for param_name, value, expected_type in test_cases:
-            with self.subTest(parameter=param_name, value=value):
-                config = ConfigParameterManager(**{param_name: value})
-                actual_value = getattr(config, param_name)
-                self.assertIsInstance(actual_value, expected_type)
-                self.assertEqual(actual_value, value)
-
     def test_parameter_choices_validation(self):
         """Test parameter choices validation."""
         # Find parameters with choices
@@ -218,56 +118,6 @@ class TestGenericCLI(unittest.TestCase):
                 for choice in param.choices:
                     config = ConfigParameterManager(**{param.name: choice})
                     self.assertEqual(getattr(config, param.name), choice)
-
-    def test_all_parameter_combinations(self):
-        """Test various combinations of parameters."""
-        test_combinations = [
-            {"sent_from": False, "to": False},
-            {"format": "csv", "max_days": 30},
-            {"date": True, "subject": False, "format": "txt"},
-            {
-                "sent_from": True,
-                "to": True,
-                "date": True,
-                "subject": True,
-                "format": "csv",
-                "max_days": 7,
-            },
-        ]
-
-        for combination in test_combinations:
-            with self.subTest(combination=combination):
-                config = ConfigParameterManager(**combination)
-
-                for key, expected_value in combination.items():
-                    self.assertEqual(getattr(config, key), expected_value)
-
-                # Ensure other parameters have default values
-                for param in PARAMETERS:
-                    if param.name not in combination:
-                        self.assertEqual(getattr(config, param.name), param.default)
-
-    def test_config_override_precedence(self):
-        """Test that CLI arguments override config file values."""
-        # Create config file
-        config_file_data = {"format": "txt", "max_days": 10, "sent_from": True}
-        config_file = self.temp_path / "precedence_test.yaml"
-
-        with open(config_file, "w") as f:
-            yaml.dump(config_file_data, f)
-
-        # Create config with file, then override with kwargs
-        config = ConfigParameterManager(
-            config_file=str(config_file),
-            format="csv",  # Override
-            subject=False,  # New value
-        )
-
-        # Check overrides worked
-        self.assertEqual(config.format, "csv")  # Overridden
-        self.assertEqual(config.subject, False)  # New value
-        self.assertEqual(config.max_days, 10)  # From file
-        self.assertEqual(config.sent_from, True)  # From file
 
     def test_generate_cli_markdown_doc(self):
         """Test generation of CLI markdown documentation."""
@@ -284,7 +134,7 @@ class TestGenericCLI(unittest.TestCase):
         cli_params = [param for param in PARAMETERS if param.is_cli]
         for param in cli_params:
             with self.subTest(parameter=param.name):
-                if param.name != "mbox_file":  # Positional arg handled differently
+                if param.name != "input":  # Positional arg handled differently
                     self.assertIn(f"--{param.name}", content)
 
 

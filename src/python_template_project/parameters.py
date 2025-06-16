@@ -22,7 +22,7 @@ class ConfigParameter:
     is_cli: bool = True
 
     def __post_init__(self):
-        if self.cli_arg is None:
+        if self.is_cli and self.cli_arg is None:
             self.cli_arg = f"--{self.name}"
 
 
@@ -33,53 +33,31 @@ This serves as the single source of truth for configuration management.
 """
 PARAMETERS = [
     ConfigParameter(
-        name="sent_from",
-        default=True,
-        type_=bool,
-        choices=[True, False],
-        help="Include 'From' field",
-    ),
-    ConfigParameter(
-        name="to",
-        default=True,
-        type_=bool,
-        choices=[True, False],
-        help="Include 'To' field",
-    ),
-    ConfigParameter(
-        name="date",
-        default=True,
-        type_=bool,
-        choices=[True, False],
-        help="Include 'Date' field",
-    ),
-    ConfigParameter(
-        name="subject",
-        default=True,
-        type_=bool,
-        choices=[True, False],
-        help="Include 'Subject' field",
-    ),
-    ConfigParameter(
-        name="format",
-        default="txt",
-        type_=str,
-        choices=["txt", "csv"],
-        help="Output format: txt or csv",
-    ),
-    ConfigParameter(
-        name="max_days",
-        default=-1,
-        type_=int,
-        help="Max number of days per output file (-1 for unlimited)",
-    ),
-    ConfigParameter(
-        name="mbox_file",
+        name="input",
         default="",
         type_=str,
-        help="Path to mbox file",
+        help="Path to input (file or folder)",
         required=True,
         cli_arg=None,  # Positional argument
+    ),
+    ConfigParameter(
+        name="output",
+        default="",
+        type_=str,
+        help="Path to output destination",
+    ),
+    ConfigParameter(
+        name="min_dist",
+        default=20,
+        type_=int,
+        help="maximum distance between two waypoints",
+    ),
+    ConfigParameter(
+        name="extract_waypoints",
+        default=True,
+        type_=bool,
+        choices=[True, False],
+        help="extract starting points of each track as waypoint",
     ),
     ConfigParameter(
         name="date_format",

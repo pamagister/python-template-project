@@ -15,14 +15,9 @@ from src.python_template_project.parameters import PARAMETERS
 def parse_arguments():
     """Parse command line arguments with config file support."""
     parser = argparse.ArgumentParser(
-        description="Parse mbox file and export to text or CSV.",
+        description="Process input files",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  %(prog)s mailbox.mbox
-  %(prog)s --config config.yaml mailbox.mbox
-  %(prog)s --format csv --max-days 30 mailbox.mbox
-  %(prog)s --from False --subject False mailbox.mbox
         """,
     )
 
@@ -35,9 +30,9 @@ Examples:
 
     # Generate arguments from config parameters
     for param in PARAMETERS:
-        if param.name == "mbox_file":
+        if param.name == "input":
             # Positional argument
-            parser.add_argument("mbox_file", help=param.help)
+            parser.add_argument("input", help=param.help)
         else:
             # Optional argument
             kwargs = {
@@ -81,13 +76,13 @@ def main():
                     setattr(config, param.name, arg_value)
 
         # Validate required parameters
-        if False and not config.mbox_file:
-            print("Error: mbox_file is required")
+        if False and not config.input:
+            print("Error: input is required")
             return 1
 
-        # Check if mbox file exists
-        if not Path(config.mbox_file).exists():
-            print(f"Error: mbox file not found: {config.mbox_file}")
+        # Check if input file exists
+        if not Path(config.input).exists():
+            print(f"Error: file not found: {config.input}")
             return 1
 
         # Create and run MboxConverter

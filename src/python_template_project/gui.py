@@ -63,14 +63,14 @@ class MboxConverterGui:
         ).grid(row=9, column=1, columnspan=1, pady=10)
 
     def select_file(self):
-        file_path = filedialog.askopenfilename(filetypes=[("MBOX files", "*.mbox")])
+        file_path = filedialog.askopenfilename(filetypes=[("input files", "*.*")])
         if file_path:
             self.mbox_path.set(file_path)
 
     def run_parser(self):
         path = self.mbox_path.get()
         if not os.path.isfile(path):
-            messagebox.showerror("Error", "Please select a valid .mbox file.")
+            messagebox.showerror("Error", "Please select a valid file.")
             return
 
         config = ConfigParameterManager("config.yaml")

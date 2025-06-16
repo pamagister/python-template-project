@@ -1,40 +1,24 @@
 # Configuration File
 # This file was auto-generated. Modify as needed.
 
-# Include 'From' field
-# Choices: [True, False]
-# Type: bool
-sent_from: True
-
-# Include 'To' field
-# Choices: [True, False]
-# Type: bool
-to: True
-
-# Include 'Date' field
-# Choices: [True, False]
-# Type: bool
-date: True
-
-# Include 'Subject' field
-# Choices: [True, False]
-# Type: bool
-subject: False
-
-# Output format: txt or csv
-# Choices: ['txt', 'csv']
+# Path to input (file or folder)
 # Type: str
-format: 'txt'
+input: ''
 
-# Max number of days per output file (-1 for unlimited)
+# Path to output destination
+# Type: str
+output: ''
+
+# maximum distance between two waypoints
 # Type: int
-max_days: 1000
+min_dist: 20
 
-# Path to mbox file
-# Type: str
-mbox_file: ''
+# extract starting points of each track as waypoint
+# Choices: [True, False]
+# Type: bool
+extract_waypoints: True
 
 # Date format to use
 # Type: str
-date_format: '%d-%m-%Y'
+date_format: '%Y-%m-%d'
 

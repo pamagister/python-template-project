@@ -112,7 +112,7 @@ class ConfigParameterManager:
         for param in PARAMETERS:
             if not param.is_cli:
                 continue
-            cli_arg = f"`--{param.name}`" if param.name != "mbox_file" else "`path/to/file.mbox`"
+            cli_arg = f"`--{param.name}`" if param.name != "input" else "`path/to/file`"
             typ = param.type_.__name__
             desc = param.help
             default = (
@@ -149,7 +149,7 @@ class ConfigParameterManager:
 
         # Beispielbefehle erzeugen
         examples = []
-        required_arg = required_params[0].name if required_params else "example.mbox"
+        required_arg = required_params[0].name if required_params else "example.input"
         examples.append(
             dedent(
                 f"""
@@ -186,7 +186,7 @@ class ConfigParameterManager:
         Command line options
 
         ```bash
-        python -m python_template_project.cli [OPTIONS] path/to/file.mbox
+        python -m python_template_project.cli [OPTIONS] path/to/file
         ```
 
         ---
@@ -197,7 +197,7 @@ class ConfigParameterManager:
 
         ## 💡 Examples
 
-        In the example, the following is assumed: `example.mbox` in the current directory
+        In the example, the following is assumed: `example.input` in the current directory
 
         {}
         """

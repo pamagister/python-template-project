@@ -14,19 +14,17 @@ class PythonProject:
         self,
         config,
     ):
-        mbox_file = getattr(config, "mbox_file")
-        include_from = getattr(config, "sent_from")
-        include_to = getattr(config, "to")
-        include_date = getattr(config, "date")
-        include_subject = getattr(config, "subject")
+        self.input = getattr(config, "input")
+        self.output = getattr(config, "output")
+        self.min_dist = getattr(config, "min_dist")
+        self.extract_waypoints = getattr(config, "extract_waypoints")
+        self.date_format = getattr(config, "date_format")
 
-        self.mbox_file = mbox_file
-        self.include_options = {
-            "from": include_from,
-            "to": include_to,
-            "date": include_date,
-            "subject": include_subject,
-        }
+        self.input = input
 
     def convert(self):
-        print(f"Command run successfully: {self.mbox_file}")
+        print(
+            f"Command run successfully: "
+            f"{self.input}, "
+            f"{self.date_format}, {self.min_dist}, {self.extract_waypoints}, {self.output}"
+        )
