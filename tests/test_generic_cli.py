@@ -1,6 +1,6 @@
 """Generic unittest class for testing mbox_converter CLI and config integration.
 
-This test suite validates the integration between parameters.py, config.py, and cli.py
+This test suite validates the integration between config.py and cli.py
 with various parameter combinations and edge cases.
 """
 
@@ -9,7 +9,6 @@ import unittest
 from pathlib import Path
 
 from python_template_project.config.config import ConfigParameterManager
-from src.python_template_project.parameters import PARAMETERS
 
 
 class TestGenericCLI(unittest.TestCase):
