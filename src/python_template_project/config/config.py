@@ -1,33 +1,163 @@
+"""Central configuration management for python_template_project project.
+
+This module provides a single source of truth for all configuration parameters
+organized in categories (CLI, App, GUI). It can generate config files, CLI modules,
+and documentation from the parameter definitions.
+"""
+
 import json
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any
+from textwrap import dedent
+from typing import Any, Dict, List, Optional, Union
 
 import yaml  # type: ignore
+from pydantic import BaseModel
 
-from src.python_template_project.parameters import PARAMETERS
+
+@dataclass
+class ConfigParameter:
+    """Represents a single configuration parameter with all its metadata."""
+
+    name: str
+    default: Any
+    type_: type
+    choices: Optional[List[Union[str, bool, int]]] = None
+    help: str = ""
+    cli_arg: Optional[str] = None
+    required: bool = False
+
+    def __post_init__(self):
+        if self.cli_arg is None and not self.required:
+            self.cli_arg = f"--{self.name}"
 
 
-class ConfigParameterManager:
-    def __init__(self, config_file: str | None = None, **kwargs):
+class CliConfig(BaseModel):
+    """CLI-specific configuration parameters."""
+
+    # Positional argument
+    input: ConfigParameter = ConfigParameter(
+        name="input",
+        default="",
+        type_=str,
+        help="Path to input (file or folder)",
+        required=True,
+        cli_arg=None,  # Positional argument
+    )
+
+    # Optional CLI arguments
+    output: ConfigParameter = ConfigParameter(
+        name="output",
+        default="",
+        type_=str,
+        help="Path to output destination",
+    )
+
+    min_dist: ConfigParameter = ConfigParameter(
+        name="min_dist",
+        default=20,
+        type_=int,
+        help="Maximum distance between two waypoints",
+    )
+
+    extract_waypoints: ConfigParameter = ConfigParameter(
+        name="extract_waypoints",
+        default=True,
+        type_=bool,
+        choices=[True, False],
+        help="Extract starting points of each track as waypoint",
+    )
+
+
+class AppConfig(BaseModel):
+    """Application-specific configuration parameters."""
+
+    date_format: ConfigParameter = ConfigParameter(
+        name="date_format",
+        default="%Y-%m-%d",
+        type_=str,
+        help="Date format to use",
+    )
+
+    log_level: ConfigParameter = ConfigParameter(
+        name="log_level",
+        default="INFO",
+        type_=str,
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        help="Logging level for the application",
+    )
+
+    max_workers: ConfigParameter = ConfigParameter(
+        name="max_workers",
+        default=4,
+        type_=int,
+        help="Maximum number of worker threads",
+    )
+
+
+class GuiConfig(BaseModel):
+    """GUI-specific configuration parameters."""
+
+    theme: ConfigParameter = ConfigParameter(
+        name="theme",
+        default="light",
+        type_=str,
+        choices=["light", "dark", "auto"],
+        help="GUI theme setting",
+    )
+
+    window_width: ConfigParameter = ConfigParameter(
+        name="window_width",
+        default=800,
+        type_=int,
+        help="Default window width",
+    )
+
+    window_height: ConfigParameter = ConfigParameter(
+        name="window_height",
+        default=600,
+        type_=int,
+        help="Default window height",
+    )
+
+
+class ConfigParameterManager(BaseModel):
+    """Main configuration manager that handles all parameter categories."""
+
+    cli: CliConfig = CliConfig()
+    app: AppConfig = AppConfig()
+    gui: GuiConfig = GuiConfig()
+
+    def __init__(self, config_file: Optional[str] = None, **kwargs):
         """Initialize configuration from file and/or keyword arguments.
 
         Args:
             config_file: Path to configuration file (JSON or YAML)
-            **kwargs: Override parameters
+            **kwargs: Override parameters in format category__parameter (e.g., cli__output)
         """
-        # Set defaults
-        for param in PARAMETERS:
-            setattr(self, param.name, param.default)
+        super().__init__()
 
         # Load from file if provided
-        print(f"### {config_file}")
         if config_file:
             self.load_from_file(config_file)
 
         # Override with provided kwargs
+        self._apply_kwargs(kwargs)
+
+    def _apply_kwargs(self, kwargs: Dict[str, Any]):
+        """Apply keyword arguments to override configuration values.
+
+        Args:
+            kwargs: Dictionary with keys in format 'category__parameter'
+        """
         for key, value in kwargs.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
+            if "__" in key:
+                category, param_name = key.split("__", 1)
+                if hasattr(self, category):
+                    category_obj = getattr(self, category)
+                    if hasattr(category_obj, param_name):
+                        param = getattr(category_obj, param_name)
+                        param.default = value
 
     def load_from_file(self, config_file: str):
         """Load configuration from JSON or YAML file."""
@@ -40,11 +170,15 @@ class ConfigParameterManager:
                 config_data = yaml.safe_load(f)
             else:
                 config_data = json.load(f)
-            print(config_data)
 
-        for key, value in config_data.items():
-            if hasattr(self, key):
-                setattr(self, key, value)
+        # Apply loaded configuration
+        for category_name, category_data in config_data.items():
+            if hasattr(self, category_name):
+                category_obj = getattr(self, category_name)
+                for param_name, param_value in category_data.items():
+                    if hasattr(category_obj, param_name):
+                        param = getattr(category_obj, param_name)
+                        param.default = param_value
 
     def save_to_file(self, config_file: str, format_: str = "auto"):
         """Save current configuration to file.
@@ -69,23 +203,40 @@ class ConfigParameterManager:
             else:
                 json.dump(config_data, f, indent=2)
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""
-        return {param.name: getattr(self, param.name) for param in PARAMETERS}
+        result = {}
+        for category_name in ["cli", "app", "gui"]:
+            category_obj = getattr(self, category_name)
+            category_dict = {}
+            for field_name in category_obj.model_fields:
+                param = getattr(category_obj, field_name)
+                category_dict[param.name] = param.default
+            result[category_name] = category_dict
+        return result
+
+    def get_all_parameters(self) -> List[ConfigParameter]:
+        """Get all parameters from all categories."""
+        parameters = []
+        for category_name in ["cli", "app", "gui"]:
+            category_obj = getattr(self, category_name)
+            for field_name in category_obj.model_fields:
+                param = getattr(category_obj, field_name)
+                parameters.append(param)
+        return parameters
+
+    def get_cli_parameters(self) -> List[ConfigParameter]:
+        """Get only CLI parameters."""
+        cli_params = []
+        for field_name in self.cli.model_fields:
+            param = getattr(self.cli, field_name)
+            cli_params.append(param)
+        return cli_params
 
     @classmethod
     def generate_default_config_file(cls, output_file: str):
         """Generate a default configuration file with all parameters and their descriptions."""
-        # Add comments to YAML
-        config_data = {}
-        for param in PARAMETERS:
-            config_data[param.name] = {
-                "value": param.default,
-                "help": param.help,
-                "type": param.type_.__name__,
-                "choices": param.choices if param.choices else None,
-            }
-
+        manager = cls()
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -93,31 +244,38 @@ class ConfigParameterManager:
             f.write("# Configuration File\n")
             f.write("# This file was auto-generated. Modify as needed.\n\n")
 
-            for param in PARAMETERS:
-                f.write(f"# {param.help}\n")
-                if param.choices:
-                    f.write(f"# Choices: {str(param.choices)}\n")
-                f.write(f"# Type: {param.type_.__name__}\n")
-                f.write(f"{param.name}: {repr(param.default)}\n\n")
+            for category_name in ["cli", "app", "gui"]:
+                category_obj = getattr(manager, category_name)
+                f.write(f"# {category_name.upper()} Configuration\n")
+                f.write(f"{category_name}:\n")
+
+                for field_name in category_obj.model_fields:
+                    param = getattr(category_obj, field_name)
+                    f.write(f"  # {param.help}\n")
+                    if param.choices:
+                        f.write(f"  # Choices: {param.choices}\n")
+                    f.write(f"  # Type: {param.type_.__name__}\n")
+                    f.write(f"  {param.name}: {repr(param.default)}\n\n")
+
+                f.write("\n")
 
     @classmethod
     def generate_cli_markdown_doc(cls, output_file: str):
         """Generate a Markdown CLI documentation with a formatted table and examples."""
-        from textwrap import dedent
+        manager = cls()
+        cli_params = manager.get_cli_parameters()
 
         rows = []
         required_params = []
         optional_params = []
 
-        for param in PARAMETERS:
-            if not param.is_cli:
-                continue
+        for param in cli_params:
             cli_arg = f"`--{param.name}`" if param.name != "input" else "`path/to/file`"
             typ = param.type_.__name__
             desc = param.help
             default = (
                 "*required*"
-                if getattr(param, "required", False) or param.default in (None, "")
+                if param.required or param.default in (None, "")
                 else repr(param.default)
             )
             choices = str(param.choices) if param.choices else "-"
@@ -128,14 +286,14 @@ class ConfigParameterManager:
             else:
                 optional_params.append(param)
 
-        # Dynamisch Spaltenbreite bestimmen
+        # Dynamically determine column width
         def pad(s, width):
             return s + " " * (width - len(s))
 
         widths = [max(len(str(col)) for col in column) for column in zip(*rows)]
-        header = ["Option", "Typ", "Description", "Default", "Choices"]
+        header = ["Option", "Type", "Description", "Default", "Choices"]
 
-        # Markdown-Tabelle erstellen
+        # Create Markdown table
         table = (
             "| "
             + " | ".join(pad(h, w) for h, w in zip(header, widths))
@@ -147,7 +305,7 @@ class ConfigParameterManager:
         for row in rows:
             table += "| " + " | ".join(pad(str(col), w) for col, w in zip(row, widths)) + " |\n"
 
-        # Beispielbefehle erzeugen
+        # Generate example commands
         examples = []
         required_arg = required_params[0].name if required_params else "example.input"
         examples.append(
@@ -210,7 +368,6 @@ class ConfigParameterManager:
 
 def main():
     """Main function to generate config file and documentation."""
-
     default_config: str = "../../config.yaml"
     default_doc: str = "../../docs/usage/cli.md"
 

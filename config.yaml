@@ -1,24 +1,55 @@
 # Configuration File
 # This file was auto-generated. Modify as needed.
 
-# Path to input (file or folder)
-# Type: str
-input: ''
+# CLI Configuration
+cli:
+  # Path to input (file or folder)
+  # Type: str
+  input: ''
 
-# Path to output destination
-# Type: str
-output: ''
+  # Path to output destination
+  # Type: str
+  output: ''
 
-# maximum distance between two waypoints
-# Type: int
-min_dist: 20
+  # Maximum distance between two waypoints
+  # Type: int
+  min_dist: 20
 
-# extract starting points of each track as waypoint
-# Choices: [True, False]
-# Type: bool
-extract_waypoints: True
+  # Extract starting points of each track as waypoint
+  # Choices: [True, False]
+  # Type: bool
+  extract_waypoints: True
 
-# Date format to use
-# Type: str
-date_format: '%Y-%m-%d'
+
+# APP Configuration
+app:
+  # Date format to use
+  # Type: str
+  date_format: '%Y-%m-%d'
+
+  # Logging level for the application
+  # Choices: ['DEBUG', 'INFO', 'WARNING', 'ERROR']
+  # Type: str
+  log_level: 'INFO'
+
+  # Maximum number of worker threads
+  # Type: int
+  max_workers: 4
+
+
+# GUI Configuration
+gui:
+  # GUI theme setting
+  # Choices: ['light', 'dark', 'auto']
+  # Type: str
+  theme: 'light'
+
+  # Default window width
+  # Type: int
+  window_width: 800
+
+  # Default window height
+  # Type: int
+  window_height: 600
+
 

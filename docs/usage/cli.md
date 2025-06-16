@@ -10,12 +10,12 @@ python -m python_template_project.cli [OPTIONS] path/to/file
 
 ## ⚙️ CLI-Options
 
-| Option                | Typ  | Description                                       | Default    | Choices       |
+| Option                | Type | Description                                       | Default    | Choices       |
 |-----------------------|------|---------------------------------------------------|------------|---------------|
 | `path/to/file`        | str  | Path to input (file or folder)                    | *required* | -             |
 | `--output`            | str  | Path to output destination                        | *required* | -             |
-| `--min_dist`          | int  | maximum distance between two waypoints            | 20         | -             |
-| `--extract_waypoints` | bool | extract starting points of each track as waypoint | True       | [True, False] |
+| `--min_dist`          | int  | Maximum distance between two waypoints            | 20         | -             |
+| `--extract_waypoints` | bool | Extract starting points of each track as waypoint | True       | [True, False] |
 
 
 ## 💡 Examples
