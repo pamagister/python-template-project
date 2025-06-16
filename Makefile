@@ -101,6 +101,10 @@ release:          ## Create a new tag for release.
 	@git tag $${TAG}
 	@git push -u origin HEAD --tags
 	@echo "GitHub Actions will detect the new tag and release the new version."
+	@echo "Add modified files to commit and push them to main"
+	@git add src/VERSION
+	@git add HISTORY.md
+	@git commit -m "release: version $${TAG}: VERSION and HISTORY"
 
 .PHONY: docs
 docs:             ## Build and sync the documentation.
