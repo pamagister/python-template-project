@@ -1,3 +1,5 @@
+from ..parameters import POSITIONAL_ARGUMENT
+
 NAME = "python_template_project"
 
 """
@@ -14,7 +16,7 @@ class PythonProject:
         self,
         config,
     ):
-        self.input = getattr(config, "input")
+        self.input = getattr(config, POSITIONAL_ARGUMENT)
         self.output = getattr(config, "output")
         self.min_dist = getattr(config, "min_dist")
         self.extract_waypoints = getattr(config, "extract_waypoints")

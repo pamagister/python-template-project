@@ -31,12 +31,13 @@ class ConfigParameter:
 All parameters are defined here as class attributes with their metadata.
 This serves as the single source of truth for configuration management.
 """
+POSITIONAL_ARGUMENT = "input"
 PARAMETERS = [
     ConfigParameter(
-        name="input",
+        name=POSITIONAL_ARGUMENT,
         default="",
         type_=str,
-        help="Path to input (file or folder)",
+        help=f"Path to {POSITIONAL_ARGUMENT} (file or folder)",
         required=True,
         cli_arg=None,  # Positional argument
     ),

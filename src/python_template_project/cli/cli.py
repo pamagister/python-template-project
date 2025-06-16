@@ -9,7 +9,7 @@ from pathlib import Path
 
 from ..config.config import ConfigParameterManager
 from ..core.base import PythonProject
-from ..parameters import PARAMETERS
+from ..parameters import PARAMETERS, POSITIONAL_ARGUMENT
 
 
 def parse_arguments():
@@ -30,9 +30,9 @@ def parse_arguments():
 
     # Generate arguments from config parameters
     for param in PARAMETERS:
-        if param.name == "input":
+        if param.name == POSITIONAL_ARGUMENT:
             # Positional argument
-            parser.add_argument("input", help=param.help)
+            parser.add_argument(POSITIONAL_ARGUMENT, help=param.help)
         else:
             # Optional argument
             kwargs = {
