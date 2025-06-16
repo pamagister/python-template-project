@@ -9,10 +9,10 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 from textwrap import dedent
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
 import yaml  # type: ignore
-from pydantic import BaseModel
+from pydantic import BaseModel  # type: ignore
 
 
 @dataclass
@@ -22,9 +22,9 @@ class ConfigParameter:
     name: str
     default: Any
     type_: type
-    choices: Optional[List[Union[str, bool, int]]] = None
+    choices: list[str | bool | int] | None = None
     help: str = ""
-    cli_arg: Optional[str] = None
+    cli_arg: str | None = None
     required: bool = False
 
     def __post_init__(self):
@@ -128,7 +128,7 @@ class ConfigParameterManager(BaseModel):
     app: AppConfig = AppConfig()
     gui: GuiConfig = GuiConfig()
 
-    def __init__(self, config_file: Optional[str] = None, **kwargs):
+    def __init__(self, config_file: str | None = None, **kwargs):
         """Initialize configuration from file and/or keyword arguments.
 
         Args:
@@ -144,7 +144,7 @@ class ConfigParameterManager(BaseModel):
         # Override with provided kwargs
         self._apply_kwargs(kwargs)
 
-    def _apply_kwargs(self, kwargs: Dict[str, Any]):
+    def _apply_kwargs(self, kwargs: dict[str, Any]):
         """Apply keyword arguments to override configuration values.
 
         Args:
@@ -203,7 +203,7 @@ class ConfigParameterManager(BaseModel):
             else:
                 json.dump(config_data, f, indent=2)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary."""
         result = {}
         for category_name in ["cli", "app", "gui"]:
@@ -215,7 +215,7 @@ class ConfigParameterManager(BaseModel):
             result[category_name] = category_dict
         return result
 
-    def get_all_parameters(self) -> List[ConfigParameter]:
+    def get_all_parameters(self) -> list[ConfigParameter]:
         """Get all parameters from all categories."""
         parameters = []
         for category_name in ["cli", "app", "gui"]:
@@ -225,7 +225,7 @@ class ConfigParameterManager(BaseModel):
                 parameters.append(param)
         return parameters
 
-    def get_cli_parameters(self) -> List[ConfigParameter]:
+    def get_cli_parameters(self) -> list[ConfigParameter]:
         """Get only CLI parameters."""
         cli_params = []
         for field_name in self.cli.model_fields:

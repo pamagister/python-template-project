@@ -1,8 +1,8 @@
 """GUI entry point for project_name."""
 
-import sys
+import sys  # pragma: no cover
 
-from .gui import main
+from .gui import main  # pragma: no cover
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover
     sys.exit(main())

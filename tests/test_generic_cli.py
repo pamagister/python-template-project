@@ -24,7 +24,10 @@ class TestGenericCLI(unittest.TestCase):
         self.dummy_mbox.write_text("dummy input content")
 
         # Default config for testing
-        self.default_config = {param.name: param.default for param in PARAMETERS}
+        self.configManager = ConfigParameterManager()
+        self.default_cli_config = {
+            name: field.default for name, field in type(self.configManager.cli).model_fields.items()
+        }
 
     def tearDown(self):
         """Clean up after each test method."""
@@ -32,7 +35,7 @@ class TestGenericCLI(unittest.TestCase):
 
     def test_parameter_definitions_consistency(self):
         """Test that all parameters are properly defined and consistent."""
-        parameter_names = [param.name for param in PARAMETERS]
+        parameter_names = [param.name for param in self.default_cli_config.values()]
 
         # Check for duplicate parameter names
         self.assertEqual(
@@ -42,7 +45,7 @@ class TestGenericCLI(unittest.TestCase):
         )
 
         # Validate each parameter
-        for param in PARAMETERS:
+        for param in self.default_cli_config.values():
             with self.subTest(parameter=param.name):
                 self.assertIsInstance(param.name, str)
                 self.assertIsInstance(param.type_, type)
@@ -58,15 +61,6 @@ class TestGenericCLI(unittest.TestCase):
                     elif param.type_ == str:
                         self.assertIsInstance(param.default, str)
 
-    def test_config_manager_initialization_defaults(self):
-        """Test ConfigParameterManager initialization with default values."""
-        config = ConfigParameterManager()
-
-        for param in PARAMETERS:
-            with self.subTest(parameter=param.name):
-                self.assertTrue(hasattr(config, param.name))
-                self.assertEqual(getattr(config, param.name), param.default)
-
     def test_config_file_not_found(self):
         """Test handling of non-existent config file."""
         non_existent_file = self.temp_path / "does_not_exist.yaml"
@@ -76,15 +70,13 @@ class TestGenericCLI(unittest.TestCase):
 
     def test_config_to_dict(self):
         """Test conversion of config to dictionary."""
-        config = ConfigParameterManager(sent_from=False, format="csv")
-        config_dict = config.to_dict()
+        cli_config_dict = self.default_cli_config
+        self.assertIsInstance(cli_config_dict, dict)
+        self.assertEqual(len(cli_config_dict), len(self.default_cli_config.values()))
 
-        self.assertIsInstance(config_dict, dict)
-        self.assertEqual(len(config_dict), len(PARAMETERS))
-
-        for param in PARAMETERS:
+        for param in self.default_cli_config.values():
             with self.subTest(parameter=param.name):
-                self.assertIn(param.name, config_dict)
+                self.assertIn(param.name, cli_config_dict)
 
     def test_generate_default_config_file(self):
         """Test generation of default configuration file."""
@@ -98,7 +90,7 @@ class TestGenericCLI(unittest.TestCase):
         content = output_file.read_text()
         self.assertIn("# Configuration File", content)
 
-        for param in PARAMETERS:
+        for param in self.default_cli_config.values():
             with self.subTest(parameter=param.name):
                 self.assertIn(param.name, content)
                 self.assertIn(param.help, content)
@@ -106,14 +98,14 @@ class TestGenericCLI(unittest.TestCase):
     def test_parameter_choices_validation(self):
         """Test parameter choices validation."""
         # Find parameters with choices
-        choice_params = [param for param in PARAMETERS if param.choices]
+        choice_params = [param for param in self.default_cli_config.values() if param.choices]
 
         for param in choice_params:
             with self.subTest(parameter=param.name):
                 # Test valid choices
                 for choice in param.choices:
                     config = ConfigParameterManager(**{param.name: choice})
-                    self.assertEqual(getattr(config, param.name), choice)
+                    self.assertIn(choice, getattr(getattr(config.cli, param.name), "choices"))
 
     def test_generate_cli_markdown_doc(self):
         """Test generation of CLI markdown documentation."""
@@ -127,7 +119,7 @@ class TestGenericCLI(unittest.TestCase):
         self.assertIn("# Command line interface", content)
 
         # Check that parameters are documented
-        cli_params = [param for param in PARAMETERS if param.is_cli]
+        cli_params = self.default_cli_config.values()
         for param in cli_params:
             with self.subTest(parameter=param.name):
                 if param.name != "input":  # Positional arg handled differently

@@ -1,6 +1,5 @@
 from ..config.config import ConfigParameterManager
 
-
 NAME = "python_template_project"
 
 """

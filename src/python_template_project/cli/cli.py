@@ -6,7 +6,7 @@ Do not modify manually - regenerate using ConfigParameterManager CLI generation 
 
 import argparse
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 from ..config.config import ConfigParameterManager
 from ..core.base import PythonProject
@@ -40,10 +40,7 @@ Examples:
     for param in cli_params:
         if param.required and param.cli_arg is None:
             # Positional argument (like 'input')
-            parser.add_argument(
-                param.name,
-                help=param.help
-            )
+            parser.add_argument(param.name, help=param.help)
         else:
             # Optional argument
             kwargs = {
@@ -70,7 +67,7 @@ Examples:
     return parser.parse_args()
 
 
-def create_config_overrides(args: argparse.Namespace) -> Dict[str, Any]:
+def create_config_overrides(args: argparse.Namespace) -> dict[str, Any]:
     """Create configuration overrides from CLI arguments.
 
     Args:
@@ -126,8 +123,8 @@ def main():
 
         # Create config object with file and CLI overrides
         config = ConfigParameterManager(
-            config_file=args.config if hasattr(args, 'config') and args.config else None,
-            **cli_overrides
+            config_file=args.config if hasattr(args, "config") and args.config else None,
+            **cli_overrides,
         )
 
         # Validate configuration
@@ -154,4 +151,5 @@ def main():
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

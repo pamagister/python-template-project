@@ -1,6 +1,6 @@
 """Entry point for python_template_project."""
 
-import sys
+import sys  # pragma: no cover
 
 from .cli.cli import main  # pragma: no cover
 
