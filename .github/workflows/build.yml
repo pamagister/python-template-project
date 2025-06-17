@@ -40,7 +40,7 @@ jobs:
         run: |
           mkdir release
           copy dist\executable_cli.exe release\
-          **copy dist\executable_gui.exe release\**
+          copy dist\executable_gui.exe release\
           copy config.yaml release\
           copy README.md release\
           powershell Compress-Archive -Path release\* -DestinationPath installer-win.zip
