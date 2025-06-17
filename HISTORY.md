@@ -4,6 +4,31 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #18: Logging framework. [Paul Magister]
+- Feat #14: add run configurations. [Paul Magister]
+- Feat #14: Implement minimalist GUI with an auto-generated settings
+  menu. [Paul Magister]
+- Feat #10: massive refactoring on parameter and config handling: fix
+  tests. [Paul Magister]
+- Feat #10: massive refactoring on parameter and config handling: remove
+  parameters.py. [Paul Magister]
+- Feat #10: massive refactoring on parameter and config handling. [Paul
+  Magister]
+- Feat #17: genberal refactoring. [Paul Magister]
+- Feat #13: rename image. [Paul Magister]
+- Feat #11: adjust posituonal parameter to be more general. [Paul
+  Magister]
+- Feat #17: structural refactorings, fix import issues. [Paul Magister]
+- Feat #17: structural refactorings. [Paul Magister]
+- Feat #11: suitable cli parameters for this example workspace. [Paul
+  Magister]
+- Feat #5: Makefile better debugable. [Paul Magister]
+- Feat #12: add cli nav. [Paul Magister]
+- Feat #16: release. [Paul Magister]
+
+
+0.1.5 (2025-06-16)
+------------------
 - Feat #12: add cli nav. [Paul Magister]
 - Feat #12: cli documentation. [Paul Magister]
 - Feat #16: make the sh files runnable using: ```git update-index

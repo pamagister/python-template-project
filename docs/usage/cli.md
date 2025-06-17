@@ -29,13 +29,25 @@ In the example, the following is assumed: `example.input` in the current directo
 python -m python_template_project.cli input
 ```
 
-### 2. Example with 1 Parameter(s)
+### 2. With verbose logging
+
+```bash
+python -m python_template_project.cli --verbose input
+```
+
+### 3. With quiet mode
+
+```bash
+python -m python_template_project.cli --quiet input
+```
+
+### 4. Example with 1 Parameter(s)
 
 ```bash
 python -m python_template_project.cli --min_dist 20 input
 ```
 
-### 3. Example with 2 Parameter(s)
+### 5. Example with 2 Parameter(s)
 
 ```bash
 python -m python_template_project.cli --min_dist 20 --extract_waypoints True input
