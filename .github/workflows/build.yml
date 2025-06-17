@@ -3,8 +3,8 @@ name: Build Windows EXE
 on:
   push:
     tags:
-      - '*'  # Löst bei Tags wie 0.1 oder v0.1.3 aus
-  workflow_dispatch:  # Ermöglicht manuelles Auslösen
+      - '*'  # Triggers for tags like 0.1 or v0.1.3
+  workflow_dispatch:  # Allows manual triggering
 
 jobs:
   build:
