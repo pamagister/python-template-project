@@ -4,6 +4,31 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #8: CI: build macos: more echo. [Paul Magister]
+- Feat #7: CI: build windows: more echo. [Paul Magister]
+- Feat #7: CI: Create workflow for building Windows executable: fix
+  script: remove unneccessary ** [Paul Magister]
+- Feat #7: CI: Create workflow for building Windows executable: english.
+  [Paul Magister]
+- Feat #7: CI: Create workflow for building Windows executable. [Paul
+  Magister]
+- Feat #7: CI: Create workflow for building Windows executable. [Paul
+  Magister]
+- Feat #8: CI: Create workflow for building macOS installer/app bundle.
+  [Paul Magister]
+- Feat #7: CI: Create workflow for building Windows executable. [Paul
+  Magister]
+- Feat #17: cleanup doc. [Paul Magister]
+- Feat #16: adjust doc. [Paul Magister]
+- Feat #18: fix deprecation warning. [Paul Magister]
+- Feat #18: fix tests. [Paul Magister]
+- Feat #18: add logging for gui. [Paul Magister]
+- Feat #18: fix. [Paul Magister]
+- Feat #18: Logging framework. [Paul Magister]
+
+
+0.1.6 (2025-06-17)
+------------------
 - Feat #18: Logging framework. [Paul Magister]
 - Feat #14: add run configurations. [Paul Magister]
 - Feat #14: Implement minimalist GUI with an auto-generated settings
