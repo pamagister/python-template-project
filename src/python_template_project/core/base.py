@@ -1,4 +1,4 @@
-from ..config.config import ConfigParameterManager
+from python_template_project.config.config import ConfigParameterManager
 
 NAME = "python_template_project"
 
@@ -20,8 +20,6 @@ class PythonProject:
         self.min_dist = config.cli.min_dist
         self.extract_waypoints = config.cli.extract_waypoints
         self.date_format = config.app.date_format
-
-        self.input = input
 
     def convert(self):
         print(

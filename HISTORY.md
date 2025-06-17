@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #21: Build unified executable (gui and cli) for mac os. [Paul
+  Magister]
+
+
+0.1.9 (2025-06-17)
+------------------
 - Feat #21: Build unified executable (gui and cli) #21. [Paul Magister]
 - Feat #20: Makefile: Generate file tree #20. [Paul Magister]
 - Feat #16: make release. [Paul Magister]

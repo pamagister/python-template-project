@@ -264,7 +264,7 @@ class ConfigParameterManager(BaseModel):
     def to_dict(self) -> dict[str, Any]:
         """Convert configuration to dictionary."""
         result = {}
-        for category_name in ["cli", "app", "gui"]:
+        for category_name in self.model_fields.keys():
             category_obj = getattr(self, category_name)
             category_dict = {}
             for field_name in category_obj.model_fields:
@@ -276,7 +276,7 @@ class ConfigParameterManager(BaseModel):
     def get_all_parameters(self) -> list[ConfigParameter]:
         """Get all parameters from all categories."""
         parameters = []
-        for category_name in ["cli", "app", "gui"]:
+        for category_name in self.model_fields.keys():
             category_obj = getattr(self, category_name)
             for field_name in category_obj.model_fields:
                 param = getattr(category_obj, field_name)
@@ -311,6 +311,67 @@ class ConfigParameterManager(BaseModel):
         }
 
     @classmethod
+    def generate_config_markdown_doc(cls, output_file: str):
+        """Generate a Markdown documentation for all
+        configuration parameters organized by category."""
+
+        manager = cls()
+
+        def pad(s, width):
+            return s + " " * (width - len(s))
+
+        markdown_content = dedent(
+            """
+            # Config parameters
+
+            These parameters are available to configure the behavior of your application.
+            The parameters in the cli category can be accessed via the command line interface.
+
+            """
+        ).lstrip()
+
+        for category_name in cls.model_fields.keys():
+            category_obj = getattr(manager, category_name)
+            markdown_content += f'## Category "{category_name}"\n\n'
+
+            # Collect all parameters for this category
+            rows = []
+            header = ["Name", "Type", "Description", "Default", "Choices"]
+
+            for field_name in type(category_obj).model_fields.keys():
+                param = getattr(category_obj, field_name)
+                name = param.name
+                typ = param.type_.__name__
+                desc = param.help
+                default = repr(param.default)
+                choices = str(param.choices) if param.choices else "-"
+
+                rows.append((name, typ, desc, default, choices))
+
+            # Calculate column widths
+            all_rows = [header] + rows
+            widths = [max(len(str(col)) for col in column) for column in zip(*all_rows)]
+
+            # Create Markdown table
+            table = (
+                "| "
+                + " | ".join(pad(h, w) for h, w in zip(header, widths))
+                + " |\n"
+                + "|-"
+                + "-|-".join("-" * w for w in widths)
+                + "-|\n"
+            )
+            for row in rows:
+                table += "| " + " | ".join(pad(str(col), w) for col, w in zip(row, widths)) + " |\n"
+
+            markdown_content += table + "\n"
+
+        # Write to file
+        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(markdown_content)
+
+    @classmethod
     def generate_default_config_file(cls, output_file: str):
         """Generate a default configuration file with all parameters and their descriptions."""
         manager = cls()
@@ -321,7 +382,7 @@ class ConfigParameterManager(BaseModel):
             f.write("# Configuration File\n")
             f.write("# This file was auto-generated. Modify as needed.\n\n")
 
-            for category_name in ["cli", "app", "gui"]:
+            for category_name in cls.model_fields.keys():
                 category_obj = getattr(manager, category_name)
                 f.write(f"# {category_name.upper()} Configuration\n")
                 f.write(f"{category_name}:\n")
@@ -472,13 +533,17 @@ class ConfigParameterManager(BaseModel):
 def main():
     """Main function to generate config file and documentation."""
     default_config: str = "../../config.yaml"
-    default_doc: str = "../../docs/usage/cli.md"
+    default_cli_doc: str = "../../docs/usage/cli.md"
+    default_config_doc: str = "../../docs/usage/config.md"
 
     ConfigParameterManager.generate_default_config_file(default_config)
     print(f"Generated: {default_config}")
 
-    ConfigParameterManager.generate_cli_markdown_doc(default_doc)
-    print(f"Generated: {default_doc}")
+    ConfigParameterManager.generate_config_markdown_doc(default_config_doc)
+    print(f"Generated: {default_config_doc}")
+
+    ConfigParameterManager.generate_cli_markdown_doc(default_cli_doc)
+    print(f"Generated: {default_cli_doc}")
 
 
 if __name__ == "__main__":

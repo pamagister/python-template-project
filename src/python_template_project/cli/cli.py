@@ -11,9 +11,9 @@ import traceback
 from pathlib import Path
 from typing import Any
 
-from ..config.config import ConfigParameterManager
-from ..core.base import PythonProject
-from ..core.logging import initialize_logging
+from python_template_project.config.config import ConfigParameterManager
+from python_template_project.core.base import PythonProject
+from python_template_project.core.logging import initialize_logging
 
 
 def parse_arguments():
