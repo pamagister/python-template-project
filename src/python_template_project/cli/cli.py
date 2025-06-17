@@ -13,6 +13,7 @@ from typing import Any
 
 from ..config.config import ConfigParameterManager
 from ..core.base import PythonProject
+from ..core.logging import get_logger, initialize_logging
 
 
 def parse_arguments():
@@ -33,6 +34,14 @@ Examples:
         "--config",
         default=None,
         help="Path to configuration file (JSON or YAML)",
+    )
+
+    # Verbose/quiet options for log level override
+    parser.add_argument(
+        "-v", "--verbose", action="store_true", help="Enable verbose logging (DEBUG level)"
+    )
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="Enable quiet mode (WARNING level only)"
     )
 
     # Get CLI parameters from ConfigParameterManager
@@ -89,34 +98,44 @@ def create_config_overrides(args: argparse.Namespace) -> dict[str, Any]:
             # Add CLI category prefix for override system
             overrides[f"cli__{param.name}"] = arg_value
 
+    # Handle log level overrides from verbose/quiet flags
+    if hasattr(args, "verbose") and args.verbose:
+        overrides["app__log_level"] = "DEBUG"
+    elif hasattr(args, "quiet") and args.quiet:
+        overrides["app__log_level"] = "WARNING"
+
     return overrides
 
 
-def validate_config(config: ConfigParameterManager) -> bool:
+def validate_config(config: ConfigParameterManager, logger) -> bool:
     """Validate the configuration parameters.
 
     Args:
         config: Configuration manager instance
+        logger: Logger instance for error reporting
 
     Returns:
         True if configuration is valid, False otherwise
     """
     # Check required parameters
     if not config.cli.input.default:
-        print("Error: input is required")
+        logger.error("Input is required")
         return False
 
     # Check if input file exists
     input_path = Path(config.cli.input.default)
     if not input_path.exists():
-        print(f"Error: file not found: {input_path}")
+        logger.error(f"File not found: {input_path}")
         return False
 
+    logger.debug(f"Input file validation passed: {input_path}")
     return True
 
 
 def main():
     """Main entry point for the CLI application."""
+    logger = None
+
     try:
         # Parse command line arguments
         args = parse_arguments()
@@ -130,27 +149,58 @@ def main():
             **cli_overrides,
         )
 
+        # Initialize logging system
+        logger_manager = initialize_logging(config)
+        logger = logger_manager.get_logger()
+
+        # Log startup information
+        logger.info("Starting python_template_project CLI")
+        logger.debug(f"Command line arguments: {vars(args)}")
+        logger_manager.log_config_summary()
+
         # Validate configuration
-        if not validate_config(config):
+        if not validate_config(config, logger):
+            logger.error("Configuration validation failed")
             return 1
+
+        logger.info(f"Processing input: {config.cli.input.default}")
 
         # Create and run PythonProject
         project = PythonProject(config)
+        logger.info("Starting conversion process")
+
         project.convert()
 
-        print(f"Successfully processed: {config.cli.input.default}")
+        logger.info(f"Successfully processed: {config.cli.input.default}")
         if config.cli.output.default:
-            print(f"Output written to: {config.cli.output.default}")
+            logger.info(f"Output written to: {config.cli.output.default}")
 
+        logger.info("CLI processing completed successfully")
         return 0
 
     except FileNotFoundError as e:
-        print(f"Error: {e}")
-        traceback.print_exc()
+        if logger:
+            logger.error(f"File not found: {e}")
+            logger.debug("Full traceback:", exc_info=True)
+        else:
+            print(f"Error: {e}")
+            traceback.print_exc()
         return 1
+
+    except KeyboardInterrupt:
+        if logger:
+            logger.warning("Process interrupted by user")
+        else:
+            print("Process interrupted by user")
+        return 130  # Standard exit code for SIGINT
+
     except Exception as e:
-        print(f"Unexpected error: {e}")
-        traceback.print_exc()
+        if logger:
+            logger.error(f"Unexpected error: {e}")
+            logger.debug("Full traceback:", exc_info=True)
+        else:
+            print(f"Unexpected error: {e}")
+            traceback.print_exc()
         return 1
 
 

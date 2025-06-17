@@ -84,8 +84,30 @@ class AppConfig(BaseModel):
         name="log_level",
         default="INFO",
         type_=str,
-        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
         help="Logging level for the application",
+    )
+
+    log_file_max_size: ConfigParameter = ConfigParameter(
+        name="log_file_max_size",
+        default=10,
+        type_=int,
+        help="Maximum log file size in MB before rotation",
+    )
+
+    log_backup_count: ConfigParameter = ConfigParameter(
+        name="log_backup_count",
+        default=5,
+        type_=int,
+        help="Number of backup log files to keep",
+    )
+
+    log_format: ConfigParameter = ConfigParameter(
+        name="log_format",
+        default="detailed",
+        type_=str,
+        choices=["simple", "detailed", "json"],
+        help="Log message format style",
     )
 
     max_workers: ConfigParameter = ConfigParameter(
@@ -93,6 +115,20 @@ class AppConfig(BaseModel):
         default=4,
         type_=int,
         help="Maximum number of worker threads",
+    )
+
+    enable_file_logging: ConfigParameter = ConfigParameter(
+        name="enable_file_logging",
+        default=True,
+        type_=bool,
+        help="Enable logging to file",
+    )
+
+    enable_console_logging: ConfigParameter = ConfigParameter(
+        name="enable_console_logging",
+        default=True,
+        type_=bool,
+        help="Enable logging to console",
     )
 
 
@@ -119,6 +155,27 @@ class GuiConfig(BaseModel):
         default=600,
         type_=int,
         help="Default window height",
+    )
+
+    log_window_height: ConfigParameter = ConfigParameter(
+        name="log_window_height",
+        default=200,
+        type_=int,
+        help="Height of the log window in pixels",
+    )
+
+    auto_scroll_log: ConfigParameter = ConfigParameter(
+        name="auto_scroll_log",
+        default=True,
+        type_=bool,
+        help="Automatically scroll to newest log entries",
+    )
+
+    max_log_lines: ConfigParameter = ConfigParameter(
+        name="max_log_lines",
+        default=1000,
+        type_=int,
+        help="Maximum number of log lines to keep in GUI",
     )
 
 
@@ -234,6 +291,25 @@ class ConfigParameterManager(BaseModel):
             cli_params.append(param)
         return cli_params
 
+    def get_logging_config(self) -> dict[str, Any]:
+        """Get logging-specific configuration as dictionary.
+
+        Returns:
+            Dictionary with logging configuration parameters
+        """
+        return {
+            "log_level": self.app.log_level.default,
+            "log_file_max_size": self.app.log_file_max_size.default
+            * 1024
+            * 1024,  # Convert MB to bytes
+            "log_backup_count": self.app.log_backup_count.default,
+            "log_format": self.app.log_format.default,
+            "enable_file_logging": self.app.enable_file_logging.default,
+            "enable_console_logging": self.app.enable_console_logging.default,
+            "max_log_lines": self.gui.max_log_lines.default,
+            "auto_scroll_log": self.gui.auto_scroll_log.default,
+        }
+
     @classmethod
     def generate_default_config_file(cls, output_file: str):
         """Generate a default configuration file with all parameters and their descriptions."""
@@ -321,22 +397,48 @@ class ConfigParameterManager(BaseModel):
             )
         )
 
-        for i in range(1, min(5, len(optional_params) + 1)):
-            selected = optional_params[:i]
-            cli_part = " ".join(
-                f"--{p.name} {p.choices[0] if p.choices else p.default}" for p in selected
-            )
-            examples.append(
-                dedent(
-                    f"""
-            ### {i + 1}. Example with {i} Parameter(s)
+        # Add logging examples
+        examples.append(
+            dedent(
+                f"""
+        ### 2. With verbose logging
 
-            ```bash
-            python -m python_template_project.cli {cli_part} {required_arg}
-            ```
-            """
-                )
+        ```bash
+        python -m python_template_project.cli --verbose {required_arg}
+        ```
+        """
             )
+        )
+
+        examples.append(
+            dedent(
+                f"""
+        ### 3. With quiet mode
+
+        ```bash
+        python -m python_template_project.cli --quiet {required_arg}
+        ```
+        """
+            )
+        )
+
+        for i in range(1, min(3, len(optional_params) + 1)):
+            selected = [p for p in optional_params if p.name not in ["verbose", "quiet"]][:i]
+            if selected:
+                cli_part = " ".join(
+                    f"--{p.name} {p.choices[0] if p.choices else p.default}" for p in selected
+                )
+                examples.append(
+                    dedent(
+                        f"""
+                ### {i + 3}. Example with {i} Parameter(s)
+
+                ```bash
+                python -m python_template_project.cli {cli_part} {required_arg}
+                ```
+                """
+                    )
+                )
 
         markdown = dedent(
             """
