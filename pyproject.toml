@@ -11,7 +11,6 @@ dependencies = [
     "pydantic>=2.11.7",
     "pyyaml>=6.0.2",
 ]
-packages = [{ include = "python_template_project", from = "src" }]
 
 # Dev dependencies as optional dependencies
 [project.optional-dependencies]
@@ -36,19 +35,17 @@ docs = [
     "pygments>=2.19.1",
 ]
 
+[project.scripts]
+python-template-project = "python_template_project.cli.cli:main"
+python-template-project-gui = "python_template_project.gui.gui:main"
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.poetry.scripts]
-python-template-project = "python_template_project.cli.cli:main"
-python-template-project-gui = "python_template_project.gui.gui:main"
-
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.setuptools.package-dir]
-"" = "src"
+# Hatchling-spezifische Konfiguration für src-Layout
+[tool.hatch.build.targets.wheel]
+packages = ["src/python_template_project"]
 
 [tool.deptry]
 pep621_dev_dependency_groups = ["dev", "docs"]

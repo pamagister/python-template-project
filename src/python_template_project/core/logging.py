@@ -12,7 +12,7 @@ import logging.handlers
 import sys
 from pathlib import Path
 
-from ..config.config import ConfigParameterManager
+from python_template_project.config.config import ConfigParameterManager
 
 
 class GuiLogHandler(logging.Handler):

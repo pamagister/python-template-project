@@ -13,9 +13,9 @@ import tkinter as tk
 import webbrowser
 from tkinter import filedialog, messagebox, ttk
 
-from ..config.config import ConfigParameter, ConfigParameterManager
-from ..core.base import PythonProject
-from ..core.logging import (
+from python_template_project.config.config import ConfigParameter, ConfigParameterManager
+from python_template_project.core.base import PythonProject
+from python_template_project.core.logging import (
     connect_gui_logging,
     disconnect_gui_logging,
     get_logger,

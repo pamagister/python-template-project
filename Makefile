@@ -78,7 +78,7 @@ clean:            ## Clean unused files.
 .PHONY: deptry
 deptry:            ## Check for unused dependencies.
 	uv pip install deptry
-	uv run deptry .
+	uv run deptry src
 
 .PHONY: virtualenv
 virtualenv:       ## Create a virtual environment.
