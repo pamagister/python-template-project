@@ -112,9 +112,14 @@ To trigger a new release all you need to do is.
     * Commit your changes following the [conventional git commit messages](https://www.conventionalcommits.org/en/v1.0.0/).
 2. Run the tests to ensure everything is working.
 3. Set your git username and email:
+    * `git init`
     * `git config --global user.name "Your name"`
     * `git config --global user.email "your.mail@example.com"`
-4. Run `make release` to create a new tag and push it to the remote repo.
+4. Verify settings
+    * `git config --list --show-origin"`
+    * `git config user.name`
+    * `git config user.email"`
+5. Run `make release` to create a new tag and push it to the remote repo.
 
 the `make release` will ask you the version number to create the tag, ex: type `0.1.1` when you are asked.
 
