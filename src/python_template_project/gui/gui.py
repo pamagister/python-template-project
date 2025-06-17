@@ -1,7 +1,7 @@
-"""GUI interface for python_template_project using tkinter.
+"""GUI interface for python_template_project using tkinter with integrated logging.
 
 This module provides a graphical user interface for the python_template_project
-with settings dialog, file management, and logging capabilities.
+with settings dialog, file management, and centralized logging capabilities.
 
 run gui: python -m python_template_project.gui
 """
@@ -15,6 +15,8 @@ from tkinter import filedialog, messagebox, ttk
 
 from ..config.config import ConfigParameter, ConfigParameterManager
 from ..core.base import PythonProject
+from ..core.logging import (connect_gui_logging, disconnect_gui_logging,
+                            get_logger, initialize_logging)
 
 
 class ToolTip:
@@ -63,6 +65,33 @@ class ToolTip:
             tw.destroy()
 
 
+class GuiLogWriter:
+    """Log writer that handles GUI text widget updates in a thread-safe way."""
+
+    def __init__(self, text_widget):
+        self.text_widget = text_widget
+        self.root = text_widget.winfo_toplevel()
+
+    def write(self, text):
+        """Write text to the widget in a thread-safe manner."""
+        # Schedule the GUI update in the main thread
+        self.root.after(0, self._update_text, text)
+
+    def _update_text(self, text):
+        """Update the text widget (must be called from main thread)."""
+        try:
+            self.text_widget.insert(tk.END, text)
+            self.text_widget.see(tk.END)
+            self.text_widget.update_idletasks()
+        except tk.TclError:
+            # Widget might be destroyed
+            pass
+
+    def flush(self):
+        """Flush method for compatibility."""
+        pass
+
+
 class SettingsDialog:
     """Settings dialog for configuration management."""
 
@@ -71,6 +100,7 @@ class SettingsDialog:
         self.config_manager = config_manager
         self.result = None
         self.widgets = {}
+        self.logger = get_logger("gui.settings")
 
         # Create dialog window
         self.dialog = tk.Toplevel(parent)
@@ -80,12 +110,14 @@ class SettingsDialog:
         self.dialog.grab_set()
 
         # Center the dialog
-        self.dialog.geometry(f"+{parent.winfo_rootx() + 50} + {parent.winfo_rooty() + 50}")
+        self.dialog.geometry(f"+{int(parent.winfo_rootx() + 50)}+{int(parent.winfo_rooty() + 50)}")
 
         self._create_widgets()
 
         # Handle window closing
         self.dialog.protocol("WM_DELETE_WINDOW", self._on_cancel)
+
+        self.logger.debug("Settings dialog opened")
 
     def _create_widgets(self):
         """Create the settings dialog widgets."""
@@ -235,46 +267,34 @@ class SettingsDialog:
 
     def _on_ok(self):
         """Handle OK button click."""
-        # Update configuration with widget values
-        overrides = {}
-        for key, widget in self.widgets.items():
-            value = widget.var.get()
-            overrides[key] = value
-
-        # Apply overrides to config manager
-        self.config_manager._apply_kwargs(overrides)
-
-        # Save to file
         try:
-            self.config_manager.save_to_file("config.yaml")
-            self.result = "ok"
-        except Exception as e:
-            messagebox.showerror("Error", f"Failed to save configuration: {e}")
-            return
+            # Update configuration with widget values
+            overrides = {}
+            for key, widget in self.widgets.items():
+                value = widget.var.get()
+                overrides[key] = value
 
-        self.dialog.destroy()
+            self.logger.info(f"Applying configuration overrides: {len(overrides)} settings")
+
+            # Apply overrides to config manager
+            self.config_manager._apply_kwargs(overrides)
+
+            # Save to file
+            self.config_manager.save_to_file("config.yaml")
+            self.logger.info("Configuration saved successfully")
+
+            self.result = "ok"
+            self.dialog.destroy()
+
+        except Exception as e:
+            self.logger.error(f"Failed to save configuration: {e}")
+            messagebox.showerror("Error", f"Failed to save configuration: {e}")
 
     def _on_cancel(self):
         """Handle Cancel button click."""
+        self.logger.debug("Settings dialog cancelled")
         self.result = "cancel"
         self.dialog.destroy()
-
-
-class LogHandler:
-    """Log handler that redirects output to GUI text widget."""
-
-    def __init__(self, text_widget):
-        self.text_widget = text_widget
-
-    def write(self, text):
-        """Write text to the widget."""
-        self.text_widget.insert(tk.END, text)
-        self.text_widget.see(tk.END)
-        self.text_widget.update()
-
-    def flush(self):
-        """Flush method for compatibility."""
-        pass
 
 
 class MainGui:
@@ -288,14 +308,24 @@ class MainGui:
         # Initialize configuration
         self.config_manager = ConfigParameterManager()
 
+        # Initialize logging system
+        self.logger_manager = initialize_logging(self.config_manager)
+        self.logger = get_logger("gui.main")
+
         # File list
         self.file_list = []
 
         self._build_widgets()
         self._create_menu()
 
-        # Setup logging
-        self._setup_logging()
+        # Setup GUI logging after widgets are created
+        self._setup_gui_logging()
+
+        # Handle window closing
+        self.root.protocol("WM_DELETE_WINDOW", self._on_closing)
+
+        self.logger.info("GUI application started")
+        self.logger_manager.log_config_summary()
 
     def _build_widgets(self):
         """Build the main GUI widgets."""
@@ -324,12 +354,20 @@ class MainGui:
         self.file_listbox.pack(side="left", fill="both", expand=True)
         file_scrollbar.pack(side="right", fill="y")
 
-        # Right side - Run button
+        # Right side - Run button and controls
         button_frame = ttk.Frame(top_frame)
-        button_frame.pack(side=tk.RIGHT, fill=tk.Y)
+        button_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=(5, 0))
 
         self.run_button = ttk.Button(button_frame, text="Run", command=self._run_processing)
-        self.run_button.pack(pady=10)
+        self.run_button.pack(pady=5)
+
+        # Clear files button
+        self.clear_button = ttk.Button(button_frame, text="Clear Files", command=self._clear_files)
+        self.clear_button.pack(pady=5)
+
+        # Progress bar
+        self.progress = ttk.Progressbar(button_frame, mode="indeterminate")
+        self.progress.pack(pady=5, fill=tk.X)
 
         # Bottom frame - Log output
         log_frame = ttk.LabelFrame(main_frame, text="Log Output")
@@ -348,6 +386,25 @@ class MainGui:
         self.log_text.pack(side="left", fill="both", expand=True)
         log_text_scrollbar.pack(side="right", fill="y")
 
+        # Log controls
+        log_controls = ttk.Frame(log_frame)
+        log_controls.pack(fill=tk.X, padx=5, pady=(0, 5))
+
+        ttk.Button(log_controls, text="Clear Log", command=self._clear_log).pack(side=tk.LEFT)
+
+        # Log level selector
+        ttk.Label(log_controls, text="Log Level:").pack(side=tk.LEFT, padx=(10, 5))
+        self.log_level_var = tk.StringVar(value=self.config_manager.app.log_level.default)
+        log_level_combo = ttk.Combobox(
+            log_controls,
+            textvariable=self.log_level_var,
+            values=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+            state="readonly",
+            width=10,
+        )
+        log_level_combo.pack(side=tk.LEFT)
+        log_level_combo.bind("<<ComboboxSelected>>", self._on_log_level_changed)
+
     def _create_menu(self):
         """Create the application menu."""
         menubar = tk.Menu(self.root)
@@ -360,7 +417,7 @@ class MainGui:
         file_menu.add_separator()
         file_menu.add_command(label="Run", command=self._run_processing)
         file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.root.quit)
+        file_menu.add_command(label="Exit", command=self._on_closing)
 
         # Options menu
         options_menu = tk.Menu(menubar, tearoff=0)
@@ -374,9 +431,30 @@ class MainGui:
         help_menu.add_separator()
         help_menu.add_command(label="About", command=self._show_about)
 
-    def _setup_logging(self):
-        """Setup logging to redirect to GUI."""
-        self.log_handler = LogHandler(self.log_text)
+    def _setup_gui_logging(self):
+        """Setup GUI logging integration."""
+        # Create GUI log writer
+        self.gui_log_writer = GuiLogWriter(self.log_text)
+
+        # Connect to logging system
+        connect_gui_logging(self.gui_log_writer)
+
+    def _on_log_level_changed(self, event=None):
+        """Handle log level change."""
+        new_level = self.log_level_var.get()
+        self.logger_manager.set_log_level(new_level)
+        self.logger.info(f"Log level changed to {new_level}")
+
+    def _clear_log(self):
+        """Clear the log text widget."""
+        self.log_text.delete(1.0, tk.END)
+        self.logger.debug("Log display cleared")
+
+    def _clear_files(self):
+        """Clear the file list."""
+        self.file_list.clear()
+        self.file_listbox.delete(0, tk.END)
+        self.logger.info("File list cleared")
 
     def _open_files(self):
         """Open file dialog and add files to list."""
@@ -384,37 +462,45 @@ class MainGui:
             title="Select input files", filetypes=[("All files", "*.*"), ("Text files", "*.txt")]
         )
 
+        new_files = 0
         for file in files:
             if file not in self.file_list:
                 self.file_list.append(file)
                 self.file_listbox.insert(tk.END, os.path.basename(file))
+                new_files += 1
+
+        if new_files > 0:
+            self.logger.info(f"Added {new_files} new files to processing list")
+        else:
+            self.logger.debug("No new files selected")
 
     def _run_processing(self):
         """Run the processing in a separate thread."""
         if not self.file_list:
+            self.logger.warning("No input files selected")
             messagebox.showwarning("Warning", "No input files selected!")
             return
 
-        # Clear log
-        self.log_text.delete(1.0, tk.END)
+        self.logger.info(f"Starting processing of {len(self.file_list)} files")
 
-        # Disable run button during processing
+        # Disable controls during processing
         self.run_button.config(state="disabled")
+        self.clear_button.config(state="disabled")
+        self.progress.start()
 
         # Run in separate thread to avoid blocking GUI
-        thread = threading.Thread(target=self._process_files)
-        thread.daemon = True
+        thread = threading.Thread(target=self._process_files, daemon=True)
         thread.start()
 
     def _process_files(self):
         """Process the selected files."""
         try:
-            # Redirect stdout to log widget
-            old_stdout = sys.stdout
-            sys.stdout = self.log_handler
+            self.logger.info("=== Processing Started ===")
 
-            for file_path in self.file_list:
-                self.log_handler.write(f"Processing: {file_path}\n")
+            for i, file_path in enumerate(self.file_list, 1):
+                self.logger.info(
+                    f"Processing file {i}/{len(self.file_list)}: {os.path.basename(file_path)}"
+                )
 
                 # Update config with current file
                 self.config_manager.cli.input.default = file_path
@@ -423,43 +509,63 @@ class MainGui:
                 project = PythonProject(self.config_manager)
                 project.convert()
 
-                self.log_handler.write(f"Completed: {file_path}\n")
+                self.logger.info(f"Completed: {os.path.basename(file_path)}")
 
-            self.log_handler.write("All files processed successfully!\n")
+            self.logger.info("=== All files processed successfully! ===")
 
-        except Exception as e:
-            self.log_handler.write(f"Error: {e}\n")
+        except Exception as err:
+            self.logger.error(f"Processing failed: {err}", exc_info=True)
+            # Show error dialog in main thread
+            self.root.after(0, lambda: messagebox.showerror("Error", f"Processing failed: {err}"))
 
         finally:
-            # Restore stdout
-            sys.stdout = old_stdout
+            # Re-enable controls in main thread
+            self.root.after(0, self._processing_finished)
 
-            # Re-enable run button
-            self.root.after(0, lambda: self.run_button.config(state="normal"))
+    def _processing_finished(self):
+        """Re-enable controls after processing is finished."""
+        self.run_button.config(state="normal")
+        self.clear_button.config(state="normal")
+        self.progress.stop()
 
     def _open_settings(self):
         """Open the settings dialog."""
+        self.logger.debug("Opening settings dialog")
         dialog = SettingsDialog(self.root, self.config_manager)
         self.root.wait_window(dialog.dialog)
 
         if dialog.result == "ok":
-            self.log_text.insert(tk.END, "Settings saved successfully!\n")
-            self.log_text.see(tk.END)
+            self.logger.info("Settings updated successfully")
+            # Update log level selector if it changed
+            self.log_level_var.set(self.config_manager.app.log_level.default)
 
     def _open_help(self):
         """Open help documentation in browser."""
+        self.logger.debug("Opening help documentation")
         webbrowser.open("https://python-template-project.readthedocs.io/en/stable/")
 
     def _show_about(self):
         """Show about dialog."""
+        self.logger.debug("Showing about dialog")
         messagebox.showinfo("About", "python-template-project\n\nCopyright by Paul")
+
+    def _on_closing(self):
+        """Handle application closing."""
+        self.logger.info("Closing GUI application")
+        disconnect_gui_logging()
+        self.root.quit()
+        self.root.destroy()
 
 
 def main():
     """Main entry point for the GUI application."""
     root = tk.Tk()
-    MainGui(root)
-    root.mainloop()
+    try:
+        MainGui(root)
+        root.mainloop()
+    except Exception as e:
+        print(f"GUI startup failed: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":
