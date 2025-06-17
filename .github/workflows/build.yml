@@ -30,10 +30,10 @@ jobs:
 
       - name: Build EXEs with PyInstaller
         run: |
-          # Build of the CLI application
+          echo "Build of the CLI application"
           uv run pyinstaller --onefile src/python_template_project/cli/cli.py --name executable_cli
           
-          # Build the GUI application with --windowed to hide the console
+          echo "Build the GUI application with --windowed to hide the console"
           uv run pyinstaller --onefile --windowed src/python_template_project/gui/gui.py --name executable_gui
 
       - name: Prepare ZIP file for release
