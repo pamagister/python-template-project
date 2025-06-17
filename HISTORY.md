@@ -4,6 +4,13 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #16: fix doc: command line prompts. [Paul Magister]
+- Fix #19: Workaround for deptree issue 295 #19. [Paul Magister]
+- Feat #16: new release. [Paul Magister]
+
+
+0.1.7 (2025-06-17)
+------------------
 - Feat #8: CI: build macos: more echo. [Paul Magister]
 - Feat #7: CI: build windows: more echo. [Paul Magister]
 - Feat #7: CI: Create workflow for building Windows executable: fix
