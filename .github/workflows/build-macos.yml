@@ -85,7 +85,7 @@ jobs:
           zip -r ../python-template-project-macOS.zip .
 
       - name: Upload ZIP to GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: python-template-project-macOS.zip

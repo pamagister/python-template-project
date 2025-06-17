@@ -44,7 +44,7 @@ jobs:
           powershell Compress-Archive -Path release\* -DestinationPath installer-win.zip
 
       - name: Upload ZIP to GitHub Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           files: installer-win.zip
