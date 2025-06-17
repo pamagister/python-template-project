@@ -36,12 +36,12 @@ python -m python_template_project.gui
 
 ### Run CLI from command line
 ```bash
-python-template-project-gui [OPTIONS] path/to/file
+python-template-project [OPTIONS] path/to/file
 ```
 
 ### Run GUI from command line
 ```bash
-python-template-project-gui [OPTIONS] path/to/file
+python-template-project-gui
 ```
 
 ## Run GUI
