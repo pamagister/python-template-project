@@ -13,7 +13,7 @@ from typing import Any
 
 from ..config.config import ConfigParameterManager
 from ..core.base import PythonProject
-from ..core.logging import get_logger, initialize_logging
+from ..core.logging import initialize_logging
 
 
 def parse_arguments():

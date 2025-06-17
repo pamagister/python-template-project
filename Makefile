@@ -37,6 +37,8 @@ precommit: ## Format, test and check dependencies.
 fmt:              ## Format code using black & isort.
 	uv run ruff format src/
 	uv run ruff format tests/
+	uv run ruff check --fix src/
+	uv run ruff check --fix tests/
 	uv run isort src/
 	uv run isort tests/
 
