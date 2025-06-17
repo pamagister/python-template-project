@@ -28,28 +28,25 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Build EXEs with PyInstaller
+      - name: Build Unified EXE with PyInstaller
         run: |
-          echo "Build of the CLI application"
-          uv run pyinstaller --onefile src/python_template_project/cli/cli.py --name executable_cli
-          
-          echo "Build the GUI application with --windowed to hide the console"
-          uv run pyinstaller --onefile --windowed src/python_template_project/gui/gui.py --name executable_gui
+          echo "Building unified CLI/GUI application"
+          uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml;." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
 
       - name: Prepare ZIP file for release
         run: |
           mkdir release
-          copy dist\executable_cli.exe release\
-          copy dist\executable_gui.exe release\
+          copy dist\python-template-project.exe release\
           copy config.yaml release\
           copy README.md release\
+          echo "  - Double-click to start GUI" >> release\USAGE.txt
+          echo "  - Run from command line for CLI options" >> release\USAGE.txt
           powershell Compress-Archive -Path release\* -DestinationPath installer-win.zip
 
       - name: Upload ZIP to GitHub Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          # Ensures that the file name matches the one created in the previous step
           files: installer-win.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
