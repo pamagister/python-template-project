@@ -286,7 +286,7 @@ class ConfigParameterManager(BaseModel):
     def get_cli_parameters(self) -> list[ConfigParameter]:
         """Get only CLI parameters."""
         cli_params = []
-        for field_name in self.cli.model_fields:
+        for field_name in type(self.cli).model_fields.keys():
             param = getattr(self.cli, field_name)
             cli_params.append(param)
         return cli_params
@@ -326,7 +326,7 @@ class ConfigParameterManager(BaseModel):
                 f.write(f"# {category_name.upper()} Configuration\n")
                 f.write(f"{category_name}:\n")
 
-                for field_name in category_obj.model_fields:
+                for field_name in type(category_obj).model_fields.keys():
                     param = getattr(category_obj, field_name)
                     f.write(f"  # {param.help}\n")
                     if param.choices:
