@@ -30,7 +30,7 @@ jobs:
 
       - name: Build EXE with PyInstaller
         run: |
-          uv run pyinstaller --onefile src/python-project-template/cli/cli.py --name executable_cli
+          uv run pyinstaller --onefile src/python-template-project/cli/cli.py --name executable_cli
 
       - name: Prepare ZIP file for release
         run: |
