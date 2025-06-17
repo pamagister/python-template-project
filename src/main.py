@@ -32,8 +32,21 @@ def is_console_attached():
 
             return True
         else:
-            # On Unix-like systems, check if stdout is a terminal
-            return sys.stdout.isatty()
+            # On Unix-like systems (macOS, Linux), check multiple indicators
+            # Check if stdout is a terminal
+            if not sys.stdout.isatty():
+                return False
+
+            # Additional check for macOS: Check if we're running in a .app bundle
+            if sys.platform == "darwin":
+                # If we're in a .app bundle, we're likely launched via double-click
+                executable_path = sys.executable
+                if ".app/" in executable_path:
+                    # We're in an app bundle, check if we have a real terminal
+                    # by checking if TERM environment variable is set
+                    return os.environ.get("TERM") is not None
+
+            return True
     except Exception as ex:
         # Fallback: assume GUI if we can't determine
         print(ex)

@@ -29,35 +29,65 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Build Executable and App Bundle with PyInstaller
+      - name: Build Unified Executable and App Bundle with PyInstaller
         run: |
-          echo "Build of the CLI application"
-          uv run pyinstaller --onefile src/python_template_project/cli/cli.py --name executable_cli
+          echo "Building unified CLI/GUI application as executable"
+          uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml:." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
           
-          echo "Build the GUI application as an .app bundle"
-          # --windowed is important to hide the console
-          # The name "executable_gui" becomes the name of the .app (executable_gui.app)
-          uv run pyinstaller --windowed --name "executable_gui" src/python_template_project/gui/gui.py
+          echo "Building unified CLI/GUI application as .app bundle"
+          # --windowed is important to hide the console for GUI mode
+          # The name "Python Template Project" becomes the name of the .app
+          uv run pyinstaller --windowed --name "Python Template Project" src/main.py --add-data "config.yaml:." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
 
       - name: Prepare ZIP file for release
         run: |
           mkdir release
-          echo "Copy the CLI file"
-          cp dist/executable_cli release/
+          echo "Copy the CLI/GUI executable"
+          cp dist/python-template-project release/
           echo "Copy the .app bundle (directory) recursively"
-          cp -R dist/executable_gui.app release/
-          echo "Copy more files"
+          cp -R "dist/Python Template Project.app" release/
+          echo "Copy configuration and documentation"
           cp config.yaml release/
           cp README.md release/
+          echo "Create usage instructions"
+          cat > release/USAGE.txt << 'EOF'
+          # Python Template Project - macOS Distribution
+          
+          This package contains:
+          
+          1. **python-template-project** (Terminal executable)
+             - Run from Terminal for CLI interface
+             - Double-click will open Terminal and show menu
+          
+          2. **Python Template Project.app** (macOS App Bundle)
+             - Double-click to launch GUI interface
+             - Can also be launched from Terminal: open "Python Template Project.app"
+          
+          ## Usage Examples:
+          
+          ### Command Line:
+          ```bash
+          # Interactive mode (shows CLI/GUI selection)
+          ./python-template-project
+          
+          # Direct CLI mode with arguments
+          ./python-template-project --help
+          ./python-template-project [your-cli-args]
+          ```
+          
+          ### GUI Mode:
+          - Double-click "Python Template Project.app"
+          - Or run: open "Python Template Project.app"
+          
+          EOF
           echo "Create the ZIP archive from the contents of the release folder"
           cd release
-          zip -r ../executable_gui-macOS.zip .
+          zip -r ../python-template-project-macOS.zip .
 
       - name: Upload ZIP to GitHub Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          # The file name must match the one created in the previous step
-          files: executable_gui-macOS.zip
+          files: python-template-project-macOS.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

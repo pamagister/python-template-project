@@ -4,6 +4,14 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #21: Build unified executable (gui and cli) #21. [Paul Magister]
+- Feat #20: Makefile: Generate file tree #20. [Paul Magister]
+- Feat #16: make release. [Paul Magister]
+- Feat #16: fix doc: add git init commands. [Paul Magister]
+
+
+0.1.8 (2025-06-17)
+------------------
 - Feat #16: fix doc: command line prompts. [Paul Magister]
 - Fix #19: Workaround for deptree issue 295 #19. [Paul Magister]
 - Feat #16: new release. [Paul Magister]
