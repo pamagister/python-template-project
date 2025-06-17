@@ -15,8 +15,12 @@ from tkinter import filedialog, messagebox, ttk
 
 from ..config.config import ConfigParameter, ConfigParameterManager
 from ..core.base import PythonProject
-from ..core.logging import (connect_gui_logging, disconnect_gui_logging,
-                            get_logger, initialize_logging)
+from ..core.logging import (
+    connect_gui_logging,
+    disconnect_gui_logging,
+    get_logger,
+    initialize_logging,
+)
 
 
 class ToolTip:
@@ -516,7 +520,9 @@ class MainGui:
         except Exception as err:
             self.logger.error(f"Processing failed: {err}", exc_info=True)
             # Show error dialog in main thread
-            self.root.after(0, lambda: messagebox.showerror("Error", f"Processing failed: {err}"))
+            self.root.after(
+                0, lambda err=err: messagebox.showerror("Error", f"Processing failed: {err}")
+            )
 
         finally:
             # Re-enable controls in main thread
