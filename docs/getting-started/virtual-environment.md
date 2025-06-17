@@ -14,7 +14,7 @@ Activating a Python virtual environment `venv`
 
 🔹 Windows (PowerShell)
 
-```powershell
+```bash
 .venv\Scripts\activate.ps1
 ```
 

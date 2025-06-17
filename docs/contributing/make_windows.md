@@ -31,7 +31,7 @@ Before installing GNU Make via Chocolatey, ensure you have Chocolatey package ma
 
 **To check if Chocolatey is installed:**
 Open PowerShell as Administrator and run:
-```powershell
+```bash
 choco --version
 ```
 
@@ -40,7 +40,7 @@ choco --version
 1. Open PowerShell as Administrator
 2. Run the following command to install Chocolatey:
 
-    ```powershell
+    ```
     Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
     ```
    
@@ -54,7 +54,7 @@ choco --version
 
 2. **Install GNU Make using Chocolatey**
 
-    ```powershell
+    ```
     choco install make
     ```
 
@@ -66,13 +66,13 @@ choco --version
 
 5. After installation completes, verify that `make` is available:
 
-    ```powershell
+    ```
     make --version
     ```
    
     You should see output similar to:
 
-    ```powershell
+    ```
     GNU Make 4.x.x
     Built for Windows32
     ```
@@ -81,7 +81,7 @@ choco --version
 
 Once installed, you can use `make` commands directly in any PowerShell or Command Prompt window:
 
-```powershell
+```bash
 # Navigate to your project directory
 cd path\to\your\project
 
@@ -99,7 +99,7 @@ make clean
 3. Try running `refreshenv` in PowerShell to refresh environment variables
 
 **To uninstall:**
-```powershell
+```bash
 choco uninstall make
 ```
 
