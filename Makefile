@@ -111,6 +111,11 @@ docs:             ## Build and sync the documentation.
 	@uv run mkdocs build
 	@uv run mkdocs serve
 
+.PHONY: tree
+tree:            ## Show project tree (excluding ignored folders)
+	@powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/show-filelist.ps1
+	@powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/show-tree.ps1
+
 .PHONY: init
 init:             ## Initialize the project based on an application template.
 	@./.github/init.sh
