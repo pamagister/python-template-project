@@ -15,21 +15,33 @@ python -m pip install python_template_project
 - [⬇️ Download for macOS](https://github.com/pamagister/python-template-project/releases/latest/download/MboxConverter-macOS.zip)
 
 
+
 ## Run from source
 
+### Run with CLI from source
+
 ```bash
-python -m python_template_project --format csv example.mbox
+python -m python_template_project.cli [OPTIONS] path/to/file
 ```
 
-## Run GUI from source
+
+### Run with GUI from source
 
 ```bash
 python -m python_template_project.gui
 ```
 
-Run python_template_project from command line:
+
+## Run from command line:
+
+### Run CLI from command line
 ```bash
-python_template_project --format csv example.mbox
+python-template-project-gui [OPTIONS] path/to/file
+```
+
+### Run GUI from command line
+```bash
+python-template-project-gui [OPTIONS] path/to/file
 ```
 
 ## Run GUI
