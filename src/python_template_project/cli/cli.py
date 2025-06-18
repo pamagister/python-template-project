@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from python_template_project.config.config import ConfigParameterManager
-from python_template_project.core.base import PythonProject
+from python_template_project.core.base import BaseGPXProcessor
 from python_template_project.core.logging import initialize_logging
 
 
@@ -165,11 +165,18 @@ def main():
 
         logger.info(f"Processing input: {config.cli.input.default}")
 
-        # Create and run PythonProject
-        project = PythonProject(config)
+        # Create and run BaseGPXProcessor
+        project = BaseGPXProcessor(
+            config.cli.input.default,
+            config.cli.output.default,
+            config.cli.min_dist.default,
+            config.cli.extract_waypoints.default,
+            config.app.date_format.default,
+        )
+
         logger.info("Starting conversion process")
 
-        project.convert()
+        project.compress_files()
 
         logger.info(f"Successfully processed: {config.cli.input.default}")
         if config.cli.output.default:

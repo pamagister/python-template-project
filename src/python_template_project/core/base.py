@@ -7,25 +7,18 @@ import gpxpy
 import srtm
 from gpxpy.gpx import GPX, GPXTrackPoint, GPXXMLSyntaxException
 
-from python_template_project.config.config import ConfigParameterManager
-
 NAME = "python_template_project"
 
 
-class PythonProject:
+class BaseGPXProcessor:
     def __init__(
-        self,
-        config: ConfigParameterManager,
+        self, input_: str, output=None, min_dist=10, extract_waypoints=False, date_format="%Y-%m-%d"
     ):
-        # can be the path to one or more gpx file
-        # or a folder (use all gpx and zip files inside this folder)
-        # or input can be one or more zip files, where to consider the containing gpx files
-
-        self.input = config.cli.input.default
-        self.output = config.cli.output.default  # default: cwd/subfolder_date_format
-        self.min_dist = config.cli.min_dist.default
-        self.extract_waypoints = config.cli.extract_waypoints.default
-        self.date_format = config.app.date_format.default
+        self.input = input_  # gpx file, directory, or zip file
+        self.output = output
+        self.min_dist = min_dist
+        self.extract_waypoints = extract_waypoints
+        self.date_format = date_format
 
         # Initialize SRTM elevation data
         self.elevation_data = srtm.get_data()

@@ -14,7 +14,7 @@ import webbrowser
 from tkinter import filedialog, messagebox, ttk
 
 from python_template_project.config.config import ConfigParameter, ConfigParameterManager
-from python_template_project.core.base import PythonProject
+from python_template_project.core.base import BaseGPXProcessor
 from python_template_project.core.logging import (
     connect_gui_logging,
     disconnect_gui_logging,
@@ -510,8 +510,14 @@ class MainGui:
                 self.config_manager.cli.input.default = file_path
 
                 # Create and run project
-                project = PythonProject(self.config_manager)
-                project.convert()
+                project = BaseGPXProcessor(
+                    self.config_manager.cli.input.default,
+                    self.config_manager.cli.output.default,
+                    self.config_manager.cli.min_dist.default,
+                    self.config_manager.cli.extract_waypoints.default,
+                    self.config_manager.app.date_format.default,
+                )
+                project.compress_files()
 
                 self.logger.info(f"Completed: {os.path.basename(file_path)}")
 
