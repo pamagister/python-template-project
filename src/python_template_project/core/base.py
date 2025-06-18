@@ -34,7 +34,7 @@ class BaseGPXProcessor:
         output_path.mkdir(parents=True, exist_ok=True)
         return output_path
 
-    def _get_adjusted_elevation(self, point: GPXTrackPoint) -> float:
+    def _get_adjusted_elevation(self, point: GPXTrackPoint) -> int:
         """Get adjusted elevation from SRTM data, fallback to original elevation."""
         try:
             srtm_elevation = self.elevation_data.get_elevation(point.latitude, point.longitude)
@@ -110,6 +110,7 @@ class BaseGPXProcessor:
     def _get_gpx_files(self) -> list[Path]:
         """Get all GPX files from input (file, folder, or zip)."""
         input_path = Path(self.input)
+        print(f"Input path: {input_path.absolute()}")
         gpx_files = []
 
         if input_path.is_file():
@@ -120,7 +121,6 @@ class BaseGPXProcessor:
         elif input_path.is_dir():
             # Get all GPX files in directory
             gpx_files.extend(input_path.glob("*.gpx"))
-            gpx_files.extend(input_path.glob("*.GPX"))
 
             # Get GPX files from ZIP files in directory
             for zip_file in input_path.glob("*.zip"):
