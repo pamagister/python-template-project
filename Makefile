@@ -22,7 +22,7 @@ install:          ## Install the project in dev mode.
 	uv pip install -e .[dev,docs]
 
 .PHONY: lock
-lock:           ## builds the uv.lock file and syncs the packages
+lock:           ## builds the uv.make lock file and syncs the packages
 	uv lock
 
 .PHONY: precommit
@@ -112,9 +112,12 @@ docs:             ## Build and sync the documentation.
 	@uv run mkdocs build
 	@uv run mkdocs serve
 
+.PHONY: list
+list:            ## Show project file list (excluding ignored folders)
+	@powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/show-filelist.ps1
+
 .PHONY: tree
 tree:            ## Show project tree (excluding ignored folders)
-	@powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/show-filelist.ps1
 	@powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/show-tree.ps1
 
 .PHONY: init
