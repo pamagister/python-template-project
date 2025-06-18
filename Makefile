@@ -17,6 +17,7 @@ show:             ## Show the current environment.
 
 .PHONY: install
 install:          ## Install the project in dev mode.
+	$(MAKE) lock
 	$(MAKE) virtualenv
 	uv pip install -e .[dev,docs]
 

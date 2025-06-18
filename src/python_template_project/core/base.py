@@ -1,13 +1,15 @@
+import math
+import zipfile
+from datetime import datetime
+from pathlib import Path
+
+import gpxpy
+import srtm
+from gpxpy.gpx import GPX, GPXTrackPoint, GPXXMLSyntaxException
+
 from python_template_project.config.config import ConfigParameterManager
 
 NAME = "python_template_project"
-
-"""
-generate a gui application
-
-pip install pyinstaller
-pyinstaller --onefile --windowed python_template_project_gui.py
-"""
 
 
 class PythonProject:
@@ -15,15 +17,324 @@ class PythonProject:
         self,
         config: ConfigParameterManager,
     ):
-        self.input = config.cli.input
-        self.output = config.cli.output
-        self.min_dist = config.cli.min_dist
-        self.extract_waypoints = config.cli.extract_waypoints
-        self.date_format = config.app.date_format
+        # can be the path to one or more gpx file
+        # or a folder (use all gpx and zip files inside this folder)
+        # or input can be one or more zip files, where to consider the containing gpx files
 
-    def convert(self):
-        print(
-            f"Command run successfully: "
-            f"{self.input}, "
-            f"{self.date_format}, {self.min_dist}, {self.extract_waypoints}, {self.output}"
-        )
+        self.input = config.cli.input.default
+        self.output = config.cli.output.default  # default: cwd/subfolder_date_format
+        self.min_dist = config.cli.min_dist.default
+        self.extract_waypoints = config.cli.extract_waypoints.default
+        self.date_format = config.app.date_format.default
+
+        # Initialize SRTM elevation data
+        self.elevation_data = srtm.get_data()
+
+    def _get_output_folder(self) -> Path:
+        """Get the output folder path, create if not exists."""
+        if self.output:
+            output_path = Path(self.output)
+        else:
+            timestamp = datetime.now().strftime(f"{self.date_format}_%H%M")
+            output_path = Path.cwd() / f"gpx_processed_{timestamp}"
+
+        output_path.mkdir(parents=True, exist_ok=True)
+        return output_path
+
+    def _get_adjusted_elevation(self, point: GPXTrackPoint) -> float:
+        """Get adjusted elevation from SRTM data, fallback to original elevation."""
+        try:
+            srtm_elevation = self.elevation_data.get_elevation(point.latitude, point.longitude)
+            if srtm_elevation is not None:
+                return round(srtm_elevation, 1)
+        except Exception:
+            pass
+
+        # Fallback to original elevation or 0
+        return round(point.elevation or 0, 1)
+
+    def _calculate_distance(self, point1: GPXTrackPoint, point2: GPXTrackPoint) -> float:
+        """Calculate distance between two GPX points in meters using Haversine formula."""
+        lat1, lon1 = math.radians(point1.latitude), math.radians(point1.longitude)
+        lat2, lon2 = math.radians(point2.latitude), math.radians(point2.longitude)
+
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2) ** 2
+        c = 2 * math.asin(math.sqrt(a))
+
+        # Earth's radius in meters
+        earth_radius = 6371000
+        return earth_radius * c
+
+    def _optimize_track_points(self, track_points: list[GPXTrackPoint]) -> list[GPXTrackPoint]:
+        """Optimize track points by removing close points and cleaning metadata."""
+        if not track_points:
+            return track_points
+
+        optimized_points = [track_points[0]]  # Always keep first point
+
+        for point in track_points[1:]:
+            # Check distance to last kept point
+            if self._calculate_distance(optimized_points[-1], point) >= self.min_dist:
+                optimized_points.append(point)
+
+        # Always keep last point if it's different from the last kept point
+        if len(track_points) > 1 and optimized_points[-1] != track_points[-1]:
+            optimized_points.append(track_points[-1])
+
+        # Clean and optimize each point
+        for point in optimized_points:
+            # Remove time information
+            point.time = None
+
+            # Round coordinates to 5 decimal places
+            point.latitude = round(point.latitude, 5)
+            point.longitude = round(point.longitude, 5)
+
+            # Set optimized elevation
+            point.elevation = self._get_adjusted_elevation(point)
+
+            # Remove unnecessary extensions and metadata
+            point.extensions = None
+            point.symbol = None
+            point.type = None
+            point.comment = None
+            point.description = None
+            point.source = None
+            point.link = None
+            point.link_text = None
+            point.link_type = None
+            point.horizontal_dilution = None
+            point.vertical_dilution = None
+            point.position_dilution = None
+            point.age_of_dgps_data = None
+            point.dgps_id = None
+
+        return optimized_points
+
+    def _get_gpx_files(self) -> list[Path]:
+        """Get all GPX files from input (file, folder, or zip)."""
+        input_path = Path(self.input)
+        gpx_files = []
+
+        if input_path.is_file():
+            if input_path.suffix.lower() == ".gpx":
+                gpx_files.append(input_path)
+            elif input_path.suffix.lower() == ".zip":
+                gpx_files.extend(self._extract_gpx_from_zip(input_path))
+        elif input_path.is_dir():
+            # Get all GPX files in directory
+            gpx_files.extend(input_path.glob("*.gpx"))
+            gpx_files.extend(input_path.glob("*.GPX"))
+
+            # Get GPX files from ZIP files in directory
+            for zip_file in input_path.glob("*.zip"):
+                gpx_files.extend(self._extract_gpx_from_zip(zip_file))
+
+        return gpx_files
+
+    def _extract_gpx_from_zip(self, zip_path: Path) -> list[Path]:
+        """Extract GPX files from ZIP archive to temporary location."""
+        gpx_files = []
+        temp_dir = Path.cwd() / "temp_gpx_extract"
+        temp_dir.mkdir(exist_ok=True)
+
+        try:
+            with zipfile.ZipFile(zip_path, "r") as zip_ref:
+                for file_info in zip_ref.infolist():
+                    if file_info.filename.lower().endswith(".gpx"):
+                        extracted_path = temp_dir / Path(file_info.filename).name
+                        with open(extracted_path, "wb") as f:
+                            f.write(zip_ref.read(file_info.filename))
+                        gpx_files.append(extracted_path)
+        except Exception as e:
+            print(f"Error extracting ZIP file {zip_path}: {e}")
+
+        return gpx_files
+
+    def _load_gpx_file(self, gpx_path: Path) -> GPX:
+        """Load and parse GPX file."""
+        try:
+            with open(gpx_path, "r", encoding="utf-8") as f:
+                return gpxpy.parse(f)
+        except GPXXMLSyntaxException as e:
+            print(f"Error parsing GPX file {gpx_path}: {e}")
+            return None
+        except Exception as e:
+            print(f"Error loading GPX file {gpx_path}: {e}")
+            return None
+
+    def _save_gpx_file(self, gpx: GPX, output_path: Path):
+        """Save GPX object to file."""
+        try:
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write(gpx.to_xml())
+        except Exception as e:
+            print(f"Error saving GPX file {output_path}: {e}")
+
+    def compress_files(self):
+        """Shrink the size of all given gpx files in self.input."""
+        gpx_files = self._get_gpx_files()
+        output_folder = self._get_output_folder()
+
+        print(f"Processing {len(gpx_files)} GPX files...")
+
+        for gpx_file in gpx_files:
+            gpx = self._load_gpx_file(gpx_file)
+            if gpx is None:
+                continue
+
+            # Process all tracks
+            for track in gpx.tracks:
+                for segment in track.segments:
+                    segment.points = self._optimize_track_points(segment.points)
+
+            # Process all routes
+            for route in gpx.routes:
+                route.points = self._optimize_track_points(route.points)
+
+            # Clean GPX metadata
+            gpx.time = None
+            gpx.extensions = None
+
+            # Save compressed file
+            output_path = output_folder / f"compressed_{gpx_file.name}"
+            self._save_gpx_file(gpx, output_path)
+            print(f"Compressed: {gpx_file.name} -> {output_path}")
+
+    def merge_files(self):
+        """Merge all files of self.input into one gpx file with reduced resolution."""
+        gpx_files = self._get_gpx_files()
+        output_folder = self._get_output_folder()
+
+        if not gpx_files:
+            print("No GPX files found to merge.")
+            return
+
+        print(f"Merging {len(gpx_files)} GPX files...")
+
+        # Create new GPX object
+        merged_gpx = gpxpy.gpx.GPX()
+        merged_gpx.name = "Merged GPX Tracks"
+        merged_gpx.description = f"Merged from {len(gpx_files)} GPX files"
+
+        track_counter = 1
+
+        for gpx_file in gpx_files:
+            gpx = self._load_gpx_file(gpx_file)
+            if gpx is None:
+                continue
+
+            # Add all tracks from this file
+            for track in gpx.tracks:
+                new_track = gpxpy.gpx.GPXTrack()
+                new_track.name = f"Track_{track_counter}_{gpx_file.stem}"
+
+                for segment in track.segments:
+                    optimized_points = self._optimize_track_points(segment.points)
+                    if optimized_points:
+                        new_segment = gpxpy.gpx.GPXTrackSegment()
+                        new_segment.points = optimized_points
+                        new_track.segments.append(new_segment)
+
+                if new_track.segments:
+                    merged_gpx.tracks.append(new_track)
+                    track_counter += 1
+
+            # Add all routes from this file
+            for route in gpx.routes:
+                new_route = gpxpy.gpx.GPXRoute()
+                new_route.name = f"Route_{track_counter}_{gpx_file.stem}"
+                new_route.points = self._optimize_track_points(route.points)
+
+                if new_route.points:
+                    merged_gpx.routes.append(new_route)
+                    track_counter += 1
+
+        # Save merged file
+        output_path = output_folder / "merged_tracks.gpx"
+        self._save_gpx_file(merged_gpx, output_path)
+        print(f"Merged file saved: {output_path}")
+
+    def extract_pois(self):
+        """Merge every starting point of each track in all files
+        into one gpx file with many pois."""
+        if not self.extract_waypoints:
+            print("Waypoint extraction is disabled in configuration.")
+            return
+
+        gpx_files = self._get_gpx_files()
+        output_folder = self._get_output_folder()
+
+        if not gpx_files:
+            print("No GPX files found to extract POIs from.")
+            return
+
+        print(f"Extracting POIs from {len(gpx_files)} GPX files...")
+
+        # Create new GPX object for waypoints
+        poi_gpx = gpxpy.gpx.GPX()
+        poi_gpx.name = "Extracted Track Starting Points"
+        poi_gpx.description = f"Starting points extracted from {len(gpx_files)} GPX files"
+
+        poi_counter = 1
+
+        for gpx_file in gpx_files:
+            gpx = self._load_gpx_file(gpx_file)
+            if gpx is None:
+                continue
+
+            # Extract starting points from tracks
+            for track_idx, track in enumerate(gpx.tracks):
+                for _segment_idx, segment in enumerate(track.segments):
+                    if segment.points:
+                        start_point = segment.points[0]
+
+                        # Create waypoint from starting point
+                        waypoint = gpxpy.gpx.GPXWaypoint(
+                            latitude=round(start_point.latitude, 5),
+                            longitude=round(start_point.longitude, 5),
+                            elevation=self._get_adjusted_elevation(start_point),
+                        )
+
+                        track_name = track.name or f"Track_{track_idx + 1}"
+                        waypoint.name = f"POI_{poi_counter:03d}"
+                        waypoint.description = f"Start of {track_name} from {gpx_file.name}"
+                        waypoint.type = "Track Start"
+
+                        poi_gpx.waypoints.append(waypoint)
+                        poi_counter += 1
+
+            # Extract starting points from routes
+            for route_idx, route in enumerate(gpx.routes):
+                if route.points:
+                    start_point = route.points[0]
+
+                    # Create waypoint from starting point
+                    waypoint = gpxpy.gpx.GPXWaypoint(
+                        latitude=round(start_point.latitude, 5),
+                        longitude=round(start_point.longitude, 5),
+                        elevation=self._get_adjusted_elevation(start_point),
+                    )
+
+                    route_name = route.name or f"Route_{route_idx + 1}"
+                    waypoint.name = f"POI_{poi_counter:03d}"
+                    waypoint.description = f"Start of {route_name} from {gpx_file.name}"
+                    waypoint.type = "Route Start"
+
+                    poi_gpx.waypoints.append(waypoint)
+                    poi_counter += 1
+
+        # Save POI file
+        output_path = output_folder / "extracted_pois.gpx"
+        self._save_gpx_file(poi_gpx, output_path)
+        print(f"POI file saved with {len(poi_gpx.waypoints)} waypoints: {output_path}")
+
+        # Clean up temporary files
+        temp_dir = Path.cwd() / "temp_gpx_extract"
+        if temp_dir.exists():
+            import shutil
+
+            shutil.rmtree(temp_dir)

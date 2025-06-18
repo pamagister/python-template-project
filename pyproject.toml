@@ -8,8 +8,10 @@ authors = [
 readme = "docs/index.md"
 requires-python = ">=3.10,<3.12"
 dependencies = [
+    "gpxpy>=1.6.2",
     "pydantic>=2.11.7",
     "pyyaml>=6.0.2",
+    "srtm-py>=0.3.7",
 ]
 
 # Dev dependencies as optional dependencies
