@@ -10,7 +10,9 @@ import os
 import sys
 import threading
 import tkinter as tk
+import traceback
 import webbrowser
+from functools import partial
 from tkinter import filedialog, messagebox, ttk
 
 from python_template_project.config.config import ConfigParameter, ConfigParameterManager
@@ -309,6 +311,12 @@ class SettingsDialog:
 class MainGui:
     """Main GUI application class."""
 
+    processing_modes = [
+        ("compress_files", "Compress"),
+        ("merge_files", "Merge"),
+        ("extract_pois", "Extract POIs"),
+    ]
+
     def __init__(self, root):
         self.root = root
         self.root.title("python-template-project")
@@ -367,12 +375,22 @@ class MainGui:
         button_frame = ttk.Frame(top_frame)
         button_frame.pack(side=tk.RIGHT, fill=tk.Y, padx=(5, 0))
 
-        self.run_button = ttk.Button(button_frame, text="Run", command=self._run_processing)
-        self.run_button.pack(pady=5)
+        open_button = ttk.Button(button_frame, text="Open Files", command=self._open_files)
+        open_button.pack(pady=8)
+
+        # Create buttons dynamically
+        self.run_buttons = {}
+        for mode, label in self.processing_modes:
+            button = ttk.Button(
+                button_frame, text=label, command=partial(self._run_processing, mode=mode)
+            )
+            button.pack(pady=1)
+            # Save buttons in dictionary for later access
+            self.run_buttons[mode] = button
 
         # Clear files button
         self.clear_button = ttk.Button(button_frame, text="Clear Files", command=self._clear_files)
-        self.clear_button.pack(pady=5)
+        self.clear_button.pack(pady=8)
 
         # Progress bar
         self.progress = ttk.Progressbar(button_frame, mode="indeterminate")
@@ -424,7 +442,11 @@ class MainGui:
         menubar.add_cascade(label="File", menu=file_menu)
         file_menu.add_command(label="Open...", command=self._open_files)
         file_menu.add_separator()
-        file_menu.add_command(label="Run", command=self._run_processing)
+
+        # Create Run menu options dynamically
+        for mode, label in self.processing_modes:
+            file_menu.add_command(label=label, command=partial(self._run_processing, mode=mode))
+
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=self._on_closing)
 
@@ -483,25 +505,25 @@ class MainGui:
         else:
             self.logger.debug("No new files selected")
 
-    def _run_processing(self):
+    def _run_processing(self, mode="compress_files"):
         """Run the processing in a separate thread."""
         if not self.file_list:
             self.logger.warning("No input files selected")
             messagebox.showwarning("Warning", "No input files selected!")
             return
 
-        self.logger.info(f"Starting processing of {len(self.file_list)} files")
+        self.logger.info(f"Starting processing of {len(self.file_list)} files in mode: {mode}")
 
-        # Disable controls during processing
-        self.run_button.config(state="disabled")
-        self.clear_button.config(state="disabled")
+        # Alle Buttons während der Verarbeitung deaktivieren
+        for button in self.run_buttons.values():
+            button.config(state="disabled")
         self.progress.start()
 
         # Run in separate thread to avoid blocking GUI
-        thread = threading.Thread(target=self._process_files, daemon=True)
+        thread = threading.Thread(target=self._process_files, args=(mode,), daemon=True)
         thread.start()
 
-    def _process_files(self):
+    def _process_files(self, mode="compress_files"):
         """Process the selected files."""
         try:
             self.logger.info("=== Processing Started ===")
@@ -522,7 +544,15 @@ class MainGui:
                     self.config_manager.app.date_format.default,
                     self.logger,
                 )
-                project.compress_files()
+                # implement switch case for different processing modes
+                if mode == "compress_files":
+                    project.compress_files()
+                elif mode == "merge_files":
+                    project.merge_files()
+                elif mode == "extract_pois":
+                    project.extract_pois()
+                else:
+                    self.logger.warning(f"Unknown mode: {mode}")
 
                 self.logger.info(f"Completed: {os.path.basename(file_path)}")
 
@@ -541,7 +571,8 @@ class MainGui:
 
     def _processing_finished(self):
         """Re-enable controls after processing is finished."""
-        self.run_button.config(state="normal")
+        for button in self.run_buttons.values():
+            button.config(state="normal")
         self.clear_button.config(state="normal")
         self.progress.stop()
 
@@ -582,6 +613,7 @@ def main():
         root.mainloop()
     except Exception as e:
         print(f"GUI startup failed: {e}")
+        traceback.print_exc()
         sys.exit(1)
 
 
