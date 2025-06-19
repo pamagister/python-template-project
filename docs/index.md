@@ -13,7 +13,7 @@ A feature-rich Python project template designed for robustness and ease of use.
 This template provides a solid foundation for your next Python project, incorporating best practices for testing, automation, and distribution. It streamlines the development process with a comprehensive set of pre-configured tools and workflows, allowing you to focus on writing code.
 
 
-## Features
+## Feature overview
 
 * **Testing:** Unit testing setup with `pytest`.
 * **CI/CD:** GitHub Actions for automated builds (Windows, macOS), unit tests, and code checks.
@@ -26,7 +26,7 @@ This template provides a solid foundation for your next Python project, incorpor
     * Automatic generation of CLI API documentation.
 * **Documentation:** Configuration for publishing documentation on Read the Docs.
 * **Workflow Automation:** A `Makefile` is included to simplify and automate common development tasks.
-* **Minimalist GUI:** Comes with a basic GUI that includes an auto-generated settings menu based on your defined parameters.
+* **Minimalist GUI:** Comes with a basic GUI based on [tkinker](https://tkdocs.com/tutorial/index.html) that includes an auto-generated settings menu based on your defined parameters.
 
 ## Getting started
 
@@ -60,4 +60,3 @@ You have to run these commands in your IDE Terminal or the git bash and then pus
 git update-index --chmod=+x ./.github/release_message.sh
 ```
 
-### 
