@@ -4,6 +4,48 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #29: Generate elevation of points optionally, bugfix loop in main
+  gui, [Paul Magister]
+- Feat #28: Multiple file list conversion and merging #28. [Paul
+  Magister]
+- Feat #14: GUI: add buttons and run menu for each functionality. [Paul
+  Magister]
+- Feat #14: GUI: do NOT display required param in settings dialog. it
+  has to be set every time via gui. [Paul Magister]
+- Feat #23: little refactorings on gpx. [Paul Magister]
+- Feat #14: GUI: mention tkinker in docs. [Paul Magister]
+- Feat #18: Logging enabled in converter logic. [Paul Magister]
+- Merge pull request #15 from
+  pamagister/dependabot/github_actions/softprops/action-gh-release-2.
+  [Paul Magister]
+
+  Bump softprops/action-gh-release from 1 to 2
+- Bump softprops/action-gh-release from 1 to 2. [dependabot[bot]]
+
+  Bumps [softprops/action-gh-release](https://github.com/softprops/action-gh-release) from 1 to 2.
+  - [Release notes](https://github.com/softprops/action-gh-release/releases)
+  - [Changelog](https://github.com/softprops/action-gh-release/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/softprops/action-gh-release/compare/v1...v2)
+
+  ---
+  updated-dependencies:
+  - dependency-name: softprops/action-gh-release
+    dependency-version: '2'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Feat #26: unit-tests gpx functionality #26. [Paul Magister]
+- Feat #23: Implement gpx functionality: adjust interface. [Paul
+  Magister]
+- Feat #16: generate relative paths and improve filtering and visuals.
+  [Paul Magister]
+- Feat #25: add example gpx data #25. [Paul Magister]
+- Feat #23: Implement gpx functionality #23. [Paul Magister]
+- Feat #22: Auto-generate parameters md doc #22. [Paul Magister]
+
+
+0.1.10 (2025-06-17)
+-------------------
 - Feat #21: Build unified executable (gui and cli) for mac os. [Paul
   Magister]
 
