@@ -11,6 +11,7 @@ The parameters in the cli category can be accessed via the command line interfac
 | output            | str  | Path to output destination                        | ''      | -             |
 | min_dist          | int  | Maximum distance between two waypoints            | 20      | -             |
 | extract_waypoints | bool | Extract starting points of each track as waypoint | True    | [True, False] |
+| elevation         | bool | Include elevation data in waypoints               | True    | [True, False] |
 
 ## Category "app"
 

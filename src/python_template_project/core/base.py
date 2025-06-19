@@ -17,6 +17,7 @@ class BaseGPXProcessor:
         output=None,
         min_dist=10,
         date_format="%Y-%m-%d",
+        elevation=True,
         logger=None,
     ):
         # ensure that input is converted into a list[Path]
@@ -25,13 +26,14 @@ class BaseGPXProcessor:
         elif isinstance(input_, Path):
             self.input = [input_]
         elif isinstance(input_, list):
-            self.input = [Path(p) for p in input_ if isinstance(p, (str, Path))]
+            self.input = [Path(p) for p in input_ if isinstance(p, str | Path)]
         else:
             raise ValueError("Input must be a string, Path, or list of strings/Paths.")
 
         self.output = output
         self.min_dist = min_dist
         self.date_format = date_format
+        self.include_elevation = elevation
 
         # Initialize SRTM elevation data
         self.elevation_data = srtm.get_data()
@@ -104,7 +106,10 @@ class BaseGPXProcessor:
             point.longitude = round(point.longitude, 5)
 
             # Set optimized elevation
-            point.elevation = self._get_adjusted_elevation(point)
+            if self.include_elevation:
+                point.elevation = self._get_adjusted_elevation(point)
+            else:
+                point.elevation = None
 
             # Remove unnecessary extensions and metadata
             point.extensions = None
@@ -185,7 +190,8 @@ class BaseGPXProcessor:
                 f.write(gpx.to_xml())
                 if original_file and original_file.exists():
                     self.logger.info(
-                        f"Original gpx file size: {Path(original_file).stat().st_size / 1024:.2f} KB"
+                        f"Original gpx file size: "
+                        f"{Path(original_file).stat().st_size / 1024:.2f} KB"
                     )
                 self.logger.info(
                     f"Processed gpx file size: {output_path.stat().st_size / 1024:.2f} KB"
@@ -206,6 +212,10 @@ class BaseGPXProcessor:
             if gpx is None:
                 continue
 
+            # process and clean waypoints
+            for waypoint in gpx.waypoints:
+                self._optimize_waypoint(waypoint)
+
             # Process all tracks
             for track in gpx.tracks:
                 for segment in track.segments:
@@ -224,6 +234,28 @@ class BaseGPXProcessor:
             self._save_gpx_file(gpx, output_path, gpx_file)
             self.logger.info(f"Compressed: {gpx_file.name} -> {output_path}")
 
+    def _optimize_waypoint(self, waypoint):
+        # Round coordinates and elevation
+        waypoint.latitude = round(waypoint.latitude, 5)
+        waypoint.longitude = round(waypoint.longitude, 5)
+        if self.include_elevation:
+            waypoint.elevation = self._get_adjusted_elevation(waypoint)
+        else:
+            waypoint.elevation = None
+
+        # Clean metadata
+        waypoint.time = None
+        waypoint.extensions = None
+        waypoint.symbol = None
+        waypoint.type = None
+        waypoint.comment = None
+        waypoint.description = None
+        waypoint.source = None
+        waypoint.link = None
+        waypoint.link_text = None
+        waypoint.link_type = None
+        return waypoint
+
     def merge_files(self):
         """Merge all files of self.input into one gpx file with reduced resolution."""
         gpx_files = self._get_gpx_files()
@@ -238,7 +270,9 @@ class BaseGPXProcessor:
         # Create new GPX object
         merged_gpx = gpxpy.gpx.GPX()
         merged_gpx.name = "Merged GPX Tracks"
-        merged_gpx.description = f"Merged from {len(gpx_files)} GPX files"
+        merged_gpx.description = (
+            f"Merged from {len(gpx_files)} GPX files: {', '.join(str(f.name) for f in gpx_files)}"
+        )
 
         track_counter = 1
 
@@ -247,10 +281,16 @@ class BaseGPXProcessor:
             if gpx is None:
                 continue
 
+            # Add all waypoints from this file
+            for waypoint in gpx.waypoints:
+                waypoint = self._optimize_waypoint(waypoint)
+                waypoint.name = f"{waypoint.name}_{track_counter}"
+                merged_gpx.waypoints.append(waypoint)
+
             # Add all tracks from this file
             for track in gpx.tracks:
                 new_track = gpxpy.gpx.GPXTrack()
-                new_track.name = f"{gpx_file.stem}_{track.name or track_counter}"
+                new_track.name = f"{track.name or track_counter}_{gpx_file.stem}"
 
                 for segment in track.segments:
                     optimized_points = self._optimize_track_points(segment.points)
@@ -266,7 +306,7 @@ class BaseGPXProcessor:
             # Add all routes from this file
             for route in gpx.routes:
                 new_route = gpxpy.gpx.GPXRoute()
-                new_route.name = f"{gpx_file.stem}_{route.name or track_counter}"
+                new_route.name = f"{route.name or track_counter}_{gpx_file.stem}"
                 new_route.points = self._optimize_track_points(route.points)
 
                 if new_route.points:

@@ -69,6 +69,13 @@ class CliConfig(BaseModel):
         help="Extract starting points of each track as waypoint",
     )
 
+    elevation: ConfigParameter = ConfigParameter(
+        name="elevation",
+        default=True,
+        type_=bool,
+        help="Include elevation data in waypoints",
+    )
+
 
 class AppConfig(BaseModel):
     """Application-specific configuration parameters."""

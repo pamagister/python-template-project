@@ -20,6 +20,11 @@ cli:
   # Type: bool
   extract_waypoints: True
 
+  # Include elevation data in waypoints
+  # Choices: [True, False]
+  # Type: bool
+  elevation: True
+
 
 # APP Configuration
 app:

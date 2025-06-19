@@ -527,34 +527,28 @@ class MainGui:
         """Process the selected files."""
         try:
             self.logger.info("=== Processing Started ===")
+            self.logger.info("Processing files...")
 
-            for i, file_path in enumerate(self.file_list, 1):
-                self.logger.info(
-                    f"Processing file {i}/{len(self.file_list)}: {os.path.basename(file_path)}"
-                )
+            # Create and run project
+            project = BaseGPXProcessor(
+                self.file_list,
+                self.config_manager.cli.output.default,
+                self.config_manager.cli.min_dist.default,
+                self.config_manager.app.date_format.default,
+                self.config_manager.cli.elevation.default,
+                self.logger,
+            )
+            # implement switch case for different processing modes
+            if mode == "compress_files":
+                project.compress_files()
+            elif mode == "merge_files":
+                project.merge_files()
+            elif mode == "extract_pois":
+                project.extract_pois()
+            else:
+                self.logger.warning(f"Unknown mode: {mode}")
 
-                # Update config with current file
-                self.config_manager.cli.input.default = file_path
-
-                # Create and run project
-                project = BaseGPXProcessor(
-                    self.file_list,
-                    self.config_manager.cli.output.default,
-                    self.config_manager.cli.min_dist.default,
-                    self.config_manager.app.date_format.default,
-                    self.logger,
-                )
-                # implement switch case for different processing modes
-                if mode == "compress_files":
-                    project.compress_files()
-                elif mode == "merge_files":
-                    project.merge_files()
-                elif mode == "extract_pois":
-                    project.extract_pois()
-                else:
-                    self.logger.warning(f"Unknown mode: {mode}")
-
-                self.logger.info(f"Completed: {os.path.basename(file_path)}")
+            self.logger.info(f"Completed: {len(self.file_list)} files processed")
 
             self.logger.info("=== All files processed successfully! ===")
 
