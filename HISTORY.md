@@ -4,6 +4,13 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #16: remove old mbox strings and adjust names. [Paul Magister]
+- Feat #16: release. [Paul Magister]
+- Update README.md from docs/index.md. [github-actions]
+
+
+0.1.11 (2025-06-19)
+-------------------
 - Feat #29: Generate elevation of points optionally, bugfix loop in main
   gui, [Paul Magister]
 - Feat #28: Multiple file list conversion and merging #28. [Paul
