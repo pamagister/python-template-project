@@ -12,7 +12,7 @@ python -m pip install python_template_project
 ## 🔽 Download installer
 
 - [⬇️ Download for Windows](https://github.com/pamagister/python-template-project/releases/latest/download/installer-win.zip)
-- [⬇️ Download for macOS](https://github.com/pamagister/python-template-project/releases/latest/download/installer-macOS.zip)
+- [⬇️ Download for macOS](https://github.com/pamagister/python-template-project/releases/latest/download/package-macos.zip)
 
 
 
