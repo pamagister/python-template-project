@@ -12,16 +12,21 @@ NAME = "python_template_project"
 
 class BaseGPXProcessor:
     def __init__(
-        self, input_: str, output=None, min_dist=10, extract_waypoints=False, date_format="%Y-%m-%d"
+        self,
+        input_: str,
+        output=None,
+        min_dist=10,
+        date_format="%Y-%m-%d",
+        logger=None,
     ):
         self.input = input_  # gpx file, directory, or zip file
         self.output = output
         self.min_dist = min_dist
-        self.extract_waypoints = extract_waypoints
         self.date_format = date_format
 
         # Initialize SRTM elevation data
         self.elevation_data = srtm.get_data()
+        self.logger = logger
 
     def _get_output_folder(self) -> Path:
         """Get the output folder path, create if not exists."""
@@ -110,7 +115,7 @@ class BaseGPXProcessor:
     def _get_gpx_files(self) -> list[Path]:
         """Get all GPX files from input (file, folder, or zip)."""
         input_path = Path(self.input)
-        print(f"Input path: {input_path.absolute()}")
+        self.logger.info(f"Input path: {input_path.absolute()}")
         gpx_files = []
 
         if input_path.is_file():
@@ -143,7 +148,7 @@ class BaseGPXProcessor:
                             f.write(zip_ref.read(file_info.filename))
                         gpx_files.append(extracted_path)
         except Exception as e:
-            print(f"Error extracting ZIP file {zip_path}: {e}")
+            self.logger.error(f"Error extracting ZIP file {zip_path}: {e}")
 
         return gpx_files
 
@@ -153,10 +158,10 @@ class BaseGPXProcessor:
             with open(gpx_path, "r", encoding="utf-8") as f:
                 return gpxpy.parse(f)
         except GPXXMLSyntaxException as e:
-            print(f"Error parsing GPX file {gpx_path}: {e}")
+            self.logger.error(f"Error parsing GPX file {gpx_path}: {e}")
             return None
         except Exception as e:
-            print(f"Error loading GPX file {gpx_path}: {e}")
+            self.logger.error(f"Error loading GPX file {gpx_path}: {e}")
             return None
 
     def _save_gpx_file(self, gpx: GPX, output_path: Path):
@@ -165,14 +170,14 @@ class BaseGPXProcessor:
             with open(output_path, "w", encoding="utf-8") as f:
                 f.write(gpx.to_xml())
         except Exception as e:
-            print(f"Error saving GPX file {output_path}: {e}")
+            self.logger.error(f"Error saving GPX file {output_path}: {e}")
 
     def compress_files(self):
         """Shrink the size of all given gpx files in self.input."""
         gpx_files = self._get_gpx_files()
         output_folder = self._get_output_folder()
 
-        print(f"Processing {len(gpx_files)} GPX files...")
+        self.logger.info(f"Processing {len(gpx_files)} GPX files...")
 
         for gpx_file in gpx_files:
             gpx = self._load_gpx_file(gpx_file)
@@ -195,7 +200,7 @@ class BaseGPXProcessor:
             # Save compressed file
             output_path = output_folder / f"compressed_{gpx_file.name}"
             self._save_gpx_file(gpx, output_path)
-            print(f"Compressed: {gpx_file.name} -> {output_path}")
+            self.logger.info(f"Compressed: {gpx_file.name} -> {output_path}")
 
     def merge_files(self):
         """Merge all files of self.input into one gpx file with reduced resolution."""
@@ -203,10 +208,10 @@ class BaseGPXProcessor:
         output_folder = self._get_output_folder()
 
         if not gpx_files:
-            print("No GPX files found to merge.")
+            self.logger.error("No GPX files found to merge.")
             return
 
-        print(f"Merging {len(gpx_files)} GPX files...")
+        self.logger.info(f"Merging {len(gpx_files)} GPX files...")
 
         # Create new GPX object
         merged_gpx = gpxpy.gpx.GPX()
@@ -249,23 +254,20 @@ class BaseGPXProcessor:
         # Save merged file
         output_path = output_folder / "merged_tracks.gpx"
         self._save_gpx_file(merged_gpx, output_path)
-        print(f"Merged file saved: {output_path}")
+        self.logger.info(f"Merged file saved: {output_path}")
 
     def extract_pois(self):
         """Merge every starting point of each track in all files
         into one gpx file with many pois."""
-        if not self.extract_waypoints:
-            print("Waypoint extraction is disabled in configuration.")
-            return
 
         gpx_files = self._get_gpx_files()
         output_folder = self._get_output_folder()
 
         if not gpx_files:
-            print("No GPX files found to extract POIs from.")
+            self.logger.error("No GPX files found to extract POIs from.")
             return
 
-        print(f"Extracting POIs from {len(gpx_files)} GPX files...")
+        self.logger.info(f"Extracting POIs from {len(gpx_files)} GPX files...")
 
         # Create new GPX object for waypoints
         poi_gpx = gpxpy.gpx.GPX()
@@ -323,7 +325,7 @@ class BaseGPXProcessor:
         # Save POI file
         output_path = output_folder / "extracted_pois.gpx"
         self._save_gpx_file(poi_gpx, output_path)
-        print(f"POI file saved with {len(poi_gpx.waypoints)} waypoints: {output_path}")
+        self.logger.info(f"POI file saved with {len(poi_gpx.waypoints)} waypoints: {output_path}")
 
         # Clean up temporary files
         temp_dir = Path.cwd() / "temp_gpx_extract"

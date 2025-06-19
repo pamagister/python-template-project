@@ -514,8 +514,8 @@ class MainGui:
                     self.config_manager.cli.input.default,
                     self.config_manager.cli.output.default,
                     self.config_manager.cli.min_dist.default,
-                    self.config_manager.cli.extract_waypoints.default,
                     self.config_manager.app.date_format.default,
+                    self.logger,
                 )
                 project.compress_files()
 
@@ -527,7 +527,7 @@ class MainGui:
             self.logger.error(f"Processing failed: {err}", exc_info=True)
             # Show error dialog in main thread
             self.root.after(
-                0, lambda err=err: messagebox.showerror("Error", f"Processing failed: {err}")
+                0, lambda e=err: messagebox.showerror("Error", f"Processing failed: {e}")
             )
 
         finally:

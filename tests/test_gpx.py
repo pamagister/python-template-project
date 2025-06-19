@@ -1,4 +1,3 @@
-import os
 import shutil
 import unittest
 import zipfile
@@ -8,6 +7,8 @@ from pathlib import Path
 import gpxpy
 from gpxpy.gpx import GPXTrackPoint
 
+from python_template_project.config.config import ConfigParameterManager
+from python_template_project.core.logging import initialize_logging
 from src.python_template_project.core.base import BaseGPXProcessor
 
 
@@ -28,9 +29,12 @@ class TestGPXProcessor(unittest.TestCase):
         self.output_dir = project_root / "test_output"
         # Ensure the output directory exists
         self.output_dir.mkdir(parents=True, exist_ok=True)
+        self.logger = initialize_logging(ConfigParameterManager()).get_logger("TestGPXProcessor")
 
         self.processor = BaseGPXProcessor(
-            input_=str(self.test_gpx_file), output=str(self.output_dir)
+            input_=str(self.test_gpx_file),
+            output=str(self.output_dir),
+            logger=self.logger,
         )
 
     def tearDown(self):
@@ -51,7 +55,9 @@ class TestGPXProcessor(unittest.TestCase):
         """
         # Test with a specified output folder
         processor_with_output = BaseGPXProcessor(
-            input_=str(self.test_gpx_file), output="custom_output"
+            input_=str(self.test_gpx_file),
+            output="custom_output",
+            logger=self.logger,
         )
         output_path = processor_with_output._get_output_folder()
         self.assertEqual(output_path, Path("custom_output"))
@@ -59,7 +65,7 @@ class TestGPXProcessor(unittest.TestCase):
         shutil.rmtree(output_path)  # Clean up custom output
 
         # Test without a specified output folder (default behavior)
-        processor_no_output = BaseGPXProcessor(input_=str(self.test_gpx_file))
+        processor_no_output = BaseGPXProcessor(input_=str(self.test_gpx_file), logger=self.logger)
         output_path_default = processor_no_output._get_output_folder()
         # Check if the path starts with 'gpx_processed_' and current date
         self.assertTrue(str(output_path_default).startswith(str(Path.cwd() / "gpx_processed_")))
@@ -178,7 +184,7 @@ class TestGPXProcessor(unittest.TestCase):
         (temp_dir / "test2.gpx").touch()
         (temp_dir / "not_gpx.txt").touch()
 
-        processor_dir = BaseGPXProcessor(input_=str(temp_dir))
+        processor_dir = BaseGPXProcessor(input_=str(temp_dir), logger=self.logger)
         files_dir = processor_dir._get_gpx_files()
         self.assertEqual(len(files_dir), 2)
         self.assertTrue(any(f.name == "test1.gpx" for f in files_dir))
@@ -191,7 +197,7 @@ class TestGPXProcessor(unittest.TestCase):
             zf.writestr("zip_gpx_2.gpx", "<gpx></gpx>")
             zf.writestr("not_gpx_in_zip.txt", "text")
 
-        processor_zip = BaseGPXProcessor(input_=str(temp_zip_file))
+        processor_zip = BaseGPXProcessor(input_=str(temp_zip_file), logger=self.logger)
         files_zip = processor_zip._get_gpx_files()
         self.assertEqual(len(files_zip), 2)
         self.assertTrue(any(f.name == "zip_gpx_1.gpx" for f in files_zip))
@@ -292,7 +298,9 @@ class TestGPXProcessor(unittest.TestCase):
         shutil.copy(self.test_gpx_file, merge_input_dir)
         shutil.copy(dummy_gpx_path, merge_input_dir)
 
-        self.processor = BaseGPXProcessor(input_=str(merge_input_dir), output=str(self.output_dir))
+        self.processor = BaseGPXProcessor(
+            input_=str(merge_input_dir), output=str(self.output_dir), logger=self.logger
+        )
 
         self.processor.merge_files()
 
@@ -327,9 +335,6 @@ class TestGPXProcessor(unittest.TestCase):
         """
         Test the public extract_pois method.
         """
-        # Enable waypoint extraction for this test
-        self.processor.extract_waypoints = True
-
         self.processor.extract_pois()
 
         poi_file_path = self.output_dir / "extracted_pois.gpx"
@@ -350,14 +355,6 @@ class TestGPXProcessor(unittest.TestCase):
             self.assertIsInstance(poi.latitude, float)
             self.assertIsInstance(poi.longitude, float)
             self.assertIsInstance(poi.elevation, float)
-
-        # Test when extract_waypoints is False
-        self.processor.extract_waypoints = False
-        # Remove previously created POI file for clean test
-        if poi_file_path.exists():
-            os.remove(poi_file_path)
-        self.processor.extract_pois()
-        self.assertFalse(poi_file_path.exists())  # Should not create file if disabled
 
 
 if __name__ == "__main__":
