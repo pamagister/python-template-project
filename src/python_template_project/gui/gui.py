@@ -538,7 +538,7 @@ class MainGui:
 
                 # Create and run project
                 project = BaseGPXProcessor(
-                    self.config_manager.cli.input.default,
+                    self.file_list,
                     self.config_manager.cli.output.default,
                     self.config_manager.cli.min_dist.default,
                     self.config_manager.app.date_format.default,

@@ -13,13 +13,22 @@ NAME = "python_template_project"
 class BaseGPXProcessor:
     def __init__(
         self,
-        input_: str,
+        input_: str | Path | list[str],
         output=None,
         min_dist=10,
         date_format="%Y-%m-%d",
         logger=None,
     ):
-        self.input = input_  # gpx file, directory, or zip file
+        # ensure that input is converted into a list[Path]
+        if isinstance(input_, str):
+            self.input = [Path(input_)]
+        elif isinstance(input_, Path):
+            self.input = [input_]
+        elif isinstance(input_, list):
+            self.input = [Path(p) for p in input_ if isinstance(p, (str, Path))]
+        else:
+            raise ValueError("Input must be a string, Path, or list of strings/Paths.")
+
         self.output = output
         self.min_dist = min_dist
         self.date_format = date_format
@@ -117,22 +126,24 @@ class BaseGPXProcessor:
 
     def _get_gpx_files(self) -> list[Path]:
         """Get all GPX files from input (file, folder, or zip)."""
-        input_path = Path(self.input)
-        self.logger.info(f"Input path: {input_path.absolute()}")
         gpx_files = []
+        for input_path in self.input:
+            if not isinstance(input_path, Path):
+                input_path = Path(input_path)
+            self.logger.debug(f"Input path: {input_path.absolute()}")
 
-        if input_path.is_file():
-            if input_path.suffix.lower() == ".gpx":
-                gpx_files.append(input_path)
-            elif input_path.suffix.lower() == ".zip":
-                gpx_files.extend(self._extract_gpx_from_zip(input_path))
-        elif input_path.is_dir():
-            # Get all GPX files in directory
-            gpx_files.extend(input_path.glob("*.gpx"))
+            if input_path.is_file():
+                if input_path.suffix.lower() == ".gpx":
+                    gpx_files.append(input_path)
+                elif input_path.suffix.lower() == ".zip":
+                    gpx_files.extend(self._extract_gpx_from_zip(input_path))
+            elif input_path.is_dir():
+                # Get all GPX files in directory
+                gpx_files.extend(input_path.glob("*.gpx"))
 
-            # Get GPX files from ZIP files in directory
-            for zip_file in input_path.glob("*.zip"):
-                gpx_files.extend(self._extract_gpx_from_zip(zip_file))
+                # Get GPX files from ZIP files in directory
+                for zip_file in input_path.glob("*.zip"):
+                    gpx_files.extend(self._extract_gpx_from_zip(zip_file))
 
         return gpx_files
 
@@ -167,17 +178,15 @@ class BaseGPXProcessor:
             self.logger.error(f"Error loading GPX file {gpx_path}: {e}")
             return None
 
-    def _save_gpx_file(self, gpx: GPX, output_path: Path):
+    def _save_gpx_file(self, gpx: GPX, output_path: Path, original_file: Path | None = None):
         """Save GPX object to file."""
         try:
             with open(output_path, "w", encoding="utf-8") as f:
                 f.write(gpx.to_xml())
-                try:
+                if original_file and original_file.exists():
                     self.logger.info(
-                        f"Original gpx file size: {Path(self.input).stat().st_size / 1024:.2f} KB"
+                        f"Original gpx file size: {Path(original_file).stat().st_size / 1024:.2f} KB"
                     )
-                except FileNotFoundError:
-                    pass
                 self.logger.info(
                     f"Processed gpx file size: {output_path.stat().st_size / 1024:.2f} KB"
                 )
@@ -212,7 +221,7 @@ class BaseGPXProcessor:
 
             # Save compressed file
             output_path = output_folder / f"compressed_{gpx_file.name}"
-            self._save_gpx_file(gpx, output_path)
+            self._save_gpx_file(gpx, output_path, gpx_file)
             self.logger.info(f"Compressed: {gpx_file.name} -> {output_path}")
 
     def merge_files(self):
@@ -241,7 +250,7 @@ class BaseGPXProcessor:
             # Add all tracks from this file
             for track in gpx.tracks:
                 new_track = gpxpy.gpx.GPXTrack()
-                new_track.name = f"Track_{track_counter}_{gpx_file.stem}"
+                new_track.name = f"{gpx_file.stem}_{track.name or track_counter}"
 
                 for segment in track.segments:
                     optimized_points = self._optimize_track_points(segment.points)
@@ -257,7 +266,7 @@ class BaseGPXProcessor:
             # Add all routes from this file
             for route in gpx.routes:
                 new_route = gpxpy.gpx.GPXRoute()
-                new_route.name = f"Route_{track_counter}_{gpx_file.stem}"
+                new_route.name = f"{gpx_file.stem}_{route.name or track_counter}"
                 new_route.points = self._optimize_track_points(route.points)
 
                 if new_route.points:
