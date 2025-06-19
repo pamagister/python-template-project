@@ -1,4 +1,4 @@
-"""Generic unittest class for testing mbox_converter CLI and config integration.
+"""Generic unittest class for testing CLI and config integration.
 
 This test suite validates the integration between config.py and cli.py
 with various parameter combinations and edge cases.
@@ -20,8 +20,8 @@ class TestGenericCLI(unittest.TestCase):
         self.temp_path = Path(self.temp_dir.name)
 
         # Create a dummy file for testing
-        self.dummy_mbox = self.temp_path / "test.input"
-        self.dummy_mbox.write_text("dummy input content")
+        self.dummy_input = self.temp_path / "test.input"
+        self.dummy_input.write_text("dummy input content")
 
         # Default config for testing
         self.configManager = ConfigParameterManager()

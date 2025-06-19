@@ -11,8 +11,8 @@ python -m pip install python_template_project
 
 ## 🔽 Download installer
 
-- [⬇️ Download for Windows](https://github.com/pamagister/python-template-project/releases/latest/download/MboxConverter-win.zip)
-- [⬇️ Download for macOS](https://github.com/pamagister/python-template-project/releases/latest/download/MboxConverter-macOS.zip)
+- [⬇️ Download for Windows](https://github.com/pamagister/python-template-project/releases/latest/download/installer-win.zip)
+- [⬇️ Download for macOS](https://github.com/pamagister/python-template-project/releases/latest/download/installer-macOS.zip)
 
 
 
@@ -42,10 +42,4 @@ python-template-project [OPTIONS] path/to/file
 ### Run GUI from command line
 ```bash
 python-template-project-gui
-```
-
-## Run GUI
-
-```bash
-mbox_gui
 ```

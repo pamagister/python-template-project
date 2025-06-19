@@ -18,7 +18,7 @@ echo "Renaming project..."
 
 original_author="pamagister"
 original_name="python-template-project"
-original_urlname="mbox_converter"
+original_urlname="python-template-project"
 original_description="Awesome python-template-project created by pamagister"
 # for filename in $(find . -name "*.*") 
 for filename in $(git ls-files) 

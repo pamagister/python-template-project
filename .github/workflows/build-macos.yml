@@ -82,7 +82,7 @@ jobs:
           EOF
           echo "Create the ZIP archive from the contents of the release folder"
           cd release
-          zip -r ../python-template-project-macOS.zip .
+          zip -r ../installer-macOS.zip .
 
       - name: Upload ZIP to GitHub Release
         uses: softprops/action-gh-release@v2
