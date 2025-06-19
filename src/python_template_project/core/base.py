@@ -5,7 +5,7 @@ from pathlib import Path
 
 import gpxpy
 import srtm
-from gpxpy.gpx import GPX, GPXTrackPoint, GPXXMLSyntaxException
+from gpxpy.gpx import GPX, GPXTrackPoint, GPXWaypoint, GPXXMLSyntaxException
 
 NAME = "python_template_project"
 
@@ -39,7 +39,7 @@ class BaseGPXProcessor:
         output_path.mkdir(parents=True, exist_ok=True)
         return output_path
 
-    def _get_adjusted_elevation(self, point: GPXTrackPoint) -> int:
+    def _get_adjusted_elevation(self, point: GPXTrackPoint) -> int | float:
         """Get adjusted elevation from SRTM data, fallback to original elevation."""
         try:
             srtm_elevation = self.elevation_data.get_elevation(point.latitude, point.longitude)
@@ -51,7 +51,8 @@ class BaseGPXProcessor:
         # Fallback to original elevation or 0
         return round(point.elevation or 0, 1)
 
-    def _calculate_distance(self, point1: GPXTrackPoint, point2: GPXTrackPoint) -> float:
+    @staticmethod
+    def _calculate_distance(point1: GPXTrackPoint, point2: GPXTrackPoint) -> float:
         """Calculate distance between two GPX points in meters using Haversine formula."""
         lat1, lon1 = math.radians(point1.latitude), math.radians(point1.longitude)
         lat2, lon2 = math.radians(point2.latitude), math.radians(point2.longitude)
@@ -66,7 +67,9 @@ class BaseGPXProcessor:
         earth_radius = 6371000
         return earth_radius * c
 
-    def _optimize_track_points(self, track_points: list[GPXTrackPoint]) -> list[GPXTrackPoint]:
+    def _optimize_track_points(
+        self, track_points: list[GPXTrackPoint] | list[GPXWaypoint]
+    ) -> list[GPXTrackPoint]:
         """Optimize track points by removing close points and cleaning metadata."""
         if not track_points:
             return track_points
@@ -152,7 +155,7 @@ class BaseGPXProcessor:
 
         return gpx_files
 
-    def _load_gpx_file(self, gpx_path: Path) -> GPX:
+    def _load_gpx_file(self, gpx_path: Path) -> GPX | None:
         """Load and parse GPX file."""
         try:
             with open(gpx_path, "r", encoding="utf-8") as f:
@@ -169,6 +172,16 @@ class BaseGPXProcessor:
         try:
             with open(output_path, "w", encoding="utf-8") as f:
                 f.write(gpx.to_xml())
+                try:
+                    self.logger.info(
+                        f"Original gpx file size: {Path(self.input).stat().st_size / 1024:.2f} KB"
+                    )
+                except FileNotFoundError:
+                    pass
+                self.logger.info(
+                    f"Processed gpx file size: {output_path.stat().st_size / 1024:.2f} KB"
+                )
+
         except Exception as e:
             self.logger.error(f"Error saving GPX file {output_path}: {e}")
 
