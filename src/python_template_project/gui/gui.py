@@ -219,6 +219,10 @@ class SettingsDialog:
         row = 0
         for field_name in category_obj.model_fields:
             param = getattr(category_obj, field_name)
+            if param.required:
+                # Skip required parameters as they are not configurable in GUI
+                # --> required params have to be set via Open file dialog in GUI
+                continue
 
             # Create label
             label = ttk.Label(parent, text=f"{param.name}:")
@@ -229,6 +233,7 @@ class SettingsDialog:
             widget.grid(row=row, column=1, sticky="ew", padx=5, pady=2)
 
             # Add tooltip
+            ToolTip(label, param.help)
             ToolTip(widget, param.help)
 
             # Store widget reference
