@@ -54,6 +54,7 @@ pep621_dev_dependency_groups = ["dev", "docs"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+exclude = ["src/python_template_project/VERSION.py"]
 
 [tool.ruff.lint]
 select = [
