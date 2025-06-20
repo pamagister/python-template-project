@@ -1,42 +1,55 @@
 name: Rename the project from template
 
-on: [push]
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
 
 permissions: write-all
 
 jobs:
   rename-project:
-    if: ${{ !contains (github.repository, '/python-template-project') }}
+    # Execute the job only if the repository name is no longer the template name
+    # or if it is the first run after templating (manual triggering)
+    if: github.repository != github.event.repository.owner.login || !contains(github.repository, '/python-template-project')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
-          # by default, it uses a depth of 1
-          # this fetches all history so that we can read each commit
-          fetch-depth: 0
+          fetch-depth: 0 # Loads the entire history for change tracking
           ref: ${{ github.head_ref }}
-          
-      - run: echo "REPOSITORY_NAME=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}' | tr '-' '_' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      # The repository name (e.g. "my-new-repo" or "my_new_repo")
+      - run: echo "NEW_REPO_BASE_NAME=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
         shell: bash
 
-      - run: echo "REPOSITORY_URLNAME=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
+      # The name for internal Python packages (always with underscores)
+      - run: echo "NEW_PACKAGE_NAME=$(echo '${{ env.NEW_REPO_BASE_NAME }}' | tr '-' '_')" >> $GITHUB_ENV
+        shell: bash
+
+      # The name for external designations (remains as in the repo name)
+      - run: echo "NEW_PROJECT_NAME=$(echo '${{ env.NEW_REPO_BASE_NAME }}' | tr '_' '-')" >> $GITHUB_ENV
         shell: bash
 
       - run: echo "REPOSITORY_OWNER=$(echo '${{ github.repository }}' | awk -F '/' '{print $1}')" >> $GITHUB_ENV
         shell: bash
-        
-      - name: Is this still a template
+
+      - name: Check if this is still a template
         id: is_template
-        run: echo "::set-output name=is_template::$(ls .github/template.yml &> /dev/null && echo true || echo false)"
+        # Check whether the template.yml still exists
+        run: echo "::set-output name=is_template::$(test -f .github/template.yml && echo 'true' || echo 'false')"
 
       - name: Rename the project
+        # Execute only if the template.yml exists (indicator for template repo)
         if: steps.is_template.outputs.is_template == 'true'
         run: |
-          echo "Renaming the project with -a(author) ${{ env.REPOSITORY_OWNER }} -n(name) ${{ env.REPOSITORY_NAME }} -u(urlname) ${{ env.REPOSITORY_URLNAME }}"
-          .github/rename_project.sh -a ${{ env.REPOSITORY_OWNER }} -n ${{ env.REPOSITORY_NAME }} -u ${{ env.REPOSITORY_URLNAME }} -d "Awesome ${{ env.REPOSITORY_NAME }} created by ${{ env.REPOSITORY_OWNER }}"
-              
+          echo "Renaming the project with author: ${{ env.REPOSITORY_OWNER }}, package name: ${{ env.NEW_PACKAGE_NAME }}, project name: ${{ env.NEW_PROJECT_NAME }}"
+          .github/rename_project.sh \
+            -a "${{ env.REPOSITORY_OWNER }}" \
+            -p "${{ env.NEW_PACKAGE_NAME }}" \
+            -n "${{ env.NEW_PROJECT_NAME }}" \
+            -d "Feature-rich Python project template for ${{ env.NEW_PROJECT_NAME }}." # Angepasste Beschreibung
+
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: "✅ Ready to clone and code."
-          # commit_options: '--amend --no-edit'
+          commit_message: "✅ Project renamed from template."
           push_options: --force
