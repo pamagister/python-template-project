@@ -55,6 +55,11 @@ test: lint        ## Run tests and generate coverage report.
 	uv run coverage xml
 	uv run coverage html
 
+.PHONY: build-win
+build-win:    ## Build the Windows executable.
+	echo "Building unified CLI/GUI application"
+	uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml;." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+
 .PHONY: watch
 watch:            ## Run tests on every change.
 	ls **/**.py | entr uv run pytest -s -vvv -l --tb=long --maxfail=1 tests/

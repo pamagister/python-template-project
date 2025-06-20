@@ -29,9 +29,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Build Unified EXE with PyInstaller
-        run: |
-          echo "Building unified CLI/GUI application"
-          uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml;." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+        run: make build-win
 
       - name: Prepare ZIP file for release
         run: |
