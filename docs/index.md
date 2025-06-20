@@ -16,7 +16,7 @@ This template provides a solid foundation for your next Python project, incorpor
 
 Download from [PyPI](https://pypi.org/).
 
-💾 For more installation options see [install](getting-started/install.md).
+💾 For more installation options see [install](docs/getting-started/install.md).
 
 ```bash
 pip install python-template-project
@@ -30,7 +30,7 @@ python-template-project-gui
 
 ## How to use this template
 
-🐍 For details, see the [Getting Started](develop/01_getting_started_dev.md) guide.
+🐍 For details, see the [Getting Started](docs/develop/01_getting_started_dev.md) guide.
 
 
 ## Feature overview

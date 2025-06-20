@@ -5,21 +5,13 @@
 
 Getting started on developing your own project based on this template
 
-1. **Create** a new [github repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository).
-2. **Clone** [github repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the into your local file system.
-    ```bash
-    git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY
-    ```
-4. **Install** [uv package and project manager](https://docs.astral.sh/uv/getting-started/installation/)
-    ```bash
-    pip install uv
-    ```
-5. **Generate** [a sample project](https://docs.astral.sh/uv/guides/projects/#creating-a-new-project) with uv
-6. Add and **push** the artifacts to your github repository
-    ```bash
-    git push
-    ```
-8. Copy the content of this repository into your repository
+> **DO NOT FORK** this is meant to be used from **[Use this template](https://github.com/pamagister/python-template-project/generate)** feature.
+
+1. Click on **[Use this template](https://github.com/pamagister/python-template-project/generate)**
+3. Give a name to your project  
+   (e.g. `my_python_project` recommendation is to use all lowercase and underscores separation for repo names.)
+3. Wait until the first run of CI finishes  
+   (Github Actions will process the template and commit to your new repo)
 
 ## Troubleshooting
 
