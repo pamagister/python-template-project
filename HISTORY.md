@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #16: fix installer link and name. [Paul Magister]
+- Feat #16: release. [Paul Magister]
+
+
+0.1.12 (2025-06-19)
+-------------------
 - Feat #16: remove old mbox strings and adjust names. [Paul Magister]
 - Feat #16: release. [Paul Magister]
 - Update README.md from docs/index.md. [github-actions]
