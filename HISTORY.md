@@ -4,6 +4,26 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #31: move project specific namings into makefile so that it can
+  be renamed. [Paul Magister]
+- Feat #31: try this renaming automation. [Paul Magister]
+- Feat #31: improve renaming automation: has to be triggered manually,
+  keep kebab-case if project is named like this. [Paul Magister]
+- Feat #31: improve renaming automation: has to be triggered manually,
+  keep kebab-case if project is named like this. [Paul Magister]
+- Feat #31: improve renaming automation: has to be triggered manually,
+  keep kebab-case if project is named like this. [Paul Magister]
+- Feat #31: consistent naming. [Paul Magister]
+- Feat #31: fix rename_project.yml: use correct git auto commit. [Paul
+  Magister]
+- Feat #31: fix rename_project.yml: use correct git auto commit. [Paul
+  Magister]
+- Feat #30: fix link issue by modifying link in README.md. [Paul
+  Magister]
+
+
+0.1.18 (2025-06-20)
+-------------------
 - Feat #30: do not track _version.py. [Paul Magister]
 - Feat #30: fix version. [Paul Magister]
 
