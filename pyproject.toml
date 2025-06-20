@@ -1,6 +1,6 @@
 [project]
 name = "python-template-project"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Feature-rich Python project template designed for robustness and ease of use."
 authors = [
     {name = "pamagister"}
@@ -42,12 +42,11 @@ python-template-project = "python_template_project.cli.cli:main"
 python-template-project-gui = "python_template_project.gui.gui:main"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=61.0", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
 
-# Hatchling-spezifische Konfiguration für src-Layout
-[tool.hatch.build.targets.wheel]
-packages = ["src/python_template_project"]
+[tool.setuptools_scm]
+write_to = "src/python_template_project/_version.py"
 
 [tool.deptry]
 pep621_dev_dependency_groups = ["dev", "docs"]

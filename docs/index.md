@@ -27,6 +27,9 @@ This template provides a solid foundation for your next Python project, incorpor
 * **Documentation:** Configuration for publishing documentation on [Read the Docs](https://about.readthedocs.com/) using [mkdocs](https://www.mkdocs.org/) .
 * **Workflow Automation:** A `Makefile` is included to simplify and automate common development tasks.
 * **Minimalist GUI:** Comes with a basic GUI based on [tkinker](https://tkdocs.com/tutorial/index.html) that includes an auto-generated settings menu based on your defined parameters.
+* **Release pipeline:** Automated releases unsing the Makefile `make release` command, which creates a new tag and pushes it to the remote repo. The `release` pipeline will automatically create a new release on GitHub and trigger a release on PyPI.
+    * **[setuptools](https://pypi.org/project/setuptools/)** is used to package the project and manage dependencies.
+    * **[setuptools-scm](https://pypi.org/project/setuptools-scm/)** is used to automatically generate the `_version.py` file from the `pyproject.toml` file.
 
 ## Getting started
 

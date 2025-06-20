@@ -89,19 +89,29 @@ virtualenv:       ## Create a virtual environment.
 release:          ## Create a new tag for release.
 	@echo "WARNING: This operation will create a version tag and push to GitHub"
 
-	@CURRENT_VERSION=$$(cat src/VERSION)
-	IFS=. read -r MAJOR MINOR PATCH <<< "$$CURRENT_VERSION"
-	@NEXT_VERSION="$$MAJOR.$$MINOR.$$((PATCH + 1))"
-	echo "Current version: $$CURRENT_VERSION"
-	read -e -i "$$NEXT_VERSION" -p "Version? (provide the next x.y.z semver) : " TAG
-	echo "$${TAG}" > src/VERSION
+	# Get the latest Git tag if it exists, otherwise default to 0.0.0 for calculations
+	# 'git describe --tags --abbrev=0' gets the most recent tag
+	# '|| echo 0.0.0' provides a fallback if no tags exist yet
+	@CURRENT_TAG=$$(git describe --tags --abbrev=0 2>/dev/null || echo "0.0.0")
+	@echo "Current (latest) Git tag: $$CURRENT_TAG"
+
+	# Suggest next patch version based on the current tag
+	IFS=. read -r MAJOR MINOR PATCH <<< "$$CURRENT_TAG"
+	@NEXT_PATCH_VERSION="$$MAJOR.$$MINOR.$$((PATCH + 1))"
+
+	# Prompt the user for the new tag, suggesting the next patch version by default
+	read -e -i "$$NEXT_PATCH_VERSION" -p "Enter the new release tag (e.g., 1.0.0, 1.1.0, 1.1.1): " NEW_TAG
+
+	# Generate changelog *before* tagging, based on existing history up to the new tag point
 	uv run gitchangelog > HISTORY.md
-	git add src/VERSION HISTORY.md
-	git commit -m "release: version $${TAG} 🚀"
-	echo "creating git tag : $${TAG}"
-	git tag $${TAG}
+	git add HISTORY.md
+	git commit -m "docs: Update HISTORY.md for release $${NEW_TAG}"
+
+	echo "Creating git tag : $${NEW_TAG}"
+	git tag "$${NEW_TAG}"
 	git push -u origin HEAD --tags
-	echo "GitHub Actions will detect the new tag and release the new version."
+
+	echo "GitHub Actions will detect the new tag and trigger the release workflows."
 	echo "Add modified files to commit and push them to main"
 
 .PHONY: docs

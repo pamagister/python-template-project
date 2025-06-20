@@ -719,7 +719,6 @@ wheels = [
 
 [[package]]
 name = "python-template-project"
-version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "gpxpy" },
