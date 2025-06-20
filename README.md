@@ -18,32 +18,40 @@ This template provides a solid foundation for your next Python project, incorpor
 
 Download from [PyPI](https://pypi.org/).
 
-ðŸ’¾ For more installation options see [install](getting-started/install.md).
+💾 For more installation options see [install](getting-started/install.md).
 
 ```bash
 pip install python-template-project
 ```
 
-### Run GUI from command line
+Run GUI from command line
+
 ```bash
 python-template-project-gui
 ```
 
+## How to use this template
+
+🐍 For details, see the [Getting Started](develop/01_getting_started_dev.md) guide.
+
+
 ## Feature overview
 
-* **Testing:** Unit testing setup with `pytest`.
-* **CI/CD:**  [GitHub Actions](https://github.com/features/actions) for automated builds (Windows, macOS), unit tests, and code checks.
-* **Code Formatting and Linting:** Pre-commit hook with the [RUFF auto-formatter](https://docs.astral.sh/ruff/) to ensure consistent code style.
-* **Automated Builds:** GitHub pipeline for automatically building a Windows executable and a macOS installer.
-* **Package Management:** Utilizes [uv](https://docs.astral.sh/uv/getting-started/), an extremely fast Python package manager, with dependencies managed in `pyproject.toml`.
-* **Parameter-Driven Automation:**
+* 📦 **Package Management:** Utilizes [uv](https://docs.astral.sh/uv/getting-started/), an extremely fast Python package manager, with dependencies managed in `pyproject.toml`.
+* ✅ **Code Formatting and Linting:** Pre-commit hook with the [RUFF auto-formatter](https://docs.astral.sh/ruff/) to ensure consistent code style.
+* 🧪 **Testing:** Unit testing framework with [pytest](https://docs.pytest.org/en/latest/).
+* 📊 **Code coverage reports** using [codecov](https://about.codecov.io/sign-up/)
+* 🔄 **CI/CD:**  [GitHub Actions](https://github.com/features/actions) for automated builds (Windows, macOS), unit tests, and code checks.
+* 💾 **Automated Builds:** GitHub pipeline for automatically building a Windows executable and a macOS installer.
+* 💬 **Parameter-Driven Automation:**
     * Automatic generation of a configuration file from parameter definitions.
     * Automatic generation of a Command-Line Interface (CLI) from the same parameters.
     * Automatic generation of CLI API documentation.
-* **Documentation:** Configuration for publishing documentation on [Read the Docs](https://about.readthedocs.com/) using [mkdocs](https://www.mkdocs.org/) .
-* **Workflow Automation:** A `Makefile` is included to simplify and automate common development tasks.
-* **Minimalist GUI:** Comes with a basic GUI based on [tkinker](https://tkdocs.com/tutorial/index.html) that includes an auto-generated settings menu based on your defined parameters.
-* **Release pipeline:** Automated releases unsing the Makefile `make release` command, which creates a new tag and pushes it to the remote repo. The `release` pipeline will automatically create a new release on GitHub and trigger a release on PyPI.
+    * Automatic generation of change log using **gitchangelog** to keep a HISTORY.md file up to date.
+* 📃 **Documentation:** Configuration for publishing documentation on [Read the Docs](https://about.readthedocs.com/) using [mkdocs](https://www.mkdocs.org/) .
+* 🖼️ **Minimalist GUI:** Comes with a basic GUI based on [tkinker](https://tkdocs.com/tutorial/index.html) that includes an auto-generated settings menu based on your defined parameters.
+* 🖥️ **Workflow Automation:** A `Makefile` is included to simplify and automate common development tasks.
+* 🛳️ **Release pipeline:** Automated releases unsing the Makefile `make release` command, which creates a new tag and pushes it to the remote repo. The `release` pipeline will automatically create a new release on GitHub and trigger a release on  [PyPI](https://pypi.org.
     * **[setuptools](https://pypi.org/project/setuptools/)** is used to package the project and manage dependencies.
     * **[setuptools-scm](https://pypi.org/project/setuptools-scm/)** is used to automatically generate the `_version.py` file from the `pyproject.toml` file.
 
