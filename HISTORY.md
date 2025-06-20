@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #30: switch build system to setuptools_scm. [Paul Magister]
+- Feat #30: add some links to the doc. [Paul Magister]
+
+
+0.1.14 (2025-06-20)
+-------------------
 - Feat #30: release project on pypi: deploy section in release.yml.
   [Paul Magister]
 - Feat #30: release project on pypi: rename contributing section, add
