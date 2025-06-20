@@ -33,4 +33,26 @@ jobs:
         with:
           body_path: release_message.md
 
-
+  deploy:
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        # Use a specific Python version, e.g., 3.11, consistent with your build
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        # install build for modern packaging, and twine
+        pip install build twine
+    - name: Build and publish
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      run: |
+        # Use 'python -m build' for modern packaging
+        python -m build
+        twine upload dist/*
