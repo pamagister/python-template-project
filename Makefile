@@ -59,6 +59,37 @@ test: lint        ## Run tests and generate coverage report.
 build-win:    ## Build the Windows executable.
 	echo "Building unified CLI/GUI application"
 	uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml;." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+	rm -rf release
+	mkdir release
+	cp dist/python-template-project.exe release
+	cp config.yaml release
+	cp README.md release
+
+.PHONY: build-macos
+build-macos:    ## Build the macOS executable.
+	echo "Building unified CLI/GUI application as executable"
+	uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml:." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+
+	echo "Building unified CLI/GUI application as .app bundle"
+	# --windowed is important to hide the console for GUI mode
+	# The name "TemplateApp" becomes the name of the .app
+	uv run pyinstaller --windowed --name "TemplateApp" src/main.py --add-data "config.yaml:." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+
+	# Prepare ZIP file for release
+	rm -rf release
+	mkdir release
+	echo "Copy the CLI/GUI executable"
+	cp dist/python-template-project release/
+	echo "Copy the .app bundle (directory) recursively"
+	cp -R "dist/TemplateApp.app" release/
+	echo "Copy configuration and documentation"
+	cp config.yaml release/
+	cp README.md release/
+	echo "Create usage instructions"
+
+	echo "Create the ZIP archive from the contents of the release folder"
+	cd release
+	zip -r ../package-macOS.zip .
 
 .PHONY: watch
 watch:            ## Run tests on every change.

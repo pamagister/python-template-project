@@ -43,6 +43,11 @@ original_description="Feature-rich Python project template designed for robustne
 
 for filename in $(git ls-files)
 do
+    # Skip files in the .github/ directory
+    if [[ "$filename" == ".github"* ]]; then
+        echo "Skipping .github file: $filename"
+        continue
+    fi
     # Replace the old internal package name with the new internal package name
     sed -i "s/$original_package_name/$package_name/g" "$filename"
     # Replace the old external project name with the new external project name

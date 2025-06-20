@@ -33,10 +33,6 @@ jobs:
 
       - name: Prepare ZIP file for release
         run: |
-          mkdir release
-          copy dist\python-template-project.exe release\
-          copy config.yaml release\
-          copy README.md release\
           echo "  - Double-click to start GUI" >> release\USAGE.txt
           echo "  - Run from command line for CLI options" >> release\USAGE.txt
           powershell Compress-Archive -Path release\* -DestinationPath installer-win.zip
