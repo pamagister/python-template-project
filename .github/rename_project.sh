@@ -18,19 +18,20 @@ echo "Renaming project..."
 
 original_author="pamagister"
 original_name="python-template-project"
+original_package_name="python_template_project"
 original_urlname="python-template-project"
 original_description="Awesome python-template-project created by pamagister"
 # for filename in $(find . -name "*.*") 
 for filename in $(git ls-files) 
 do
     sed -i "s/$original_author/$author/g" $filename
-    sed -i "s/$original_name/$name/g" $filename
+    sed -i "s/$original_package_name/$name/g" $filename
     sed -i "s/$original_urlname/$urlname/g" $filename
     sed -i "s/$original_description/$description/g" $filename
     echo "Renamed $filename"
 done
 
-mv python-template-project $name
+mv original_name $name
 
 # This command runs only once on GHA!
 rm -rf .github/template.yml
