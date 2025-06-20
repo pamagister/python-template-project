@@ -4,6 +4,23 @@ Changelog
 
 (unreleased)
 ------------
+- Fix #29: more rubust usage of srtm in case of connection issues. [Paul
+  Magister]
+- Feat #30: exclude _version.py from check. [Paul Magister]
+- Feat #31: doc on how to generate. [Paul Magister]
+- Feat #30: exclude _version.py from check. [Paul Magister]
+- Feat #31: enable project to be copied #31. [Paul Magister]
+- Feat #27: move build logic into make file #27. [Paul Magister]
+- Feat #30: improve README.md, fix utf8-issues on copying. [Paul
+  Magister]
+- Feat #30: correct doc how to install and use this project. [Paul
+  Magister]
+- Feat #30: add _version.py instead of VERSION. [Paul Magister]
+- Update README.md from docs/index.md. [github-actions]
+
+
+0.1.15 (2025-06-20)
+-------------------
 - Feat #30: switch build system to setuptools_scm. [Paul Magister]
 - Feat #30: add some links to the doc. [Paul Magister]
 
