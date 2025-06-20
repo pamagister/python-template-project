@@ -6,6 +6,14 @@ Changelog
 ------------
 - Feat #31: move project specific namings into makefile so that it can
   be renamed. [Paul Magister]
+- Feat #31: move project specific namings into makefile so that it can
+  be renamed. [Paul Magister]
+
+
+0.1.19 (2025-06-20)
+-------------------
+- Feat #31: move project specific namings into makefile so that it can
+  be renamed. [Paul Magister]
 - Feat #31: try this renaming automation. [Paul Magister]
 - Feat #31: improve renaming automation: has to be triggered manually,
   keep kebab-case if project is named like this. [Paul Magister]
