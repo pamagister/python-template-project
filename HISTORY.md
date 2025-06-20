@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #30: fix link issue by modifying link in README.md. [Paul
+  Magister]
+
+
+0.1.16 (2025-06-20)
+-------------------
 - Fix #29: more rubust usage of srtm in case of connection issues. [Paul
   Magister]
 - Feat #30: exclude _version.py from check. [Paul Magister]
