@@ -1,22 +1,55 @@
 # Installation
 
 
+## 🐍 PyPI
 
-## 🐍 Install from PyPI 
+### Install the package from PyPI
+
+Download from [PyPI](https://pypi.org/):
 
 ```bash
-python -m pip install python_template_project
+pip install python-template-project
 ```
 
+### Run CLI from command line
+```bash
+python-template-project [OPTIONS] path/to/file
+```
 
-## 🔽 Download installer
+### Run GUI from command line
+```bash
+python-template-project-gui
+```
+
+## 🔽 Executable
+
+Download the latest executable:
 
 - [⬇️ Download for Windows](https://github.com/pamagister/python-template-project/releases/latest/download/installer-win.zip)
 - [⬇️ Download for macOS](https://github.com/pamagister/python-template-project/releases/latest/download/package-macos.zip)
 
 
+## 👩🏼‍💻 Run from source
 
-## Run from source
+### Clone the repository
+
+```bash
+git clone
+```
+
+### Navigate to the project directory
+
+```bash
+cd python-template-project
+```
+
+### Install dependencies
+
+```bash
+uv venv
+uv pip install -e .[dev,docs]
+```
+
 
 ### Run with CLI from source
 
@@ -31,15 +64,3 @@ python -m python_template_project.cli [OPTIONS] path/to/file
 python -m python_template_project.gui
 ```
 
-
-## Run from command line:
-
-### Run CLI from command line
-```bash
-python-template-project [OPTIONS] path/to/file
-```
-
-### Run GUI from command line
-```bash
-python-template-project-gui
-```

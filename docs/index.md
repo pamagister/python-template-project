@@ -12,6 +12,20 @@ A feature-rich Python project template with with auto-generated CLI, GUI and par
 
 This template provides a solid foundation for your next Python project, incorporating best practices for testing, automation, and distribution. It streamlines the development process with a comprehensive set of pre-configured tools and workflows, allowing you to focus on writing code.
 
+## Installation
+
+Download from [PyPI](https://pypi.org/).
+
+💾 For more installation options see [install](getting-started/install.md).
+
+```bash
+pip install python-template-project
+```
+
+### Run GUI from command line
+```bash
+python-template-project-gui
+```
 
 ## Feature overview
 
@@ -30,36 +44,4 @@ This template provides a solid foundation for your next Python project, incorpor
 * **Release pipeline:** Automated releases unsing the Makefile `make release` command, which creates a new tag and pushes it to the remote repo. The `release` pipeline will automatically create a new release on GitHub and trigger a release on PyPI.
     * **[setuptools](https://pypi.org/project/setuptools/)** is used to package the project and manage dependencies.
     * **[setuptools-scm](https://pypi.org/project/setuptools-scm/)** is used to automatically generate the `_version.py` file from the `pyproject.toml` file.
-
-## Getting started
-
-1. **Create** a new [github repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository).
-2. **Clone** [github repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) the into your local file system.
-    ```bash
-    git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY
-    ```
-4. **Install** [uv package and project manager](https://docs.astral.sh/uv/getting-started/installation/)
-    ```bash
-    pip install uv
-    ```
-5. **Generate** [a sample project](https://docs.astral.sh/uv/guides/projects/#creating-a-new-project) with uv
-6. Add and **push** the artifacts to your github repository
-    ```bash
-    git push
-    ```
-8. Copy the content of this repository into your repository
-
-## Troubleshooting
-
-### Problems with release pipeline
-
-If you get this error below:
-```bash
-/home/runner/work/_temp/xxxx_xxx.sh: line 1: .github/release_message.sh: Permission denied
-```
-
-You have to run these commands in your IDE Terminal or the git bash and then push the changes.
-```bash
-git update-index --chmod=+x ./.github/release_message.sh
-```
 
