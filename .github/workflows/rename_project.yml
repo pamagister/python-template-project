@@ -1,27 +1,21 @@
 name: Rename the project from template
 
-on:
-  push: # Dieser Trigger wird ausgelöst, wenn Code gepusht wird (auch beim initialen Erstellen aus einem Template)
-    branches:
-      - main # Oder dein Standard-Branch, z.B. master
-  # workflow_dispatch: # Kann optional für manuelle Auslösung beibehalten werden, aber für Automatisierung bei Erstellung ist 'push' besser
+on: [push]
 
-permissions:
-  contents: write # Ausreichend für diesen Anwendungsfall und sicherer als write-all
+permissions: write-all
 
 jobs:
   rename-project:
-    # Die if-Bedingung sorgt dafür, dass dieser Job nur einmal auf dem neuen Repository läuft.
-    # Er stellt sicher, dass wir nicht im Original-Template-Repo laufen
-    # und dass es sich noch um ein "Template" handelt (erkennbar an der .github/template.yml)
-    if: github.repository != format('{0}/{1}', github.repository_owner.login, 'python-template-project') && !contains(github.ref, 'main') # Hier anpassen: Verhindere Ausführung im Original-Repo
+    if: ${{ !contains (github.repository, 'python-template-project') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # Loads the entire history for change tracking
+          # by default, it uses a depth of 1
+          # this fetches all history so that we can read each commit
+          fetch-depth: 0
           ref: ${{ github.head_ref }}
-
+          
       # The repository name (e.g. "my-new-repo" or "my_new_repo")
       - run: echo "NEW_REPO_BASE_NAME=$(echo '${{ github.repository }}' | awk -F '/' '{print $2}')" >> $GITHUB_ENV
         shell: bash
@@ -36,7 +30,7 @@ jobs:
 
       - run: echo "REPOSITORY_OWNER=$(echo '${{ github.repository }}' | awk -F '/' '{print $1}')" >> $GITHUB_ENV
         shell: bash
-
+        
       - name: Check if this is still a template
         id: is_template
         # Check whether the template.yml still exists
@@ -52,7 +46,7 @@ jobs:
             -p "${{ env.NEW_PACKAGE_NAME }}" \
             -n "${{ env.NEW_PROJECT_NAME }}" \
             -d "Feature-rich Python project template for ${{ env.NEW_PROJECT_NAME }}." # Customized description
-
+              
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: "✅ Project renamed from template."
