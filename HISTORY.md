@@ -4,6 +4,12 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #30: do not track _version.py. [Paul Magister]
+- Feat #30: fix version. [Paul Magister]
+
+
+0.1.17 (2025-06-20)
+-------------------
 - Feat #30: fix link issue by modifying link in README.md. [Paul
   Magister]
 
