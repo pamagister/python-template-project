@@ -1,16 +1,20 @@
 name: Rename the project from template
 
 on:
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  push: # Dieser Trigger wird ausgelöst, wenn Code gepusht wird (auch beim initialen Erstellen aus einem Template)
+    branches:
+      - main # Oder dein Standard-Branch, z.B. master
+  # workflow_dispatch: # Kann optional für manuelle Auslösung beibehalten werden, aber für Automatisierung bei Erstellung ist 'push' besser
 
-permissions: write-all
+permissions:
+  contents: write # Ausreichend für diesen Anwendungsfall und sicherer als write-all
 
 jobs:
   rename-project:
-    # Execute the job only if the repository name is no longer the template name
-    # or if it is the first run after templating (manual triggering)
-    if: github.repository != github.event.repository.owner.login || !contains(github.repository, '/python-template-project')
+    # Die if-Bedingung sorgt dafür, dass dieser Job nur einmal auf dem neuen Repository läuft.
+    # Er stellt sicher, dass wir nicht im Original-Template-Repo laufen
+    # und dass es sich noch um ein "Template" handelt (erkennbar an der .github/template.yml)
+    if: github.repository != format('{0}/{1}', github.repository_owner.login, 'python-template-project') && !contains(github.ref, 'main') # Hier anpassen: Verhindere Ausführung im Original-Repo
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -47,7 +51,7 @@ jobs:
             -a "${{ env.REPOSITORY_OWNER }}" \
             -p "${{ env.NEW_PACKAGE_NAME }}" \
             -n "${{ env.NEW_PROJECT_NAME }}" \
-            -d "Feature-rich Python project template for ${{ env.NEW_PROJECT_NAME }}." # Angepasste Beschreibung
+            -d "Feature-rich Python project template for ${{ env.NEW_PROJECT_NAME }}." # Customized description
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
