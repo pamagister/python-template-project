@@ -16,15 +16,15 @@ This template provides a solid foundation for your next Python project, incorpor
 ## Feature overview
 
 * **Testing:** Unit testing setup with `pytest`.
-* **CI/CD:** GitHub Actions for automated builds (Windows, macOS), unit tests, and code checks.
-* **Code Formatting:** Pre-commit hook with the *black* auto-formatter to ensure consistent code style.
+* **CI/CD:**  [GitHub Actions](https://github.com/features/actions) for automated builds (Windows, macOS), unit tests, and code checks.
+* **Code Formatting and Linting:** Pre-commit hook with the [RUFF auto-formatter](https://docs.astral.sh/ruff/) to ensure consistent code style.
 * **Automated Builds:** GitHub pipeline for automatically building a Windows executable and a macOS installer.
-* **Package Management:** Utilizes *uv*, an extremely fast Python package manager, with dependencies managed in `pyproject.toml`.
+* **Package Management:** Utilizes [uv](https://docs.astral.sh/uv/getting-started/), an extremely fast Python package manager, with dependencies managed in `pyproject.toml`.
 * **Parameter-Driven Automation:**
     * Automatic generation of a configuration file from parameter definitions.
     * Automatic generation of a Command-Line Interface (CLI) from the same parameters.
     * Automatic generation of CLI API documentation.
-* **Documentation:** Configuration for publishing documentation on Read the Docs.
+* **Documentation:** Configuration for publishing documentation on [Read the Docs](https://about.readthedocs.com/) using [mkdocs](https://www.mkdocs.org/) .
 * **Workflow Automation:** A `Makefile` is included to simplify and automate common development tasks.
 * **Minimalist GUI:** Comes with a basic GUI based on [tkinker](https://tkdocs.com/tutorial/index.html) that includes an auto-generated settings menu based on your defined parameters.
 

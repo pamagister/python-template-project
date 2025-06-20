@@ -4,6 +4,14 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #30: release project on pypi: deploy section in release.yml.
+  [Paul Magister]
+- Feat #30: release project on pypi: rename contributing section, add
+  pypi_release.md doc. [Paul Magister]
+
+
+0.1.13 (2025-06-19)
+-------------------
 - Feat #16: fix installer link and name. [Paul Magister]
 - Feat #16: release. [Paul Magister]
 
