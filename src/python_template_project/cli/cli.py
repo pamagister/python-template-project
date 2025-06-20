@@ -1,4 +1,4 @@
-"""Auto-generated CLI interface for python_template_project project.
+"""Auto-generated CLI interface for python-template-project project.
 
 This file was generated from config.py parameter definitions.
 Do not modify manually - regenerate using ConfigParameterManager CLI generation methods.

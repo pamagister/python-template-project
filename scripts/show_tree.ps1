@@ -27,6 +27,7 @@ function Show-Tree {
                  $_.FullName -notmatch [regex]::Escape($basePath.FullName) + '\\\.venv' -and
                  $_.FullName -notmatch [regex]::Escape($basePath.FullName) + '\\\.github' -and
                  $_.FullName -notmatch [regex]::Escape($basePath.FullName) + '\\build' -and
+                 $_.FullName -notmatch [regex]::Escape($basePath.FullName) + '\\dist' -and
                  $_.FullName -notmatch [regex]::Escape($basePath.FullName) + '\\\.idea' -and
                  $_.FullName -notmatch [regex]::Escape($basePath.FullName) + '\\htmlcov' -and
                  $_.FullName -notmatch [regex]::Escape($basePath.FullName) + '\\__pycache__' -and

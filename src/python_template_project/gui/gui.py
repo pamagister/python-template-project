@@ -1,6 +1,6 @@
-"""GUI interface for python_template_project using tkinter with integrated logging.
+"""GUI interface for python-template-project using tkinter with integrated logging.
 
-This module provides a graphical user interface for the python_template_project
+This module provides a graphical user interface for the python-template-project
 with settings dialog, file management, and centralized logging capabilities.
 
 run gui: python -m python_template_project.gui
