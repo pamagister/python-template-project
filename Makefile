@@ -162,6 +162,10 @@ list:            ## Show project file list (excluding ignored folders)
 tree:            ## Show project tree (excluding ignored folders)
 	@powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/show_tree.ps1
 
+.PHONY: pytree
+pytree:            ## Show project tree (excluding ignored folders)
+	@uv run ./scripts/show_tree.py
+
 .PHONY: init
 init:             ## Initialize the project based on an application template.
 	@./.github/init.sh
