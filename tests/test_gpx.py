@@ -168,12 +168,12 @@ class TestGPXProcessor(unittest.TestCase):
         # Restore original min_dist
         self.processor.min_dist = original_min_dist
 
-    def test_get_gpx_files(self):
+    def test_get_input_files(self):
         """
-        Test the _get_gpx_files private method.
+        Test the _get_input_files private method.
         """
         # Test with a single GPX file
-        files_single = self.processor._get_gpx_files()
+        files_single = self.processor._get_input_files()
         self.assertEqual(len(files_single), 1)
         self.assertEqual(files_single[0], self.test_gpx_file)
 
@@ -185,7 +185,7 @@ class TestGPXProcessor(unittest.TestCase):
         (temp_dir / "not_gpx.txt").touch()
 
         processor_dir = BaseGPXProcessor(input_=str(temp_dir), logger=self.logger)
-        files_dir = processor_dir._get_gpx_files()
+        files_dir = processor_dir._get_input_files()
         self.assertEqual(len(files_dir), 2)
         self.assertTrue(any(f.name == "test1.gpx" for f in files_dir))
         self.assertTrue(any(f.name == "test2.gpx" for f in files_dir))
@@ -198,7 +198,7 @@ class TestGPXProcessor(unittest.TestCase):
             zf.writestr("not_gpx_in_zip.txt", "text")
 
         processor_zip = BaseGPXProcessor(input_=str(temp_zip_file), logger=self.logger)
-        files_zip = processor_zip._get_gpx_files()
+        files_zip = processor_zip._get_input_files()
         self.assertEqual(len(files_zip), 2)
         self.assertTrue(any(f.name == "zip_gpx_1.gpx" for f in files_zip))
         self.assertTrue(any(f.name == "zip_gpx_2.gpx" for f in files_zip))
@@ -248,7 +248,7 @@ class TestGPXProcessor(unittest.TestCase):
         shutil.rmtree(self.output_dir)
         compressed_file_path = self.output_dir / f"compressed_{self.test_gpx_file.name}"
         self.output_dir.mkdir()
-        print(f"files to compress: {self.processor._get_gpx_files()}")
+        print(f"files to compress: {self.processor._get_input_files()}")
         self.processor.compress_files()
 
         # Check if the compressed file exists

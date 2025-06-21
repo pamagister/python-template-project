@@ -16,6 +16,17 @@ except ImportError:
     SRTM_AVAILABLE = False
     srtm = None
 
+# Optional fastkml import for KML reading
+try:
+    from fastkml import kml, styles
+    from fastkml.features import Document, Folder, Placemark
+    from shapely.geometry import LineString, Point
+
+    KML_AVAILABLE = True
+except ImportError:
+    KML_AVAILABLE = False
+    kml = styles = Folder = Placemark = Document = Point = LineString = None
+
 NAME = "python_template_project"
 
 
@@ -114,7 +125,9 @@ class BaseGPXProcessor:
         if self.output:
             output_path = Path(self.output)
         else:
-            timestamp = datetime.now().strftime(f"{self.date_format}_%H%M")
+            timestamp = datetime.now().strftime(
+                f"{self.date_format}_%H%M%S"
+            )  # Added seconds for uniqueness
             output_path = Path.cwd() / f"gpx_processed_{timestamp}"
 
         output_path.mkdir(parents=True, exist_ok=True)
@@ -228,54 +241,56 @@ class BaseGPXProcessor:
             self.logger.debug(f"Full traceback:\n{traceback.format_exc()}")
             return track_points  # Return original points if optimization fails
 
-    def _get_gpx_files(self) -> list[Path]:
-        """Get all GPX files from input (file, folder, or zip)."""
-        gpx_files = []
-        for input_path in self.input:
+    def _get_input_files(self) -> list[Path]:
+        """Get all GPX/KML files from input (file, folder, or zip)."""
+        input_files = []
+        for input_path_str in self.input:
             try:
-                if not isinstance(input_path, Path):
-                    input_path = Path(input_path)
+                input_path = Path(input_path_str)
                 self.logger.debug(f"Input path: {input_path.absolute()}")
 
                 if input_path.is_file():
                     if input_path.suffix.lower() == ".gpx":
-                        gpx_files.append(input_path)
+                        input_files.append(input_path)
+                    elif input_path.suffix.lower() == ".kml":
+                        input_files.append(input_path)
                     elif input_path.suffix.lower() == ".zip":
-                        gpx_files.extend(self._extract_gpx_from_zip(input_path))
+                        input_files.extend(self._extract_gpx_kml_from_zip(input_path))
                 elif input_path.is_dir():
-                    # Get all GPX files in directory
-                    gpx_files.extend(input_path.glob("*.gpx"))
+                    # Get all GPX/KML files in directory
+                    input_files.extend(input_path.glob("*.gpx"))
+                    input_files.extend(input_path.glob("*.kml"))
 
-                    # Get GPX files from ZIP files in directory
+                    # Get GPX/KML files from ZIP files in directory
                     for zip_file in input_path.glob("*.zip"):
-                        gpx_files.extend(self._extract_gpx_from_zip(zip_file))
+                        input_files.extend(self._extract_gpx_kml_from_zip(zip_file))
             except Exception as e:
                 self.logger.error(f"Error processing input path {input_path}: {e}")
                 self.logger.debug(f"Full traceback:\n{traceback.format_exc()}")
                 continue
 
-        return gpx_files
+        return input_files
 
-    def _extract_gpx_from_zip(self, zip_path: Path) -> list[Path]:
-        """Extract GPX files from ZIP archive to temporary location."""
-        gpx_files = []
-        temp_dir = Path.cwd() / "temp_gpx_extract"
+    def _extract_gpx_kml_from_zip(self, zip_path: Path) -> list[Path]:
+        """Extract GPX/KML files from ZIP archive to temporary location."""
+        extracted_files = []
+        temp_dir = Path.cwd() / "temp_extracted_files"
 
         try:
             temp_dir.mkdir(exist_ok=True)
 
             with zipfile.ZipFile(zip_path, "r") as zip_ref:
                 for file_info in zip_ref.infolist():
-                    if file_info.filename.lower().endswith(".gpx"):
+                    if file_info.filename.lower().endswith((".gpx", ".kml")):
                         extracted_path = temp_dir / Path(file_info.filename).name
                         with open(extracted_path, "wb") as f:
                             f.write(zip_ref.read(file_info.filename))
-                        gpx_files.append(extracted_path)
+                        extracted_files.append(extracted_path)
         except Exception as e:
             self.logger.error(f"Error extracting ZIP file {zip_path}: {e}")
             self.logger.debug(f"Full traceback:\n{traceback.format_exc()}")
 
-        return gpx_files
+        return extracted_files
 
     def _load_gpx_file(self, gpx_path: Path) -> GPX | None:
         """Load and parse GPX file."""
@@ -290,35 +305,104 @@ class BaseGPXProcessor:
             self.logger.debug(f"Full traceback:\n{traceback.format_exc()}")
             return None
 
-    def _save_gpx_file(self, gpx: GPX, output_path: Path, original_file: Path | None = None):
-        """Save GPX object to file."""
+    def _load_kml_file(self, kml_path: Path) -> GPX | None:
+        """Load and parse KML file, converting it to a GPX object."""
+        if not KML_AVAILABLE:
+            self.logger.error("fastkml library is not available to process KML files.")
+            return None
+
+        try:
+            with open(kml_path, "r", encoding="utf-8") as f:
+                doc = f.read()
+
+            k = kml.KML()
+            k.from_string(doc)
+
+            gpx = gpxpy.gpx.GPX()
+
+            # Iterate through KML features and convert to GPX tracks/waypoints
+            for feature in k.features():
+                if isinstance(feature, Document) or isinstance(feature, Folder):
+                    for sub_feature in feature.features():
+                        self._process_kml_feature(sub_feature, gpx)
+                else:
+                    self._process_kml_feature(feature, gpx)
+
+            self.logger.info(f"Successfully loaded and converted KML file {kml_path} to GPX.")
+            return gpx
+
+        except Exception as e:
+            self.logger.error(f"Error loading or converting KML file {kml_path}: {e}")
+            self.logger.debug(f"Full traceback:\n{traceback.format_exc()}")
+            return None
+
+    def _process_kml_feature(self, feature, gpx: GPX):
+        """Recursively process KML features to extract points and add to GPX."""
+        if isinstance(feature, Placemark):
+            if feature.geometry is not None:
+                if isinstance(feature.geometry, Point):
+                    waypoint = gpxpy.gpx.GPXWaypoint(
+                        latitude=feature.geometry.y,
+                        longitude=feature.geometry.x,
+                        elevation=feature.geometry.z if feature.geometry.has_z else None,
+                        name=feature.name,
+                        description=feature.description,
+                    )
+                    gpx.waypoints.append(waypoint)
+                elif isinstance(feature.geometry, LineString):
+                    gpx_track = gpxpy.gpx.GPXTrack()
+                    gpx_track.name = feature.name
+                    gpx_segment = gpxpy.gpx.GPXTrackSegment()
+                    for coord in feature.geometry.coords:
+                        point = gpxpy.gpx.GPXTrackPoint(
+                            latitude=coord[1],
+                            longitude=coord[0],
+                            elevation=coord[2] if len(coord) > 2 else None,
+                        )
+                        gpx_segment.points.append(point)
+                    if gpx_segment.points:
+                        gpx_track.segments.append(gpx_segment)
+                    if gpx_track.segments:
+                        gpx.tracks.append(gpx_track)
+        elif isinstance(feature, Document) or isinstance(feature, Folder):
+            for sub_feature in feature.features():
+                self._process_kml_feature(sub_feature, gpx)
+
+    def _save_gpx_file(
+        self, gpx: GPX, output_path: Path, original_file: Path | None = None
+    ) -> Path:
+        """Save GPX object to file and return the path."""
         try:
             with open(output_path, "w", encoding="utf-8") as f:
                 f.write(gpx.to_xml())
                 if original_file and original_file.exists():
                     self.logger.info(
-                        f"Original gpx file size: "
-                        f"{Path(original_file).stat().st_size / 1024:.2f} KB"
+                        f"Original file size: {Path(original_file).stat().st_size / 1024:.2f} KB"
                     )
-                self.logger.info(
-                    f"Processed gpx file size: {output_path.stat().st_size / 1024:.2f} KB"
-                )
-
+                self.logger.info(f"Processed file size: {output_path.stat().st_size / 1024:.2f} KB")
+            return output_path
         except Exception as e:
             self.logger.error(f"Error saving GPX file {output_path}: {e}")
             self.logger.debug(f"Full traceback:\n{traceback.format_exc()}")
+            return None
 
-    def compress_files(self):
-        """Shrink the size of all given gpx files in self.input."""
+    def compress_files(self) -> list[str]:
+        """Shrink the size of all given gpx/kml files in self.input."""
+        generated_files = []
         try:
-            gpx_files = self._get_gpx_files()
+            input_files = self._get_input_files()
             output_folder = self._get_output_folder()
 
-            self.logger.info(f"Processing {len(gpx_files)} GPX files...")
+            self.logger.info(f"Processing {len(input_files)} GPX/KML files for compression...")
 
-            for gpx_file in gpx_files:
+            for input_file in input_files:
                 try:
-                    gpx = self._load_gpx_file(gpx_file)
+                    gpx = None
+                    if input_file.suffix.lower() == ".gpx":
+                        gpx = self._load_gpx_file(input_file)
+                    elif input_file.suffix.lower() == ".kml":
+                        gpx = self._load_kml_file(input_file)
+
                     if gpx is None:
                         continue
 
@@ -340,14 +424,17 @@ class BaseGPXProcessor:
                     gpx.extensions = None
 
                     # Save compressed file
-                    output_path = output_folder / f"compressed_{gpx_file.name}"
-                    self._save_gpx_file(gpx, output_path, gpx_file)
-                    self.logger.info(f"Compressed: {gpx_file.name} -> {output_path}")
+                    output_path = output_folder / f"compressed_{input_file.stem}.gpx"
+                    saved_path = self._save_gpx_file(gpx, output_path, input_file)
+                    if saved_path:
+                        generated_files.append(str(saved_path))
+                        self.logger.info(f"Compressed: {input_file.name} -> {output_path}")
 
                 except Exception as e:
-                    self.logger.error(f"Error processing file {gpx_file}: {e}")
+                    self.logger.error(f"Error processing file {input_file}: {e}")
                     self.logger.debug(f"Full traceback:\n{traceback.format_exc()}")
                     continue
+            return generated_files
 
         except Exception as e:
             self.logger.error(f"Error in compress_files: {e}")
@@ -383,41 +470,49 @@ class BaseGPXProcessor:
             self.logger.warning(f"Error optimizing waypoint: {e}")
             return waypoint
 
-    def merge_files(self):
+    def merge_files(self) -> list[str]:
         """Merge all files of self.input into one gpx file with reduced resolution."""
+        generated_files = []
         try:
-            gpx_files = self._get_gpx_files()
+            input_files = self._get_input_files()
             output_folder = self._get_output_folder()
 
-            if not gpx_files:
-                self.logger.error("No GPX files found to merge.")
-                return
+            if not input_files:
+                self.logger.error("No GPX/KML files found to merge.")
+                return []
 
-            self.logger.info(f"Merging {len(gpx_files)} GPX files...")
+            self.logger.info(f"Merging {len(input_files)} GPX/KML files...")
 
             # Create new GPX object
             merged_gpx = gpxpy.gpx.GPX()
             merged_gpx.name = "Merged GPX Tracks"
-            merged_gpx.description = f"Merged from {len(gpx_files)} GPX files."
+            merged_gpx.description = f"Merged from {len(input_files)} GPX/KML files."
 
             track_counter = 1
 
-            for gpx_file in gpx_files:
+            for input_file in input_files:
                 try:
-                    gpx = self._load_gpx_file(gpx_file)
+                    gpx = None
+                    if input_file.suffix.lower() == ".gpx":
+                        gpx = self._load_gpx_file(input_file)
+                    elif input_file.suffix.lower() == ".kml":
+                        gpx = self._load_kml_file(input_file)
+
                     if gpx is None:
                         continue
 
                     # Add all waypoints from this file
                     for waypoint in gpx.waypoints:
                         waypoint = self._optimize_waypoint(waypoint)
-                        waypoint.name = f"{waypoint.name}_{track_counter}"
+                        waypoint.name = f"{waypoint.name or 'Waypoint'}_{track_counter}"
                         merged_gpx.waypoints.append(waypoint)
 
                     # Add all tracks from this file
                     for track in gpx.tracks:
                         new_track = gpxpy.gpx.GPXTrack()
-                        new_track.name = f"{track.name or track_counter}_{gpx_file.stem}"
+                        new_track.name = (
+                            f"{track.name or 'Track'}_{input_file.stem}_{track_counter}"
+                        )
 
                         for segment in track.segments:
                             optimized_points = self._optimize_track_points(segment.points)
@@ -433,7 +528,9 @@ class BaseGPXProcessor:
                     # Add all routes from this file
                     for route in gpx.routes:
                         new_route = gpxpy.gpx.GPXRoute()
-                        new_route.name = f"{route.name or track_counter}_{gpx_file.stem}"
+                        new_route.name = (
+                            f"{route.name or 'Route'}_{input_file.stem}_{track_counter}"
+                        )
                         new_route.points = self._optimize_track_points(route.points)
 
                         if new_route.points:
@@ -441,43 +538,52 @@ class BaseGPXProcessor:
                             track_counter += 1
 
                 except Exception as e:
-                    self.logger.error(f"Error processing file {gpx_file} during merge: {e}")
+                    self.logger.error(f"Error processing file {input_file} during merge: {e}")
                     self.logger.debug(f"Full traceback:\n{traceback.format_exc()}")
                     continue
 
             # Save merged file
             output_path = output_folder / "merged_tracks.gpx"
-            self._save_gpx_file(merged_gpx, output_path)
-            self.logger.info(f"Merged file saved: {output_path}")
+            saved_path = self._save_gpx_file(merged_gpx, output_path)
+            if saved_path:
+                generated_files.append(str(saved_path))
+                self.logger.info(f"Merged file saved: {output_path}")
+            return generated_files
 
         except Exception as e:
             self.logger.error(f"Error in merge_files: {e}")
             self.logger.debug(f"Full traceback:\n{traceback.format_exc()}")
             raise
 
-    def extract_pois(self):
+    def extract_pois(self) -> list[str]:
         """Merge every starting point of each track in all files
         into one gpx file with many pois."""
+        generated_files = []
         try:
-            gpx_files = self._get_gpx_files()
+            input_files = self._get_input_files()
             output_folder = self._get_output_folder()
 
-            if not gpx_files:
-                self.logger.error("No GPX files found to extract POIs from.")
-                return
+            if not input_files:
+                self.logger.error("No GPX/KML files found to extract POIs from.")
+                return []
 
-            self.logger.info(f"Extracting POIs from {len(gpx_files)} GPX files...")
+            self.logger.info(f"Extracting POIs from {len(input_files)} GPX/KML files...")
 
             # Create new GPX object for waypoints
             poi_gpx = gpxpy.gpx.GPX()
             poi_gpx.name = "Extracted Track Starting Points"
-            poi_gpx.description = f"Starting points extracted from {len(gpx_files)} GPX files"
+            poi_gpx.description = f"Starting points extracted from {len(input_files)} GPX/KML files"
 
             poi_counter = 1
 
-            for gpx_file in gpx_files:
+            for input_file in input_files:
                 try:
-                    gpx = self._load_gpx_file(gpx_file)
+                    gpx = None
+                    if input_file.suffix.lower() == ".gpx":
+                        gpx = self._load_gpx_file(input_file)
+                    elif input_file.suffix.lower() == ".kml":
+                        gpx = self._load_kml_file(input_file)
+
                     if gpx is None:
                         continue
 
@@ -496,7 +602,9 @@ class BaseGPXProcessor:
 
                                 track_name = track.name or f"Track_{track_idx + 1}"
                                 waypoint.name = f"POI_{poi_counter:03d}"
-                                waypoint.description = f"Start of {track_name} from {gpx_file.name}"
+                                waypoint.description = (
+                                    f"Start of {track_name} from {input_file.name}"
+                                )
                                 waypoint.type = "Track Start"
 
                                 poi_gpx.waypoints.append(waypoint)
@@ -516,7 +624,7 @@ class BaseGPXProcessor:
 
                             route_name = route.name or f"Route_{route_idx + 1}"
                             waypoint.name = f"POI_{poi_counter:03d}"
-                            waypoint.description = f"Start of {route_name} from {gpx_file.name}"
+                            waypoint.description = f"Start of {route_name} from {input_file.name}"
                             waypoint.type = "Route Start"
 
                             poi_gpx.waypoints.append(waypoint)
@@ -524,24 +632,27 @@ class BaseGPXProcessor:
 
                 except Exception as e:
                     self.logger.error(
-                        f"Error processing file {gpx_file} during POI extraction: {e}"
+                        f"Error processing file {input_file} during POI extraction: {e}"
                     )
                     self.logger.debug(f"Full traceback:\n{traceback.format_exc()}")
                     continue
 
             # Save POI file
             output_path = output_folder / "extracted_pois.gpx"
-            self._save_gpx_file(poi_gpx, output_path)
-            self.logger.info(
-                f"POI file saved with {len(poi_gpx.waypoints)} waypoints: {output_path}"
-            )
+            saved_path = self._save_gpx_file(poi_gpx, output_path)
+            if saved_path:
+                generated_files.append(str(saved_path))
+                self.logger.info(
+                    f"POI file saved with {len(poi_gpx.waypoints)} waypoints: {output_path}"
+                )
 
             # Clean up temporary files
-            temp_dir = Path.cwd() / "temp_gpx_extract"
+            temp_dir = Path.cwd() / "temp_extracted_files"  # Changed folder name
             if temp_dir.exists():
                 import shutil
 
                 shutil.rmtree(temp_dir)
+            return generated_files
 
         except Exception as e:
             self.logger.error(f"Error in extract_pois: {e}")
