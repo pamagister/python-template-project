@@ -137,12 +137,11 @@ def show_tree(path, prefix="", show_code=False):
             code_structure = parse_python_file(full_path)
             for entry in code_structure:
                 if entry["type"] == "class":
-                    print(f"{next_prefix}{BRANCH}{CLASS_SYMBOL} {entry['name']}")
-                    sub_prefix = next_prefix + VERTICAL_LINE
-
                     # Attribute
-                    for attr in sorted(set(entry["attributes"])):
-                        print(f"{sub_prefix}{BRANCH}{ATTR_SYMBOL} {attr}")
+                    attr_str = ', '.join(entry["attributes"]) if entry["attributes"] else "None"
+
+                    print(f"{next_prefix}{BRANCH}{CLASS_SYMBOL} {entry['name']} - {ATTR_SYMBOL}: {attr_str}")
+                    sub_prefix = next_prefix + VERTICAL_LINE
 
                     # Methoden mit Signatur
                     for method in entry["methods"]:
@@ -166,3 +165,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     show_tree(args.path, show_code=args.show_code)
+
+    print('\nSymbol description:')
+    print(f"{FOLDER_SYMBOL} - Directory")
+    print(f"{FILE_SYMBOL} - File")
+    print(f"{CLASS_SYMBOL} - Class")
+    print(f"{FUNC_SYMBOL} - Function/Method")
+    print(f"{ATTR_SYMBOL} - Attribute")
+
