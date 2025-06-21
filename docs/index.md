@@ -13,10 +13,93 @@ A feature-rich Python project template with with auto-generated CLI, GUI and par
 
 This template provides a solid foundation for your next Python project, incorporating best practices for testing, automation, and distribution. It streamlines the development process with a comprehensive set of pre-configured tools and workflows, allowing you to focus on writing code.
 
+---
+
 ## How to use this template
 
-🐍 For details, see the [Getting Started](develop/01_getting_started_dev.md) guide.
+Getting started on developing your own project based on this template
 
+> **DO NOT FORK** 
+> This project is meant to be used from **[Use this template](https://github.com/pamagister/python-template-project/generate)** feature.
+
+---
+
+1. **Create a new repository using GitHub template**  
+   Click on **[Use this template](https://github.com/pamagister/python-template-project/generate)**.
+
+2. **Give a name to your project**  
+   For example: `my-python-project`  
+   *(Hyphens may ne used as project name; they are converted during renaming internally to underscores for packages.)*
+
+3. **Set write permissions**  
+   Go to: `Repository -> Settings -> Actions -> General -> Workflow permissions`  
+   Select: `Read and write permissions`, then click **Save**.
+
+4. **Trigger rename workflow**  
+   Navigate to `Actions` tab → Select **Rename Action** → Run workflow on the `main` branch.
+
+5. **Wait for the workflow to finish**
+
+6. **Clone the repository**  
+   Run:  
+   ```bash
+   git clone [your-github-url]
+   ```
+
+7. **Open the project in your IDE**
+
+8. **Install dependencies and create virtual environment**
+   Run:
+
+   ```bash
+   make install
+   ```
+
+9. **Configure your IDE**
+   Set `.venv` as the local Python virtual environment.
+
+10. **Adjust project metadata**
+    Modify `pyproject.toml` (e.g., project description, authors, license, etc.)
+
+11. **Clean up template scripts**
+    Delete the files:
+
+    * `rename_project.yml`
+    * `rename_project.sh`
+
+12. **Format your codebase**
+    Run:
+
+    ```bash
+    make fmt
+    ```
+
+    This will auto-format your files and reorder imports (based on any name changes).
+
+13. **Enable pre-commit hooks**
+    Run:
+
+    ```bash
+    uv run pre-commit install
+    ```
+
+14. **Add repository to ReadTheDocs**
+    Visit: [https://app.readthedocs.org/dashboard/import/](https://app.readthedocs.org/dashboard/import/)
+
+15. **Configure PyPI publishing**
+
+    * Generate a **PyPI API token** from your PyPI account.
+    * Go to **GitHub → Settings → Secrets and variables → Actions**.
+    * Add the secret as `PYPI_API_TOKEN`.
+
+16. **Release your first version**
+    Run:
+
+    ```bash
+    make release
+    ```
+    
+---
 
 ## Feature overview
 
@@ -37,6 +120,8 @@ This template provides a solid foundation for your next Python project, incorpor
 * 🛳️ **Release pipeline:** Automated releases unsing the Makefile `make release` command, which creates a new tag and pushes it to the remote repo. The `release` pipeline will automatically create a new release on GitHub and trigger a release on  [PyPI](https://pypi.org.
     * **[setuptools](https://pypi.org/project/setuptools/)** is used to package the project and manage dependencies.
     * **[setuptools-scm](https://pypi.org/project/setuptools-scm/)** is used to automatically generate the `_version.py` file from the `pyproject.toml` file.
+
+---
 
 ## Installation
 
@@ -65,3 +150,20 @@ python -m python_template_project.cli [OPTIONS] path/to/file
 ```bash
 python-template-project-cli [OPTIONS] path/to/file
 ```
+
+---
+
+## Troubleshooting
+
+### Problems with release pipeline
+
+If you get this error below:
+```bash
+/home/runner/work/_temp/xxxx_xxx.sh: line 1: .github/release_message.sh: Permission denied
+```
+
+You have to run these commands in your IDE Terminal or the git bash and then push the changes.
+```bash
+git update-index --chmod=+x ./.github/release_message.sh
+```
+
