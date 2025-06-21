@@ -10,25 +10,10 @@ A feature-rich Python project template with with auto-generated CLI, GUI and par
 [![License](https://img.shields.io/github/license/pamagister/python-template-project)](https://github.com/pamagister/python-template-project/blob/main/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/pamagister/python-template-project)](https://github.com/pamagister/python-template-project/issues)
 [![PyPI](https://img.shields.io/pypi/v/python-template-project)](https://pypi.org/project/python-template-project/)
+[![Downloads](https://pepy.tech/badge/python-template-project)](https://pepy.tech/project/python-template-project/)
 
 
 This template provides a solid foundation for your next Python project, incorporating best practices for testing, automation, and distribution. It streamlines the development process with a comprehensive set of pre-configured tools and workflows, allowing you to focus on writing code.
-
-## Installation
-
-Download from [PyPI](https://pypi.org/).
-
-💾 For more installation options see [install](docs/getting-started/install.md).
-
-```bash
-pip install python-template-project
-```
-
-Run GUI from command line
-
-```bash
-python-template-project-gui
-```
 
 ## How to use this template
 
@@ -55,3 +40,30 @@ python-template-project-gui
     * **[setuptools](https://pypi.org/project/setuptools/)** is used to package the project and manage dependencies.
     * **[setuptools-scm](https://pypi.org/project/setuptools-scm/)** is used to automatically generate the `_version.py` file from the `pyproject.toml` file.
 
+## Installation
+
+Get an impression of how your own project could be installed and look like.
+
+Download from [PyPI](https://pypi.org/).
+
+💾 For more installation options see [install](docs/getting-started/install.md).
+
+```bash
+pip install python-template-project
+```
+
+Run GUI from command line
+
+```bash
+python-template-project-gui
+```
+
+Run application from command line using CLI
+
+```bash
+python -m python_template_project.cli [OPTIONS] path/to/file
+```
+
+```bash
+python-template-project-cli [OPTIONS] path/to/file
+```
