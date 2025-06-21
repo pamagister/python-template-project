@@ -4,6 +4,14 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #33: Support kml files for input and display output files as
+  clickable links #33. [Paul Magister]
+- Feat #31: move project specific namings into makefile so that it can
+  be renamed. [Paul Magister]
+
+
+0.1.20 (2025-06-20)
+-------------------
 - Feat #31: move project specific namings into makefile so that it can
   be renamed. [Paul Magister]
 - Feat #31: move project specific namings into makefile so that it can
