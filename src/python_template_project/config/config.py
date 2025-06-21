@@ -22,7 +22,7 @@ class ConfigParameter:
     name: str
     default: Any
     type_: type
-    choices: list[str | bool | int] | None = None
+    choices: list[str | bool] | None = None
     help: str = ""
     cli_arg: str | None = None
     required: bool = False
@@ -297,25 +297,6 @@ class ConfigParameterManager(BaseModel):
             param = getattr(self.cli, field_name)
             cli_params.append(param)
         return cli_params
-
-    def get_logging_config(self) -> dict[str, Any]:
-        """Get logging-specific configuration as dictionary.
-
-        Returns:
-            Dictionary with logging configuration parameters
-        """
-        return {
-            "log_level": self.app.log_level.default,
-            "log_file_max_size": self.app.log_file_max_size.default
-            * 1024
-            * 1024,  # Convert MB to bytes
-            "log_backup_count": self.app.log_backup_count.default,
-            "log_format": self.app.log_format.default,
-            "enable_file_logging": self.app.enable_file_logging.default,
-            "enable_console_logging": self.app.enable_console_logging.default,
-            "max_log_lines": self.gui.max_log_lines.default,
-            "auto_scroll_log": self.gui.auto_scroll_log.default,
-        }
 
     @classmethod
     def generate_config_markdown_doc(cls, output_file: str):
