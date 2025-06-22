@@ -149,6 +149,7 @@ release:          ## Create a new tag for release.
 .PHONY: docs
 docs:             ## Build and sync the documentation.
 	@echo "sync documentation ..."
+	@uv run ./scripts/generate_config_docs.py
 	@uv run ./scripts/update_readme.py
 	@uv run ./.github/update_funding.py
 	@echo "building documentation ..."
