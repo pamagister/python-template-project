@@ -4,6 +4,28 @@ Changelog
 
 (unreleased)
 ------------
+- Feat #34: prepare config and gui to be used as library: massive
+  refactoring. [Paul Magister]
+- Feat #34: prepare config and gui to be used as library #34. [Paul
+  Magister]
+- Feat #20: Makefile: python tree: all class attributes in one line.
+  [Paul Magister]
+- Update README.md from docs/index.md. [github-actions]
+- Feat #31: update docs: usage guide for this template. [Paul Magister]
+- Feat #31: update docs: remove unneeded part of get_logging_config.
+  [Paul Magister]
+- Feat #31: update docs: move installation description below. Describe
+  features first. [Paul Magister]
+- Feat #20: Makefile: Generate file tree including python internals.
+  [Paul Magister]
+- Feat #31: move Prepare ZIP file for release into build-macos.yml.
+  [Paul Magister]
+- Feat #33: Support kml files for input and display output files as
+  clickable links #33. [Paul Magister]
+
+
+0.1.21 (2025-06-21)
+-------------------
 - Feat #33: Support kml files for input and display output files as
   clickable links #33. [Paul Magister]
 - Feat #31: move project specific namings into makefile so that it can

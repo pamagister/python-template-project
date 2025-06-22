@@ -150,6 +150,7 @@ release:          ## Create a new tag for release.
 docs:             ## Build and sync the documentation.
 	@echo "sync documentation ..."
 	@uv run ./scripts/update_readme.py
+	@uv run ./.github/update_funding.py
 	@echo "building documentation ..."
 	@uv run mkdocs build
 	@uv run mkdocs serve
