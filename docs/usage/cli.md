@@ -1,55 +1,45 @@
-# Command line interface
+# Command Line Interface
 
-Command line options
+Command line options for app
 
 ```bash
-python -m python_template_project.cli [OPTIONS] path/to/file
+python -m app [OPTIONS] input
 ```
 
----
-
-## ⚙️ CLI-Options
+## Options
 
 | Option                | Type | Description                                       | Default    | Choices       |
 |-----------------------|------|---------------------------------------------------|------------|---------------|
-| `path/to/file`        | str  | Path to input (file or folder)                    | *required* | -             |
+| `input`               | str  | Path to input (file or folder)                    | *required* | -             |
 | `--output`            | str  | Path to output destination                        | *required* | -             |
 | `--min_dist`          | int  | Maximum distance between two waypoints            | 20         | -             |
 | `--extract_waypoints` | bool | Extract starting points of each track as waypoint | True       | [True, False] |
 | `--elevation`         | bool | Include elevation data in waypoints               | True       | [True, False] |
 
 
-## 💡 Examples
-
-In the example, the following is assumed: `example.input` in the current directory
+## Examples
 
 
-### 1. Standard version (only required parameter)
+### 1. Basic usage
 
 ```bash
-python -m python_template_project.cli input
+python -m app input
 ```
 
-### 2. With verbose logging
+### 2. With min_dist parameter
 
 ```bash
-python -m python_template_project.cli --verbose input
+python -m app --min_dist 20 input
 ```
 
-### 3. With quiet mode
+### 3. With extract_waypoints parameter
 
 ```bash
-python -m python_template_project.cli --quiet input
+python -m app --extract_waypoints True input
 ```
 
-### 4. Example with 1 Parameter(s)
+### 4. With elevation parameter
 
 ```bash
-python -m python_template_project.cli --min_dist 20 input
-```
-
-### 5. Example with 2 Parameter(s)
-
-```bash
-python -m python_template_project.cli --min_dist 20 --extract_waypoints True input
+python -m app --elevation True input
 ```

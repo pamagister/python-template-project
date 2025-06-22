@@ -17,6 +17,7 @@ from functools import partial
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
+from generic_config_cli_gui.gui_generator import SettingsDialogGenerator
 from python_template_project.config.config import ConfigParameterManager
 from python_template_project.core.base import BaseGPXProcessor
 from python_template_project.core.logging import (
@@ -25,7 +26,6 @@ from python_template_project.core.logging import (
     get_logger,
     initialize_logging,
 )
-from python_template_project.gui.gui_settings import SettingsDialog
 
 
 class GuiLogWriter:
@@ -115,7 +115,7 @@ class MainGui:
         self.root.geometry("1200x600")  # Increased width for new layout
 
         # Initialize configuration
-        self.config_manager = ConfigParameterManager()
+        self.config_manager = ConfigParameterManager("config.yaml")
 
         # Initialize logging system
         self.logger_manager = initialize_logging(self.config_manager)
@@ -241,7 +241,9 @@ class MainGui:
 
         # Log level selector
         ttk.Label(log_controls, text="Log Level:").pack(side=tk.LEFT, padx=(10, 5))
-        self.log_level_var = tk.StringVar(value=self.config_manager.app.log_level.default)
+        self.log_level_var = tk.StringVar(
+            value=self.config_manager.get_category("app").log_level.default
+        )
         log_level_combo = ttk.Combobox(
             log_controls,
             textvariable=self.log_level_var,
@@ -454,10 +456,10 @@ class MainGui:
             # Create and run project
             project = BaseGPXProcessor(
                 files_to_process,  # Pass selected files
-                self.config_manager.cli.output.default,
-                self.config_manager.cli.min_dist.default,
-                self.config_manager.app.date_format.default,
-                self.config_manager.cli.elevation.default,
+                self.config_manager.get_category("cli").output.default,
+                self.config_manager.get_category("cli").min_dist.default,
+                self.config_manager.get_category("app").date_format.default,
+                self.config_manager.get_category("cli").elevation.default,
                 self.logger,
             )
             # implement switch case for different processing modes
@@ -497,13 +499,14 @@ class MainGui:
     def _open_settings(self):
         """Open the settings dialog."""
         self.logger.debug("Opening settings dialog")
-        dialog = SettingsDialog(self.root, self.config_manager)
+        settings_dialog_generator = SettingsDialogGenerator(self.config_manager)
+        dialog = settings_dialog_generator.create_settings_dialog(self.root)
         self.root.wait_window(dialog.dialog)
 
         if dialog.result == "ok":
             self.logger.info("Settings updated successfully")
             # Update log level selector if it changed
-            self.log_level_var.set(self.config_manager.app.log_level.default)
+            self.log_level_var.set(self.config_manager.get_category("app").log_level.default)
 
     def _open_help(self):
         """Open help documentation in browser."""

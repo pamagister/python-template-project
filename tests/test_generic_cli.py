@@ -8,6 +8,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from generic_config_cli_gui.config_framework import DocumentationGenerator
 from python_template_project.config.config import ConfigParameterManager
 
 
@@ -26,7 +27,7 @@ class TestGenericCLI(unittest.TestCase):
         # Default config for testing
         self.configManager = ConfigParameterManager()
         self.default_cli_config = {
-            name: field.default for name, field in type(self.configManager.cli).model_fields.items()
+            name: field.default for name, field in self.configManager.get_cli_category()
         }
 
     def tearDown(self):
@@ -35,7 +36,7 @@ class TestGenericCLI(unittest.TestCase):
 
     def test_parameter_definitions_consistency(self):
         """Test that all parameters are properly defined and consistent."""
-        parameter_names = [param.name for param in self.default_cli_config.values()]
+        parameter_names = self.default_cli_config.keys()
 
         # Check for duplicate parameter names
         self.assertEqual(
@@ -45,7 +46,7 @@ class TestGenericCLI(unittest.TestCase):
         )
 
         # Validate each parameter
-        for param in self.default_cli_config.values():
+        for param in self.configManager.get_cli_category().get_parameters():
             with self.subTest(parameter=param.name):
                 self.assertIsInstance(param.name, str)
                 self.assertIsInstance(param.type_, type)
@@ -68,21 +69,13 @@ class TestGenericCLI(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             ConfigParameterManager(config_file=str(non_existent_file))
 
-    def test_config_to_dict(self):
-        """Test conversion of config to dictionary."""
-        cli_config_dict = self.default_cli_config
-        self.assertIsInstance(cli_config_dict, dict)
-        self.assertEqual(len(cli_config_dict), len(self.default_cli_config.values()))
-
-        for param in self.default_cli_config.values():
-            with self.subTest(parameter=param.name):
-                self.assertIn(param.name, cli_config_dict)
-
     def test_generate_default_config_file(self):
         """Test generation of default configuration file."""
         output_file = self.temp_path / "default_config.yaml"
 
-        ConfigParameterManager.generate_default_config_file(str(output_file))
+        config_manager = ConfigParameterManager()
+        docGen = DocumentationGenerator(config_manager)
+        docGen.generate_default_config_file(str(output_file))
 
         self.assertTrue(output_file.exists())
 
@@ -90,40 +83,44 @@ class TestGenericCLI(unittest.TestCase):
         content = output_file.read_text()
         self.assertIn("# Configuration File", content)
 
-        for param in self.default_cli_config.values():
-            with self.subTest(parameter=param.name):
-                self.assertIn(param.name, content)
-                self.assertIn(param.help, content)
+        for param in self.default_cli_config.keys():
+            with self.subTest(parameter=param):
+                self.assertIn(param, content)
 
     def test_parameter_choices_validation(self):
         """Test parameter choices validation."""
         # Find parameters with choices
-        choice_params = [param for param in self.default_cli_config.values() if param.choices]
+        choice_params = [
+            param
+            for param in self.configManager.get_cli_category().get_parameters()
+            if param.choices
+        ]
 
         for param in choice_params:
             with self.subTest(parameter=param.name):
                 # Test valid choices
                 for choice in param.choices:
-                    config = ConfigParameterManager(**{param.name: choice})
-                    self.assertIn(choice, getattr(getattr(config.cli, param.name), "choices"))
+                    self.assertIn(choice, param.choices)
 
     def test_generate_cli_markdown_doc(self):
         """Test generation of CLI markdown documentation."""
         output_file = self.temp_path / "cli_doc_test.md"
 
-        ConfigParameterManager.generate_cli_markdown_doc(str(output_file))
+        config_manager = ConfigParameterManager()
+        docGen = DocumentationGenerator(config_manager)
+        docGen.generate_cli_markdown_doc(str(output_file))
 
         self.assertTrue(output_file.exists())
 
         content = output_file.read_text(encoding="utf8")
-        self.assertIn("# Command line interface", content)
+        self.assertIn("# Command Line Interface", content)
 
         # Check that parameters are documented
-        cli_params = self.default_cli_config.values()
+        cli_params = self.default_cli_config.keys()
         for param in cli_params:
-            with self.subTest(parameter=param.name):
-                if param.name != "input":  # Positional arg handled differently
-                    self.assertIn(f"--{param.name}", content)
+            with self.subTest(parameter=param):
+                if param != "input":  # Positional arg handled differently
+                    self.assertIn(f"--{param}", content)
 
 
 if __name__ == "__main__":

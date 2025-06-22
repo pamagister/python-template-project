@@ -1,23 +1,86 @@
+# config_framework/gui.py
+"""Generic GUI settings dialog generator for configuration framework."""
+
 import tkinter as tk
 from tkinter import messagebox, ttk
 
-from python_template_project.config.config import ConfigParameter, ConfigParameterManager
-from python_template_project.core.logging import get_logger
+from generic_config_cli_gui.config_framework import ConfigManager, ConfigParameter
 
 
-class SettingsDialog:
-    """Settings dialog for configuration management."""
+class ToolTip:
+    """Create a tooltip for a given widget."""
 
-    def __init__(self, parent, config_manager: ConfigParameterManager):
+    def __init__(self, widget, text="widget info"):
+        self.widget = widget
+        self.text = text
+        self.tipwindow = None
+        self.id = None
+        self.x = self.y = 0
+
+        self.widget.bind("<Enter>", self.on_enter)
+        self.widget.bind("<Leave>", self.on_leave)
+
+    def on_enter(self, event=None):
+        self.show_tooltip()
+
+    def on_leave(self, event=None):
+        self.hide_tooltip()
+
+    def show_tooltip(self):
+        if self.tipwindow or not self.text:
+            return
+        x, y, cx, cy = self.widget.bbox("insert")
+        x = x + self.widget.winfo_rootx() + 25
+        y = y + cy + self.widget.winfo_rooty() + 25
+        self.tipwindow = tw = tk.Toplevel(self.widget)
+        tw.wm_overrideredirect(True)
+        tw.wm_geometry(f"+{x}+{y}")
+        label = tk.Label(
+            tw,
+            text=self.text,
+            justify=tk.LEFT,
+            background="#ffffe0",
+            relief=tk.SOLID,
+            borderwidth=1,
+            font=("tahoma", "8", "normal"),
+        )
+        label.pack(ipadx=1)
+
+    def hide_tooltip(self):
+        tw = self.tipwindow
+        self.tipwindow = None
+        if tw:
+            tw.destroy()
+
+
+class SettingsDialogGenerator:
+    """Generates settings dialog from ConfigManager."""
+
+    def __init__(self, config_manager: ConfigManager):
+        self.config_manager = config_manager
+
+    def create_settings_dialog(
+        self, parent, title="Settings", config_file="config.yaml"
+    ) -> "GenericSettingsDialog":
+        """Create a settings dialog for the configuration."""
+        return GenericSettingsDialog(parent, self.config_manager, title, config_file)
+
+
+class GenericSettingsDialog:
+    """Generic settings dialog for ConfigManager."""
+
+    def __init__(
+        self, parent, config_manager: ConfigManager, title="Settings", config_file="config.yaml"
+    ):
         self.parent = parent
         self.config_manager = config_manager
+        self.config_file = config_file
         self.result = None
         self.widgets = {}
-        self.logger = get_logger("gui.settings")
 
         # Create dialog window
         self.dialog = tk.Toplevel(parent)
-        self.dialog.title("Settings")
+        self.dialog.title(title)
         self.dialog.geometry("600x500")
         self.dialog.transient(parent)
         self.dialog.grab_set()
@@ -30,8 +93,6 @@ class SettingsDialog:
         # Handle window closing
         self.dialog.protocol("WM_DELETE_WINDOW", self._on_cancel)
 
-        self.logger.debug("Settings dialog opened")
-
     def _create_widgets(self):
         """Create the settings dialog widgets."""
         # Main frame
@@ -43,9 +104,8 @@ class SettingsDialog:
         self.notebook.pack(fill=tk.BOTH, expand=True)
 
         # Create tabs for each configuration category
-        self._create_cli_tab()
-        self._create_app_tab()
-        self._create_gui_tab()
+        for category_name, category in self.config_manager._categories.items():
+            self._create_category_tab(category_name, category)
 
         # Button frame
         button_frame = ttk.Frame(main_frame)
@@ -54,14 +114,15 @@ class SettingsDialog:
         ttk.Button(button_frame, text="OK", command=self._on_ok).pack(side=tk.RIGHT, padx=(5, 0))
         ttk.Button(button_frame, text="Cancel", command=self._on_cancel).pack(side=tk.RIGHT)
 
-    def _create_cli_tab(self):
-        """Create CLI configuration tab."""
-        cli_frame = ttk.Frame(self.notebook)
-        self.notebook.add(cli_frame, text="CLI")
+    def _create_category_tab(self, category_name: str, category):
+        """Create a tab for a configuration category."""
+        # Create tab frame
+        tab_frame = ttk.Frame(self.notebook)
+        self.notebook.add(tab_frame, text=category_name.title())
 
         # Create scrollable frame
-        canvas = tk.Canvas(cli_frame)
-        scrollbar = ttk.Scrollbar(cli_frame, orient="vertical", command=canvas.yview)
+        canvas = tk.Canvas(tab_frame)
+        scrollbar = ttk.Scrollbar(tab_frame, orient="vertical", command=canvas.yview)
         scrollable_frame = ttk.Frame(canvas)
 
         scrollable_frame.bind(
@@ -72,65 +133,19 @@ class SettingsDialog:
         canvas.configure(yscrollcommand=scrollbar.set)
 
         # Add parameters
-        self._add_category_parameters(scrollable_frame, "cli", self.config_manager.cli)
+        self._add_category_parameters(scrollable_frame, category_name, category)
 
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-    def _create_app_tab(self):
-        """Create App configuration tab."""
-        app_frame = ttk.Frame(self.notebook)
-        self.notebook.add(app_frame, text="App")
-
-        # Create scrollable frame
-        canvas = tk.Canvas(app_frame)
-        scrollbar = ttk.Scrollbar(app_frame, orient="vertical", command=canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
-
-        scrollable_frame.bind(
-            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        # Add parameters
-        self._add_category_parameters(scrollable_frame, "app", self.config_manager.app)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-    def _create_gui_tab(self):
-        """Create GUI configuration tab."""
-        gui_frame = ttk.Frame(self.notebook)
-        self.notebook.add(gui_frame, text="GUI")
-
-        # Create scrollable frame
-        canvas = tk.Canvas(gui_frame)
-        scrollbar = ttk.Scrollbar(gui_frame, orient="vertical", command=canvas.yview)
-        scrollable_frame = ttk.Frame(canvas)
-
-        scrollable_frame.bind(
-            "<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-
-        canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        # Add parameters
-        self._add_category_parameters(scrollable_frame, "gui", self.config_manager.gui)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-    def _add_category_parameters(self, parent, category_name, category_obj):
+    def _add_category_parameters(self, parent, category_name: str, category):
         """Add parameter widgets for a specific category."""
         row = 0
-        for field_name in category_obj.model_fields:
-            param = getattr(category_obj, field_name)
+        parameters = category.get_parameters()
+
+        for param in parameters:
             if param.required:
                 # Skip required parameters as they are not configurable in GUI
-                # --> required params have to be set via Open file dialog in GUI
                 continue
 
             # Create label
@@ -192,70 +207,19 @@ class SettingsDialog:
                 value = widget.var.get()
                 overrides[key] = value
 
-            self.logger.info(f"Applying configuration overrides: {len(overrides)} settings")
-
             # Apply overrides to config manager
             self.config_manager._apply_kwargs(overrides)
 
             # Save to file
-            self.config_manager.save_to_file("config.yaml")
-            self.logger.info("Configuration saved successfully")
+            self.config_manager.save_to_file(self.config_file)
 
             self.result = "ok"
             self.dialog.destroy()
 
         except Exception as e:
-            self.logger.error(f"Failed to save configuration: {e}")
             messagebox.showerror("Error", f"Failed to save configuration: {e}")
 
     def _on_cancel(self):
         """Handle Cancel button click."""
-        self.logger.debug("Settings dialog cancelled")
         self.result = "cancel"
         self.dialog.destroy()
-
-
-class ToolTip:
-    """Create a tooltip for a given widget."""
-
-    def __init__(self, widget, text="widget info"):
-        self.widget = widget
-        self.text = text
-        self.tipwindow = None
-        self.id = None
-        self.x = self.y = 0
-
-        self.widget.bind("<Enter>", self.on_enter)
-        self.widget.bind("<Leave>", self.on_leave)
-
-    def on_enter(self, event=None):
-        self.show_tooltip()
-
-    def on_leave(self, event=None):
-        self.hide_tooltip()
-
-    def show_tooltip(self):
-        if self.tipwindow or not self.text:
-            return
-        x, y, cx, cy = self.widget.bbox("insert")
-        x = x + self.widget.winfo_rootx() + 25
-        y = y + cy + self.widget.winfo_rooty() + 25
-        self.tipwindow = tw = tk.Toplevel(self.widget)
-        tw.wm_overrideredirect(True)
-        tw.wm_geometry(f"+{x}+{y}")
-        label = tk.Label(
-            tw,
-            text=self.text,
-            justify=tk.LEFT,
-            background="#ffffe0",
-            relief=tk.SOLID,
-            borderwidth=1,
-            font=("tahoma", "8", "normal"),
-        )
-        label.pack(ipadx=1)
-
-    def hide_tooltip(self):
-        tw = self.tipwindow
-        self.tipwindow = None
-        if tw:
-            tw.destroy()
