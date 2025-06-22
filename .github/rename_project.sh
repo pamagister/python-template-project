@@ -74,5 +74,8 @@ fi
 # Remove the template.yml to indicate that the template has been applied
 echo "Removing .github/template.yml"
 rm -f .github/template.yml
+# Remove rename_project.yml to prevent re-running the renaming script
+echo "Removing .github/workflows/rename_project.yml"
+rm -f .github/workflows/rename_project.yml
 
 echo "Project renaming complete!"

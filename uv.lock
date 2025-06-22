@@ -148,19 +148,15 @@ wheels = [
 
 [[package]]
 name = "config-cli-gui"
-version = "0.0.2"
+version = "0.1.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "fastkml" },
-    { name = "gpxpy" },
     { name = "pydantic" },
     { name = "pyyaml" },
-    { name = "shapely" },
-    { name = "srtm-py" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/bd/39/8a6b57404c4f426a166b23da6583d5b7b92993a0156553a94590383039fb/config_cli_gui-0.0.2.tar.gz", hash = "sha256:77d0b847b774c837178c3d7f757ffc32a6274d2c91795686667951f2070d4884", size = 198742, upload-time = "2025-06-22T09:46:18.226Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ef/7e/54dee3767da40f0af0d7b19f2f359f8c45cca71c502c25208f54a0a6a0a8/config_cli_gui-0.1.0.tar.gz", hash = "sha256:073dca650b37c4bf51a3f0bd4e7548345b57c2a5e0e3b5ea66950d9e1c399682", size = 182054, upload-time = "2025-06-22T10:14:38.312Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/91/9d/52ddab706ae848ef213861fab3d20e412520d0f2e03a10b6fce2d556002d/config_cli_gui-0.0.2-py3-none-any.whl", hash = "sha256:1a5cc1fb7ecf63f7896ca8360b83e93c6c8d91d93500b9d287c8f6343df35610", size = 34202, upload-time = "2025-06-22T09:46:16.812Z" },
+    { url = "https://files.pythonhosted.org/packages/f6/87/d78bb375700c4902f70a7dd59c27d741bf45fe34ef032a8ba447cd66d4ea/config_cli_gui-0.1.0-py3-none-any.whl", hash = "sha256:a260ecc67d973f971ae580faf0b8b62229a9015b4c5c4206a36ce8c9397192a2", size = 29455, upload-time = "2025-06-22T10:14:36.798Z" },
 ]
 
 [[package]]
@@ -875,7 +871,7 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=25.1.0" },
-    { name = "config-cli-gui", specifier = ">=0.0.2" },
+    { name = "config-cli-gui", specifier = ">=0.1.0" },
     { name = "coverage", marker = "extra == 'dev'", specifier = ">=7.8.2" },
     { name = "fastkml", specifier = ">=1.1.0" },
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=7.2.0" },
