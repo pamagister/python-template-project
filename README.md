@@ -31,7 +31,7 @@ Getting started on developing your own project based on this template
 
 2. **Give a name to your project**  
    For example: `my-python-project`  
-   *(Hyphens may ne used as project name; they are converted during renaming internally to underscores for packages.)*
+   *(Hyphens may be used as project name; they are converted during renaming internally to underscores for packages.)*
 
 3. **Set write permissions**  
    Go to: `Repository -> Settings -> Actions -> General -> Workflow permissions`  
