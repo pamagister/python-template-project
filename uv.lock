@@ -147,6 +147,23 @@ wheels = [
 ]
 
 [[package]]
+name = "config-cli-gui"
+version = "0.0.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "fastkml" },
+    { name = "gpxpy" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
+    { name = "shapely" },
+    { name = "srtm-py" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/bd/39/8a6b57404c4f426a166b23da6583d5b7b92993a0156553a94590383039fb/config_cli_gui-0.0.2.tar.gz", hash = "sha256:77d0b847b774c837178c3d7f757ffc32a6274d2c91795686667951f2070d4884", size = 198742, upload-time = "2025-06-22T09:46:18.226Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/91/9d/52ddab706ae848ef213861fab3d20e412520d0f2e03a10b6fce2d556002d/config_cli_gui-0.0.2-py3-none-any.whl", hash = "sha256:1a5cc1fb7ecf63f7896ca8360b83e93c6c8d91d93500b9d287c8f6343df35610", size = 34202, upload-time = "2025-06-22T09:46:16.812Z" },
+]
+
+[[package]]
 name = "coverage"
 version = "7.9.1"
 source = { registry = "https://pypi.org/simple" }
@@ -827,10 +844,9 @@ wheels = [
 name = "python-template-project"
 source = { editable = "." }
 dependencies = [
+    { name = "config-cli-gui" },
     { name = "fastkml" },
     { name = "gpxpy" },
-    { name = "pydantic" },
-    { name = "pyyaml" },
     { name = "shapely" },
     { name = "srtm-py" },
 ]
@@ -859,6 +875,7 @@ docs = [
 [package.metadata]
 requires-dist = [
     { name = "black", marker = "extra == 'dev'", specifier = ">=25.1.0" },
+    { name = "config-cli-gui", specifier = ">=0.0.2" },
     { name = "coverage", marker = "extra == 'dev'", specifier = ">=7.8.2" },
     { name = "fastkml", specifier = ">=1.1.0" },
     { name = "flake8", marker = "extra == 'dev'", specifier = ">=7.2.0" },
@@ -869,13 +886,11 @@ requires-dist = [
     { name = "mkdocs-awesome-nav", marker = "extra == 'docs'", specifier = ">=2.6.1" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.16.0" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.2.0" },
-    { name = "pydantic", specifier = ">=2.11.7" },
     { name = "pygments", marker = "extra == 'docs'", specifier = ">=2.19.1" },
     { name = "pyinstaller", marker = "extra == 'dev'", specifier = ">=5.8" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.4.0" },
     { name = "pytest-cov", marker = "extra == 'dev'", specifier = ">=6.1.1" },
     { name = "pytest-mock", marker = "extra == 'dev'", specifier = ">=3.14.1" },
-    { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.11.13" },
     { name = "shapely", specifier = ">=2.1.1" },
     { name = "srtm-py", specifier = ">=0.3.7" },

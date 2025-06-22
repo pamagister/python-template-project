@@ -8,7 +8,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from generic_config_cli_gui.config_framework import DocumentationGenerator
+from config_cli_gui.config_framework import DocumentationGenerator
+
 from python_template_project.config.config import ConfigParameterManager
 
 

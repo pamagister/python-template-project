@@ -197,3 +197,7 @@ cython_debug/
 /.idea/python-template-project.iml
 /.idea/inspectionProfiles/profiles_settings.xml
 /.idea/inspectionProfiles/Project_Default.xml
+/src/python_template_project/_version.py
+/release/config.yaml
+/release/python-template-project.exe
+/release/README.md

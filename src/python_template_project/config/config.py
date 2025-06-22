@@ -5,7 +5,7 @@ organized in categories (CLI, App, GUI). It can generate config files, CLI modul
 and documentation from the parameter definitions.
 """
 
-from generic_config_cli_gui.config_framework import (
+from config_cli_gui.config_framework import (
     BaseConfigCategory,
     CliConfigCategory,
     ConfigManager,

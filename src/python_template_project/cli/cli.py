@@ -5,7 +5,8 @@ This file uses the CliGenerator from the generic config framework.
 
 from pathlib import Path
 
-from generic_config_cli_gui.cli_generator import CliGenerator
+from config_cli_gui.cli_generator import CliGenerator
+
 from python_template_project.config.config import ConfigParameterManager
 from python_template_project.core.base import BaseGPXProcessor
 from python_template_project.core.logging import initialize_logging

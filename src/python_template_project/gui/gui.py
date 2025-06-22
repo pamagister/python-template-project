@@ -17,7 +17,8 @@ from functools import partial
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
-from generic_config_cli_gui.gui_generator import SettingsDialogGenerator
+from config_cli_gui.gui_generator import SettingsDialogGenerator
+
 from python_template_project.config.config import ConfigParameterManager
 from python_template_project.core.base import BaseGPXProcessor
 from python_template_project.core.logging import (
