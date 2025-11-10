@@ -51,7 +51,22 @@ Getting started on developing your own project based on this template
 7. **Open the project in your IDE**
 
 8. **Install dependencies and create virtual environment**
-   Run:
+
+   Install uv first:
+   ```bash
+   pip install uv
+   ```
+   
+   On Linux, install pipx first:  
+   ```bash
+   sudo apt install pipx
+   pipx ensurepath
+   ```
+   
+   then, intall uv
+   ```bash
+   pipx install uv
+   ```
 
    ```bash
    make install
