@@ -116,11 +116,48 @@ To trigger a new release all you need to do is.
     * `git config --global user.name "Your name"`
     * `git config --global user.email "your.mail@example.com"`
 4. Verify settings
-    * `git config --list --show-origin"`
+    * `git config --list --show-origin`
     * `git config user.name`
-    * `git config user.email"`
+    * `git config user.email`
 5. Run `make release` to create a new tag and push it to the remote repo.
 
 the `make release` will ask you the version number to create the tag, ex: type `0.1.1` when you are asked.
 
 > **CAUTION**:  The make release will change local changelog files and commit all the unstaged changes you have.
+
+
+### Troubleshooting
+
+#### 🧩 Git Push Authentication Error
+
+If you encounter the following error during `make release` or when pushing manually:
+
+```bash
+remote: Invalid username or token. Password authentication is not supported for Git operations.
+fatal: Authentication failed for '[https://github.com/](https://github.com/)<user>/<repo>.git/'
+```
+
+GitHub no longer supports password-based authentication over HTTPS.  
+To fix this, you need to use a **Personal Access Token (PAT)** instead of your password.
+
+**Steps to resolve:**
+
+1. Go to [GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)](https://github.com/settings/tokens).
+2. Click **Generate new token (classic)** and select the following scopes:
+   - `repo`
+   - `workflow` (optional, for triggering GitHub Actions)
+3. Copy the generated token — you’ll only see it once.
+4. Update your Git remote to include your GitHub username:
+   ```bash
+   git remote set-url origin https://<YOUR_GITHUB_USERNAME>@github.com/<YOUR_GITHUB_USERNAME>/<YOUR_REPOSITORY>.git
+   ```
+
+5. The next time you push, Git will prompt for your password — **paste the token** instead.
+6. (Optional) To store credentials for future pushes:
+
+   ```bash
+   git config --global credential.helper store
+   ```
+
+After this setup, `make release` and manual pushes will work without further authentication errors.
+
