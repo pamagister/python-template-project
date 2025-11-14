@@ -34,7 +34,7 @@ class CliConfig(ConfigCategory):
 
     min_dist: ConfigParameter = ConfigParameter(
         name="min_dist",
-        value=20,
+        value=25,
         help="Maximum distance between two waypoints",
         is_cli=True,
     )
@@ -145,7 +145,7 @@ class GuiConfig(ConfigCategory):
     auto_scroll_log: ConfigParameter = ConfigParameter(
         name="auto_scroll_log",
         value=True,
-        help="Automatically scroll to newest log entries",
+        help="Automatically scroll to the newest log entries",
     )
 
     max_log_lines: ConfigParameter = ConfigParameter(
@@ -170,9 +170,10 @@ class ConfigParameterManager(ConfigManager):  # Inherit from ConfigManager
 
 def main():
     """Main function to generate config file and documentation."""
-    default_config: str = "../../config.yaml"
-    default_cli_doc: str = "../../docs/usage/cli.md"
-    default_config_doc: str = "../../docs/usage/config.md"
+    default_config: str = "config.yaml"
+    default_cli_doc: str = "docs/usage/cli.md"
+    default_config_doc: str = "docs/usage/config.md"
+    app_name = "python_template_project"
     config_manager = ConfigParameterManager()
     doc_gen = DocumentationGenerator(config_manager)
     doc_gen.generate_default_config_file(output_file=default_config)
@@ -181,7 +182,7 @@ def main():
     doc_gen.generate_config_markdown_doc(output_file=default_config_doc)
     print(f"Generated: {default_config_doc}")
 
-    doc_gen.generate_cli_markdown_doc(output_file=default_cli_doc)
+    doc_gen.generate_cli_markdown_doc(output_file=default_cli_doc, app_name=app_name)
     print(f"Generated: {default_cli_doc}")
 
 

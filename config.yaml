@@ -22,12 +22,12 @@ cli:
   extract_waypoints: true
   # Path to input (file or folder) | type=str, default= [CLI]
   input: ''
-  # Maximum distance between two waypoints | type=int, default=20 [CLI]
-  min_dist: 20
+  # Maximum distance between two waypoints | type=int, default=25 [CLI]
+  min_dist: 25
   # Path to output destination | type=str, default= [CLI]
   output: ''
 gui:
-  # Automatically scroll to newest log entries | type=bool, default=True
+  # Automatically scroll to the newest log entries | type=bool, default=True
   auto_scroll_log: true
   # Height of the log window in pixels | type=int, default=200
   log_window_height: 200
