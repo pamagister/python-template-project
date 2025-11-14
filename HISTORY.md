@@ -4,6 +4,19 @@ Changelog
 
 (unreleased)
 ------------
+- Update to new config: use .value to be type save. [Paul Magister]
+- Contributing.md: troubleshooting make release issue. [Paul Magister]
+- Linux setup details. [paul]
+- Feat #34: generate cli and config.md on make docs. [Paul Magister]
+- Update README.md from docs/index.md. [github-actions]
+- Feat #34: update to config-cli-gui 0.1.1. [Paul Magister]
+- Feat #31: delete rename_project.yml. [Paul Magister]
+- Feat #34: use config-cli-gui library. [Paul Magister]
+- Feat #35: funding page centralized #35. [Paul Magister]
+
+
+0.2.0 (2025-06-22)
+------------------
 - Feat #34: prepare config and gui to be used as library: massive
   refactoring. [Paul Magister]
 - Feat #34: prepare config and gui to be used as library #34. [Paul
