@@ -4,6 +4,13 @@ Changelog
 
 (unreleased)
 ------------
+- Improved cli example, fix elevation cli param problem. [Paul Magister]
+- Update to new config: cli fixes. [Paul Magister]
+
+
+0.2.1 (2025-11-14)
+------------------
+- Docs: Update HISTORY.md for release 0.2.1. [Paul Magister]
 - Update to new config: use .value to be type save. [Paul Magister]
 - Contributing.md: troubleshooting make release issue. [Paul Magister]
 - Linux setup details. [paul]
