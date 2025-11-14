@@ -17,7 +17,7 @@ from functools import partial
 from pathlib import Path
 from tkinter import filedialog, messagebox, ttk
 
-from config_cli_gui.gui_generator import SettingsDialogGenerator
+from config_cli_gui.gui import SettingsDialogGenerator
 
 from python_template_project.config.config import ConfigParameterManager
 from python_template_project.core.base import BaseGPXProcessor
@@ -242,9 +242,7 @@ class MainGui:
 
         # Log level selector
         ttk.Label(log_controls, text="Log Level:").pack(side=tk.LEFT, padx=(10, 5))
-        self.log_level_var = tk.StringVar(
-            value=self.config_manager.get_category("app").log_level.default
-        )
+        self.log_level_var = tk.StringVar(value=self.config_manager.app.log_level.value)
         log_level_combo = ttk.Combobox(
             log_controls,
             textvariable=self.log_level_var,
@@ -457,10 +455,10 @@ class MainGui:
             # Create and run project
             project = BaseGPXProcessor(
                 files_to_process,  # Pass selected files
-                self.config_manager.get_category("cli").output.default,
-                self.config_manager.get_category("cli").min_dist.default,
-                self.config_manager.get_category("app").date_format.default,
-                self.config_manager.get_category("cli").elevation.default,
+                self.config_manager.cli.output.value,
+                self.config_manager.cli.min_dist.value,
+                self.config_manager.app.date_format.value,
+                self.config_manager.cli.elevation.value,
                 self.logger,
             )
             # implement switch case for different processing modes
@@ -507,7 +505,7 @@ class MainGui:
         if dialog.result == "ok":
             self.logger.info("Settings updated successfully")
             # Update log level selector if it changed
-            self.log_level_var.set(self.config_manager.get_category("app").log_level.default)
+            self.log_level_var.set(self.config_manager.app.log_level.value)
 
     def _open_help(self):
         """Open help documentation in browser."""

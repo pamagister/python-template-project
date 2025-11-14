@@ -26,19 +26,33 @@ python -m app [OPTIONS] input
 python -m app input
 ```
 
-### 2. With min_dist parameter
+### 2. With verbose logging
+
+```bash
+python -m app -v input
+python -m app --verbose input
+```
+
+### 3. With quiet mode
+
+```bash
+python -m app -q input
+python -m app --quiet input
+```
+
+### 4. With min_dist parameter
 
 ```bash
 python -m app --min_dist 20 input
 ```
 
-### 3. With extract_waypoints parameter
+### 5. With extract_waypoints parameter
 
 ```bash
 python -m app --extract_waypoints True input
 ```
 
-### 4. With elevation parameter
+### 6. With elevation parameter
 
 ```bash
 python -m app --elevation True input

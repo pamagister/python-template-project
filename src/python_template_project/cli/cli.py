@@ -5,7 +5,7 @@ This file uses the CliGenerator from the generic config framework.
 
 from pathlib import Path
 
-from config_cli_gui.cli_generator import CliGenerator
+from config_cli_gui.cli import CliGenerator
 
 from python_template_project.config.config import ConfigParameterManager
 from python_template_project.core.base import BaseGPXProcessor
@@ -23,19 +23,19 @@ def validate_config(config: ConfigParameterManager, logger) -> bool:
         True if configuration is valid, False otherwise
     """
     # Get CLI category and check required parameters
-    cli_category = config.get_cli_category()
+    cli_category = config.cli
     if not cli_category:
         logger.error("No CLI configuration found")
         return False
 
     # Check if input parameter exists and has a value
-    input_param = getattr(cli_category, "input", None)
-    if not input_param or not input_param.default:
+    input_param = getattr(cli_category, "input")
+    if not input_param or not input_param.value:
         logger.error("Input is required")
         return False
 
     # Check if input file exists
-    input_path = Path(input_param.default)
+    input_path = Path(input_param.value)
     if not input_path.exists():
         logger.error(f"File not found: {input_path}")
         return False
@@ -68,15 +68,15 @@ def run_main_processing(config: ConfigParameterManager) -> int:
             return 1
 
         # Get CLI parameters
-        cli_category = config.get_cli_category()
-        input_file = cli_category.input.default
-        output_file = cli_category.output.default
-        min_dist = cli_category.min_dist.default
-        extract_waypoints = cli_category.extract_waypoints.default
+        cli_category = config.cli
+        input_file = cli_category.input.value
+        output_file = cli_category.output.value
+        min_dist = cli_category.min_dist.value
+        extract_waypoints = cli_category.extract_waypoints.value
 
         # Get app parameters
-        app_category = config.get_category("app")
-        date_format = app_category.date_format.default if app_category else "%Y-%m-%d"
+        app_category = config.app
+        date_format = app_category.date_format.value if app_category else "%Y-%m-%d"
 
         logger.info(f"Processing input: {input_file}")
 

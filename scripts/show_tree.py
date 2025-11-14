@@ -93,15 +93,15 @@ def parse_python_file(file_path):
                             for target in stmt.targets:
                                 if (
                                     isinstance(target, ast.Attribute)
-                                    and isinstance(target.value, ast.Name)
-                                    and target.value.id == "self"
+                                    and isinstance(target, ast.Name)
+                                    and target.id == "self"
                                 ):
                                     class_entry["attributes"].append(target.attr)
                         elif isinstance(stmt, ast.AnnAssign):
                             if (
                                 isinstance(stmt.target, ast.Attribute)
-                                and isinstance(stmt.target.value, ast.Name)
-                                and stmt.target.value.id == "self"
+                                and isinstance(stmt.target, ast.Name)
+                                and stmt.target.id == "self"
                             ):
                                 class_entry["attributes"].append(stmt.target.attr)
 
