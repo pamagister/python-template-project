@@ -12,7 +12,7 @@ from python_template_project.core.base import BaseGPXProcessor
 from python_template_project.core.logging import initialize_logging
 
 
-def validate_config(config: ConfigParameterManager, logger) -> bool:
+def validate_config(config: ConfigParameterManager) -> bool:
     """Validate the configuration parameters.
 
     Args:
@@ -22,6 +22,10 @@ def validate_config(config: ConfigParameterManager, logger) -> bool:
     Returns:
         True if configuration is valid, False otherwise
     """
+    # Initialize logging system
+    logger_manager = initialize_logging(config)
+    logger = logger_manager.get_logger("python_template_project.cli")
+
     # Get CLI category and check required parameters
     cli_category = config.cli
     if not cli_category:
@@ -63,16 +67,16 @@ def run_main_processing(config: ConfigParameterManager) -> int:
         logger_manager.log_config_summary()
 
         # Validate configuration
-        if not validate_config(config, logger):
+        if not validate_config(config):
             logger.error("Configuration validation failed")
             return 1
 
-        # Get CLI parameters
+        # Get parameters with cli overrides
         cli_category = config.cli
         input_file = cli_category.input.value
         output_file = cli_category.output.value
         min_dist = cli_category.min_dist.value
-        extract_waypoints = cli_category.extract_waypoints.value
+        elevation = cli_category.elevation.value
 
         # Get app parameters
         app_category = config.app
@@ -86,7 +90,7 @@ def run_main_processing(config: ConfigParameterManager) -> int:
             output=output_file,
             min_dist=min_dist,
             date_format=date_format,
-            elevation=extract_waypoints,
+            elevation=elevation,
             logger=logger,
         )
 
