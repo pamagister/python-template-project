@@ -4,6 +4,15 @@ Changelog
 
 (unreleased)
 ------------
+- Run precommit before building release for proper formatting. [Paul
+  Magister]
+- Valid app_name for cli configuration. [Paul Magister]
+- Proper run configurations. [Paul Magister]
+
+
+0.2.2 (2025-11-14)
+------------------
+- Docs: Update HISTORY.md for release 0.2.2. [Paul Magister]
 - Improved cli example, fix elevation cli param problem. [Paul Magister]
 - Update to new config: cli fixes. [Paul Magister]
 
