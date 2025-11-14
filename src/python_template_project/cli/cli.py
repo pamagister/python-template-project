@@ -24,7 +24,7 @@ def validate_config(config: ConfigParameterManager) -> bool:
     """
     # Initialize logging system
     logger_manager = initialize_logging(config)
-    logger = logger_manager.get_logger("python_template_project.cli")
+    logger = logger_manager.get_logger("cli")
 
     # Get CLI category and check required parameters
     cli_category = config.cli
@@ -59,7 +59,7 @@ def run_main_processing(config: ConfigParameterManager) -> int:
     """
     # Initialize logging system
     logger_manager = initialize_logging(config)
-    logger = logger_manager.get_logger("python_template_project.cli")
+    logger = logger_manager.get_logger("cli")
 
     try:
         # Log startup information
