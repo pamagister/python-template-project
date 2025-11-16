@@ -157,17 +157,13 @@ docs:             ## Build and sync the documentation.
 	@uv run mkdocs build
 	@uv run mkdocs serve
 
-.PHONY: list
-list:            ## Show project file list (excluding ignored folders)
-	@uv run ./scripts/show_filelist.py
-
 .PHONY: tree
 tree:            ## Show project tree (excluding ignored folders)
 	@uv run ./scripts/show_tree.py
 
 .PHONY: pytree
 pytree:            ## Show project tree (excluding ignored folders)
-	@uv run ./scripts/show_pytree.py
+	@uv run ./scripts/show_tree.py --show-code
 
 .PHONY: init
 init:             ## Initialize the project based on an application template.
