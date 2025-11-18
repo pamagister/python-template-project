@@ -3,18 +3,18 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
-import pytest
 import gpxpy
+import pytest
 from gpxpy.gpx import GPXTrackPoint
 
 from python_template_project.config.config import ConfigParameterManager
 from python_template_project.core.logging import initialize_logging
 from src.python_template_project.core.base import BaseGPXProcessor
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def test_paths(tmp_path):
@@ -44,6 +44,7 @@ def test_paths(tmp_path):
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 def test_get_output_folder(test_paths):
     logger = test_paths["logger"]
