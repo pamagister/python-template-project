@@ -4,6 +4,21 @@ Changelog
 
 (unreleased)
 ------------
+- Add linux build workflow. [Paul Magister]
+- Avoid warning by adding lxml package. [Paul Magister]
+- Fix format. [Paul Magister]
+- Only use on py file to show tree with or without python classes. [Paul
+  Magister]
+- Switch to python scripts that print the project structure. [Paul
+  Magister]
+- Switch to pytest. [Paul Magister]
+- Update README.md from docs/index.md. [github-actions]
+- Typo with with. [Paul Magister]
+
+
+0.2.3 (2025-11-14)
+------------------
+- Docs: Update HISTORY.md for release 0.2.3. [Paul Magister]
 - Run precommit before building release for proper formatting. [Paul
   Magister]
 - Valid app_name for cli configuration. [Paul Magister]
