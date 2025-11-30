@@ -65,6 +65,17 @@ build-win:    ## Build the Windows executable.
 	cp config.yaml release
 	cp README.md release
 
+.PHONY: build-linux
+build-linux:    ## Build the Linux executable.
+	## Build the Linux executable.
+	uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml;." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+
+	rm -rf release
+	mkdir release
+	cp dist/python-template-project release
+	cp config.yaml release
+
+
 .PHONY: build-macos
 build-macos:    ## Build the macOS executable.
 	echo "Building unified CLI/GUI application as executable"

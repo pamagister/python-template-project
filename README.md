@@ -93,6 +93,7 @@ Getting started on developing your own project based on this template
     * Generate a **PyPI API token** from your PyPI account.
     * Go to **GitHub → Settings → Secrets and variables → Actions**.
     * Add the secret as `PYPI_API_TOKEN`.
+    * The token probably starts with "pypi-..."
 
 16. **Release your first version**
     Run:
