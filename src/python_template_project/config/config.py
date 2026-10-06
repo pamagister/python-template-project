@@ -167,14 +167,18 @@ class ConfigParameterManager(ConfigManager):  # Inherit from ConfigManager
         categories = (CliConfig(), AppConfig(), GuiConfig())
         super().__init__(categories, config_file, **kwargs)
 
+    @staticmethod
+    def get_app_name() -> str:
+        return "python_template_project"
+
 
 def main():
     """Main function to generate config file and documentation."""
     default_config: str = "config.yaml"
     default_cli_doc: str = "docs/usage/cli.md"
     default_config_doc: str = "docs/usage/config.md"
-    app_name = "python_template_project"
     config_manager = ConfigParameterManager()
+    app_name = config_manager.get_app_name()
     doc_gen = DocumentationGenerator(config_manager)
     doc_gen.generate_default_config_file(output_file=default_config)
     print(f"Generated: {default_config}")

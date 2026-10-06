@@ -1,4 +1,4 @@
-from config_cli_gui.docs_generator import DocumentationGenerator
+from config_cli_gui.docs import DocumentationGenerator
 
 from python_template_project.config.config import ConfigParameterManager
 
@@ -18,5 +18,5 @@ print(f"Generated: {default_config}")
 docGen.generate_config_markdown_doc(output_file=default_config_doc)
 print(f"Generated: {default_config_doc}")
 
-docGen.generate_cli_markdown_doc(output_file=default_cli_doc)
+docGen.generate_cli_markdown_doc(output_file=default_cli_doc, app_name=config_manager.get_app_name())
 print(f"Generated: {default_cli_doc}")

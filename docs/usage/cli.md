@@ -3,13 +3,22 @@
 Command line options for python_template_project
 
 ```bash
-python -m python_template_project [OPTIONS] input
+python-template-project [OPTIONS] <input>
+```
+
+For development from a source checkout, the equivalent module invocation is:
+
+```bash
+python -m python_template_project [OPTIONS] <input>
 ```
 
 ## Options
 
 | Option                | Type | Description                                       | Default    | Choices       |
 |-----------------------|------|---------------------------------------------------|------------|---------------|
+| --config              | str  | Path to configuration file                        | -          | -             |
+| -v, --verbose         | bool | Enable debug logging                              | False      | [True, False] |
+| -q, --quiet           | bool | Show warnings and errors only                     | False      | [True, False] |
 | `input`               | str  | Path to input (file or folder)                    | *required* | -             |
 | `--output`            | str  | Path to output destination                        | *required* | -             |
 | `--min_dist`          | int  | Maximum distance between two waypoints            | 25         | -             |
@@ -23,37 +32,44 @@ python -m python_template_project [OPTIONS] input
 ### 1. Basic usage
 
 ```bash
-python -m python_template_project input
+python-template-project input
 ```
 
 ### 2. With verbose logging
 
 ```bash
-python -m python_template_project -v input
-python -m python_template_project --verbose input
+python-template-project -v input
+python-template-project --verbose input
 ```
 
 ### 3. With quiet mode
 
 ```bash
-python -m python_template_project -q input
-python -m python_template_project --quiet input
+python-template-project -q input
+python-template-project --quiet input
 ```
 
-### 4. With min_dist parameter
+### 4. With output parameter
 
 ```bash
-python -m python_template_project --min_dist 25 input
+python-template-project --output  input
 ```
 
-### 5. With extract_waypoints parameter
+### 5. With min_dist parameter
 
 ```bash
-python -m python_template_project --extract_waypoints True input
+python-template-project --min_dist 25 input
 ```
 
-### 6. With elevation parameter
+### 6. With extract_waypoints parameter
 
 ```bash
-python -m python_template_project --elevation True input
+python-template-project --extract_waypoints True input
+```
+
+### Developer usage
+
+```bash
+python -m python_template_project --help
+python -m python_template_project input
 ```

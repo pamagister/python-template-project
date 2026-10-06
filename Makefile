@@ -171,8 +171,8 @@ docs:             ## Build and sync the documentation.
 	## run syncdocs
 	$(MAKE) syncdocs
 	@echo "building documentation ..."
-	@uv run mkdocs build
-	@uv run mkdocs serve
+	@uv run --group docs mkdocs build
+	@uv run --group docs mkdocs serve
 
 .PHONY: tree
 tree:            ## Show project tree (excluding ignored folders)
