@@ -49,8 +49,8 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 write_to = "src/python_template_project/_version.py"
 
-[tool.deptry]
-pep621_dev_dependency_groups = ["dev", "docs"]
+[tool.deptry.per_rule_ignores]
+DEP002 = ["lxml"]
 
 [tool.ruff]
 line-length = 100
