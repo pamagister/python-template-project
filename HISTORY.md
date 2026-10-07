@@ -4,6 +4,20 @@ Changelog
 
 (unreleased)
 ------------
+- Ich habe .readthedocs.yaml auf Read the Docs’ uv-Integration mit der
+  Gruppe docs umgestellt. Hinweis: uv sync wählt standardmäßig auch die
+  dev-Gruppe aus. [Paul Magister]
+- Updated pyproject.toml to remove Deptry’s deprecated setting, which
+  pointed at optional-dependency groups that this project doesn’t use.
+  Added a targeted exception for lxml, an intentional dependency that
+  Deptry otherwise flags as unused. [Paul Magister]
+- Bump version of config-cli-gui to latest version. [Paul Magister]
+- Improve makefile. [Paul Magister]
+
+
+0.2.4 (2025-11-30)
+------------------
+- Docs: Update HISTORY.md for release 0.2.4. [Paul Magister]
 - Add linux build workflow. [Paul Magister]
 - Avoid warning by adding lxml package. [Paul Magister]
 - Fix format. [Paul Magister]
