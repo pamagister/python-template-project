@@ -73,3 +73,12 @@ python-template-project --extract_waypoints True input
 python -m python_template_project --help
 python -m python_template_project input
 ```
+
+# More parameter
+
+For your specific projects that inherit from the library, 
+you can add more parameters to the CLI and config file 
+by creating your own ConfigManager subclass 
+and adding more ConfigParameter instances. 
+The documentation generator will automatically include them 
+in the generated documentation.
