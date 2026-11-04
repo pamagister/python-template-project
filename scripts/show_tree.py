@@ -370,13 +370,18 @@ def get_owner(stat_result):
         return str(stat_result.st_uid)
 
 
-def count_visible_entries(path):
-    """Zaehlt die nicht ignorierten Eintraege eines Verzeichnisses."""
-    try:
-        items = os.listdir(path)
-    except OSError:
-        return 0
-    return sum(1 for item in items if not should_ignore(os.path.join(path, item)))
+def get_file_extension(name):
+    """Ermittelt die Dateiendung ohne Punkt, case-insensitiv."""
+    extension = os.path.splitext(name)[1].lower()
+    return extension[1:] if extension else "no ext"
+
+
+def format_type_counts(extensions, limit=3):
+    """Formatiert die haeufigsten Dateitypen."""
+    top_extensions = sorted(extensions.items(), key=lambda item: (-item[1], item[0]))[:limit]
+    if not top_extensions:
+        return "-"
+    return ", ".join(f"{count} {extension}" for extension, count in top_extensions)
 
 
 def format_folder_summary(path):
@@ -405,35 +410,71 @@ def format_folder_summary(path):
         except OSError:
             pass
 
-        extension = os.path.splitext(item)[1].lower()
-        extensions[extension[1:] if extension else "no ext"] += 1
+        extensions[get_file_extension(item)] += 1
 
     parts = [
         f"subfolders: {subfolders}",
         f"files: {files}",
         f"size: {format_size(total_size)}",
+        f"types: {format_type_counts(extensions)}",
     ]
-
-    top_extensions = sorted(extensions.items(), key=lambda item: (-item[1], item[0]))[:3]
-    if top_extensions:
-        types = ", ".join(f"{count} {extension}" for extension, count in top_extensions)
-        parts.append(f"types: {types}")
 
     return f"  [{', '.join(parts)}]"
 
 
+def collect_tree_stats(path):
+    """Sammelt rekursiv Ordner-, Datei- und Typstatistiken."""
+    stats = {"folders": 0, "files": 0, "size": 0, "extensions": Counter()}
+    try:
+        items = os.listdir(path)
+    except OSError:
+        return stats
+
+    for item in items:
+        full_path = os.path.join(path, item)
+        if should_ignore(full_path):
+            continue
+        if os.path.isdir(full_path):
+            stats["folders"] += 1
+            child_stats = collect_tree_stats(full_path)
+            stats["folders"] += child_stats["folders"]
+            stats["files"] += child_stats["files"]
+            stats["size"] += child_stats["size"]
+            stats["extensions"].update(child_stats["extensions"])
+        else:
+            stats["files"] += 1
+            try:
+                stats["size"] += os.path.getsize(full_path)
+            except OSError:
+                pass
+            stats["extensions"][get_file_extension(item)] += 1
+
+    return stats
+
+
+def format_tree_summary(path):
+    """Erzeugt die immer sichtbare Gesamtzusammenfassung."""
+    stats = collect_tree_stats(path)
+    parts = [
+        f"folders: {stats['folders']}",
+        f"files: {stats['files']}",
+        f"size: {format_size(stats['size'])}",
+        f"types: {format_type_counts(stats['extensions'])}",
+    ]
+    return f"\nSummary: [{', '.join(parts)}]"
+
+
 def format_details(path, is_dir):
     """Erzeugt den kompakten Metadaten-Suffix fuer eine Baumzeile."""
+    if is_dir:
+        return format_folder_summary(path)
+
     try:
         stat_result = os.stat(path)
     except OSError:
         return ""
 
-    parts = []
-    if is_dir:
-        parts.append(f"entries: {count_visible_entries(path)}")
-    else:
-        parts.append(f"size: {format_size(stat_result.st_size)}")
+    parts = [f"size: {format_size(stat_result.st_size)}"]
 
     birthtime = getattr(stat_result, "st_birthtime", None)
     if birthtime is not None:
@@ -444,25 +485,26 @@ def format_details(path, is_dir):
     if owner:
         parts.append(f"owner: {owner}")
 
-    if not is_dir:
-        metadata = get_document_metadata(path)
-        if metadata.get("author"):
-            parts.append(f"author: {metadata['author']}")
-        if metadata.get("title"):
-            parts.append(f'title: "{metadata["title"]}"')
-        if metadata.get("doc-created"):
-            parts.append(f"doc-created: {metadata['doc-created']}")
+    metadata = get_document_metadata(path)
+    if metadata.get("author"):
+        parts.append(f"author: {metadata['author']}")
+    if metadata.get("title"):
+        parts.append(f'title: "{metadata["title"]}"')
+    if metadata.get("doc-created"):
+        parts.append(f"doc-created: {metadata['doc-created']}")
 
     return f"  [{', '.join(parts)}]"
 
 
-def show_tree(path, prefix="", show_code=False, show_details=False, show_folder_summary=False):
+def show_tree(path, prefix="", show_code=False, show_details=False, show_folders_only=False):
     try:
         items = sorted(os.listdir(path))
     except PermissionError:
         return
 
     items = [i for i in items if not should_ignore(os.path.join(path, i))]
+    if show_folders_only:
+        items = [i for i in items if os.path.isdir(os.path.join(path, i))]
 
     for index, item in enumerate(items):
         full_path = os.path.join(path, item)
@@ -471,16 +513,11 @@ def show_tree(path, prefix="", show_code=False, show_details=False, show_folder_
         connector = LAST_BRANCH if is_last else BRANCH
         symbol = FOLDER_SYMBOL if is_dir else FILE_SYMBOL
 
-        if is_dir and show_folder_summary:
-            details = format_folder_summary(full_path)
-        elif not show_folder_summary and show_details:
-            details = format_details(full_path, is_dir)
-        else:
-            details = ""
+        details = format_details(full_path, is_dir) if show_details else ""
         print(f"{prefix}{connector}{symbol} {item}{details}")
         next_prefix = prefix + (INDENT if is_last else VERTICAL_LINE)
         if is_dir:
-            show_tree(full_path, next_prefix, show_code, show_details, show_folder_summary)
+            show_tree(full_path, next_prefix, show_code, show_details, show_folders_only)
         elif show_code and item.endswith(".py"):
             code_structure = parse_python_file(full_path)
             for entry in code_structure:
@@ -514,13 +551,13 @@ if __name__ == "__main__":
         "--details",
         action="store_true",
         default=False,
-        help="Shows file metadata and available document metadata",
+        help="Shows file metadata and per-folder summaries",
     )
     parser.add_argument(
         "--folder",
         action="store_true",
         default=False,
-        help="Shows per-folder summaries instead of file details",
+        help="Shows only directories and hides file names",
     )
     args = parser.parse_args()
 
@@ -528,8 +565,9 @@ if __name__ == "__main__":
         args.path,
         show_code=args.show_code,
         show_details=args.details,
-        show_folder_summary=args.folder,
+        show_folders_only=args.folder,
     )
+    print(format_tree_summary(args.path))
 
     print('\nSymbol description:')
     print(f"{FOLDER_SYMBOL} - Directory")

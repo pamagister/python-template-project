@@ -19,14 +19,30 @@ def run_tree(path, *args):
     return result.stdout
 
 
-def test_default_output_has_no_details(tmp_path):
+def get_line(output, marker):
+    return next(line for line in output.splitlines() if marker in line)
+
+
+def test_default_output_has_no_entry_details(tmp_path):
     (tmp_path / "example.txt").write_text("hello", encoding="utf-8")
 
     output = run_tree(tmp_path)
 
     assert "[F] example.txt" in output
-    assert "size:" not in output
+    assert "[F] example.txt  [" not in output
     assert "modified:" not in output
+    assert "Summary:" in output
+
+
+def test_default_output_includes_recursive_summary(tmp_path):
+    folder = tmp_path / "docs"
+    folder.mkdir()
+    (folder / "one.pdf").write_text("x", encoding="utf-8")
+    (folder / "two.pdf").write_text("xy", encoding="utf-8")
+
+    output = run_tree(tmp_path)
+
+    assert "Summary: [folders: 1, files: 2, size: 3 B, types: 2 pdf]" in output
 
 
 def test_details_show_filesystem_metadata(tmp_path):
@@ -34,21 +50,117 @@ def test_details_show_filesystem_metadata(tmp_path):
 
     output = run_tree(tmp_path, "--details")
 
-    assert "size: 5 B" in output
-    assert re.search(r"modified: \d{4}-\d{2}-\d{2}", output)
+    file_line = get_line(output, "[F] example.txt")
+    assert "size: 5 B" in file_line
+    assert re.search(r"modified: \d{4}-\d{2}-\d{2}", file_line)
     if os.name == "posix":
-        assert "owner:" in output
+        assert "owner:" in file_line
 
 
-def test_details_show_directory_entries(tmp_path):
-    folder = tmp_path / "folder"
+def test_details_show_folder_summary(tmp_path):
+    folder = tmp_path / "docs"
     folder.mkdir()
-    (folder / "one.txt").write_text("1", encoding="utf-8")
-    (folder / "two.txt").write_text("2", encoding="utf-8")
+    (folder / "nested-a").mkdir()
+    (folder / "nested-b").mkdir()
+    (folder / "one.txt").write_text("12345", encoding="utf-8")
+    (folder / "two.txt").write_text("1234567890", encoding="utf-8")
 
     output = run_tree(tmp_path, "--details")
 
-    assert "entries: 2" in output
+    folder_line = get_line(output, "[D] docs")
+    assert "subfolders: 2" in folder_line
+    assert "files: 2" in folder_line
+    assert "size: 15 B" in folder_line
+    assert "types: 2 txt" in folder_line
+    assert "entries:" not in folder_line
+
+
+def test_details_show_top_three_extensions(tmp_path):
+    folder = tmp_path / "docs"
+    folder.mkdir()
+    for name in ["a.pdf", "b.PDF", "c.pdf", "d.docx", "e.DOCX", "f.xlsx", "g.csv"]:
+        (folder / name).write_text("x", encoding="utf-8")
+
+    output = run_tree(tmp_path, "--details")
+
+    folder_line = get_line(output, "[D] docs")
+    assert "types: 3 pdf, 2 docx, 1 csv" in folder_line
+
+
+def test_details_label_files_without_extension(tmp_path):
+    folder = tmp_path / "docs"
+    folder.mkdir()
+    (folder / "README").write_text("x", encoding="utf-8")
+
+    output = run_tree(tmp_path, "--details")
+
+    folder_line = get_line(output, "[D] docs")
+    assert "types: 1 no ext" in folder_line
+
+
+def test_folder_mode_hides_file_names(tmp_path):
+    (tmp_path / "secret.txt").write_text("hello", encoding="utf-8")
+    folder = tmp_path / "docs"
+    folder.mkdir()
+    (folder / "hidden.pdf").write_text("x", encoding="utf-8")
+
+    output = run_tree(tmp_path, "--folder")
+    tree_output = output.split("\nSummary:", 1)[0]
+
+    assert "[D] docs" in tree_output
+    assert "[F]" not in tree_output
+    assert "secret.txt" not in tree_output
+    assert "hidden.pdf" not in tree_output
+    assert "Summary: [folders: 1, files: 2, size: 6 B, types: 1 pdf, 1 txt]" in output
+
+
+def test_folder_mode_with_details_shows_folder_summary_only(tmp_path):
+    folder = tmp_path / "docs"
+    folder.mkdir()
+    (folder / "nested").mkdir()
+    (folder / "example.txt").write_text("hello", encoding="utf-8")
+
+    output = run_tree(tmp_path, "--folder", "--details")
+    tree_output = output.split("\nSummary:", 1)[0]
+
+    assert "[F]" not in tree_output
+    assert "example.txt" not in tree_output
+    folder_line = get_line(tree_output, "[D] docs")
+    assert "subfolders: 1" in folder_line
+    assert "files: 1" in folder_line
+    assert "size: 5 B" in folder_line
+    assert "types: 1 txt" in folder_line
+
+
+def test_folder_mode_without_details_has_no_folder_summary(tmp_path):
+    folder = tmp_path / "docs"
+    folder.mkdir()
+    (folder / "example.txt").write_text("hello", encoding="utf-8")
+
+    output = run_tree(tmp_path, "--folder")
+
+    folder_line = get_line(output, "[D] docs")
+    assert "subfolders:" not in folder_line
+    assert "files:" not in folder_line
+    assert "types:" not in folder_line
+
+
+def test_folder_summary_ignores_ignored_entries(tmp_path):
+    folder = tmp_path / "docs"
+    folder.mkdir()
+    (folder / "visible.txt").write_text("hello", encoding="utf-8")
+    (folder / "ignored.pyc").write_bytes(b"ignored")
+    cache = folder / "__pycache__"
+    cache.mkdir()
+    (cache / "nested.pyc").write_bytes(b"ignored")
+
+    output = run_tree(tmp_path, "--folder", "--details")
+
+    folder_line = get_line(output, "[D] docs")
+    assert "subfolders: 0" in folder_line
+    assert "files: 1" in folder_line
+    assert "size: 5 B" in folder_line
+    assert "types: 1 txt" in folder_line
 
 
 def test_details_read_ooxml_metadata(tmp_path):
@@ -113,87 +225,3 @@ def test_details_read_pdf_metadata(tmp_path):
     assert "author: Alice" in output
     assert 'title: "Report"' in output
     assert "doc-created: 2024-01-02" in output
-
-
-def test_folder_summary_shows_direct_child_counts(tmp_path):
-    folder = tmp_path / "docs"
-    folder.mkdir()
-    (folder / "nested-a").mkdir()
-    (folder / "nested-b").mkdir()
-    (folder / "one.txt").write_text("12345", encoding="utf-8")
-    (folder / "two.txt").write_text("1234567890", encoding="utf-8")
-
-    output = run_tree(tmp_path, "--folder")
-
-    assert "subfolders: 2" in output
-    assert "files: 2" in output
-    assert "size: 15 B" in output
-    assert "types: 2 txt" in output
-
-
-def test_folder_summary_shows_top_three_extensions(tmp_path):
-    folder = tmp_path / "docs"
-    folder.mkdir()
-    for name in ["a.pdf", "b.PDF", "c.pdf", "d.docx", "e.DOCX", "f.xlsx", "g.csv"]:
-        (folder / name).write_text("x", encoding="utf-8")
-
-    output = run_tree(tmp_path, "--folder")
-
-    assert "types: 3 pdf, 2 docx, 1 csv" in output
-
-
-def test_folder_summary_labels_files_without_extension(tmp_path):
-    folder = tmp_path / "docs"
-    folder.mkdir()
-    (folder / "README").write_text("x", encoding="utf-8")
-
-    output = run_tree(tmp_path, "--folder")
-
-    assert "types: 1 no ext" in output
-
-
-def test_folder_mode_omits_file_details(tmp_path):
-    (tmp_path / "example.txt").write_text("hello", encoding="utf-8")
-
-    output = run_tree(tmp_path, "--folder")
-
-    file_line = next(line for line in output.splitlines() if "[F] example.txt" in line)
-    assert "[F] example.txt" in file_line
-    assert "size:" not in file_line
-    assert "modified:" not in file_line
-    assert "author:" not in file_line
-
-
-def test_folder_mode_wins_over_details(tmp_path):
-    folder = tmp_path / "docs"
-    folder.mkdir()
-    (folder / "example.txt").write_text("hello", encoding="utf-8")
-
-    output = run_tree(tmp_path, "--folder", "--details")
-
-    folder_line = next(line for line in output.splitlines() if "[D] docs" in line)
-    file_line = next(line for line in output.splitlines() if "[F] example.txt" in line)
-    assert "subfolders: 0" in folder_line
-    assert "files: 1" in folder_line
-    assert "entries:" not in folder_line
-    assert "size:" not in file_line
-    assert "modified:" not in file_line
-    assert "author:" not in file_line
-
-
-def test_folder_summary_ignores_ignored_entries(tmp_path):
-    folder = tmp_path / "docs"
-    folder.mkdir()
-    (folder / "visible.txt").write_text("hello", encoding="utf-8")
-    (folder / "ignored.pyc").write_bytes(b"ignored")
-    cache = folder / "__pycache__"
-    cache.mkdir()
-    (cache / "nested.pyc").write_bytes(b"ignored")
-
-    output = run_tree(tmp_path, "--folder")
-
-    folder_line = next(line for line in output.splitlines() if "[D] docs" in line)
-    assert "subfolders: 0" in folder_line
-    assert "files: 1" in folder_line
-    assert "size: 5 B" in folder_line
-    assert "types: 1 txt" in folder_line
