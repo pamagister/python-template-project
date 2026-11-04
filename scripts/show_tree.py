@@ -9,14 +9,16 @@ from datetime import datetime
 from xml.etree import ElementTree
 
 # Symbole
-FOLDER_SYMBOL = "[D]"
-FILE_SYMBOL = "[F]"
-CLASS_SYMBOL = "[C]"
-FUNC_SYMBOL = "[M]"
-ATTR_SYMBOL = "[A]"
-BRANCH = "|-- "
-LAST_BRANCH = "`-- "
-VERTICAL_LINE = "|   "
+FOLDER_SYMBOL = "📁"
+FILE_SYMBOL = "◼️"  # "📋"
+IMAGE_SYMBOL = "🖼️"
+DOCUMENT_SYMBOL = "📝"
+CLASS_SYMBOL = "🏛️"
+FUNC_SYMBOL = "⚙️"
+ATTR_SYMBOL = "🔹"
+BRANCH = "├── "
+LAST_BRANCH = "└── "
+VERTICAL_LINE = "│   "
 INDENT = "    "
 
 # Ignorieren
@@ -36,10 +38,33 @@ IGNORE_DIRS = {
 }
 IGNORE_EXTENSIONS = {".pyc"}
 
+# Dateitypen
+IMAGE_EXTENSIONS = {
+    ".avif",
+    ".bmp",
+    ".gif",
+    ".heic",
+    ".heif",
+    ".ico",
+    ".jpeg",
+    ".jpg",
+    ".png",
+    ".svg",
+    ".tif",
+    ".tiff",
+    ".webp",
+}
+
 # Dokument-Metadaten
 ODF_EXTENSIONS = {".odg", ".odp", ".ods", ".odt"}
 OOXML_EXTENSIONS = {".docx", ".pptx", ".xlsx"}
 PDF_EXTENSIONS = {".pdf"}
+DOCUMENT_EXTENSIONS = (
+    ODF_EXTENSIONS
+    | OOXML_EXTENSIONS
+    | PDF_EXTENSIONS
+    | {".doc", ".docm", ".epub", ".ppt", ".pptm", ".rtf", ".xls", ".xlsm"}
+)
 MAX_AUTHOR_LENGTH = 40
 MAX_TITLE_LENGTH = 60
 
@@ -376,6 +401,16 @@ def get_file_extension(name):
     return extension[1:] if extension else "no ext"
 
 
+def get_file_symbol(name):
+    """Waehlt anhand der Dateiendung das passende Dateisymbol."""
+    extension = os.path.splitext(name)[1].lower()
+    if extension in IMAGE_EXTENSIONS:
+        return IMAGE_SYMBOL
+    if extension in DOCUMENT_EXTENSIONS:
+        return DOCUMENT_SYMBOL
+    return FILE_SYMBOL
+
+
 def format_type_counts(extensions, limit=3):
     """Formatiert die haeufigsten Dateitypen."""
     top_extensions = sorted(extensions.items(), key=lambda item: (-item[1], item[0]))[:limit]
@@ -511,7 +546,7 @@ def show_tree(path, prefix="", show_code=False, show_details=False, show_folders
         is_last = index == len(items) - 1
         is_dir = os.path.isdir(full_path)
         connector = LAST_BRANCH if is_last else BRANCH
-        symbol = FOLDER_SYMBOL if is_dir else FILE_SYMBOL
+        symbol = FOLDER_SYMBOL if is_dir else get_file_symbol(item)
 
         details = format_details(full_path, is_dir) if show_details else ""
         print(f"{prefix}{connector}{symbol} {item}{details}")
@@ -572,6 +607,8 @@ if __name__ == "__main__":
     print('\nSymbol description:')
     print(f"{FOLDER_SYMBOL} - Directory")
     print(f"{FILE_SYMBOL} - File")
+    print(f"{IMAGE_SYMBOL} - Image")
+    print(f"{DOCUMENT_SYMBOL} - Document")
     print(f"{CLASS_SYMBOL} - Class")
     print(f"{FUNC_SYMBOL} - Function/Method")
     print(f"{ATTR_SYMBOL} - Attribute")
