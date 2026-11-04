@@ -4,6 +4,7 @@ import inspect
 import os
 import re
 import zipfile
+from collections import Counter
 from datetime import datetime
 from xml.etree import ElementTree
 
@@ -378,6 +379,49 @@ def count_visible_entries(path):
     return sum(1 for item in items if not should_ignore(os.path.join(path, item)))
 
 
+def format_folder_summary(path):
+    """Erzeugt eine kompakte Zusammenfassung der direkten Ordnerkinder."""
+    try:
+        items = os.listdir(path)
+    except OSError:
+        return ""
+
+    subfolders = 0
+    files = 0
+    total_size = 0
+    extensions = Counter()
+
+    for item in items:
+        full_path = os.path.join(path, item)
+        if should_ignore(full_path):
+            continue
+        if os.path.isdir(full_path):
+            subfolders += 1
+            continue
+
+        files += 1
+        try:
+            total_size += os.path.getsize(full_path)
+        except OSError:
+            pass
+
+        extension = os.path.splitext(item)[1].lower()
+        extensions[extension[1:] if extension else "no ext"] += 1
+
+    parts = [
+        f"subfolders: {subfolders}",
+        f"files: {files}",
+        f"size: {format_size(total_size)}",
+    ]
+
+    top_extensions = sorted(extensions.items(), key=lambda item: (-item[1], item[0]))[:3]
+    if top_extensions:
+        types = ", ".join(f"{count} {extension}" for extension, count in top_extensions)
+        parts.append(f"types: {types}")
+
+    return f"  [{', '.join(parts)}]"
+
+
 def format_details(path, is_dir):
     """Erzeugt den kompakten Metadaten-Suffix fuer eine Baumzeile."""
     try:
@@ -412,7 +456,7 @@ def format_details(path, is_dir):
     return f"  [{', '.join(parts)}]"
 
 
-def show_tree(path, prefix="", show_code=False, show_details=False):
+def show_tree(path, prefix="", show_code=False, show_details=False, show_folder_summary=False):
     try:
         items = sorted(os.listdir(path))
     except PermissionError:
@@ -427,11 +471,16 @@ def show_tree(path, prefix="", show_code=False, show_details=False):
         connector = LAST_BRANCH if is_last else BRANCH
         symbol = FOLDER_SYMBOL if is_dir else FILE_SYMBOL
 
-        details = format_details(full_path, is_dir) if show_details else ""
+        if is_dir and show_folder_summary:
+            details = format_folder_summary(full_path)
+        elif not show_folder_summary and show_details:
+            details = format_details(full_path, is_dir)
+        else:
+            details = ""
         print(f"{prefix}{connector}{symbol} {item}{details}")
         next_prefix = prefix + (INDENT if is_last else VERTICAL_LINE)
         if is_dir:
-            show_tree(full_path, next_prefix, show_code, show_details)
+            show_tree(full_path, next_prefix, show_code, show_details, show_folder_summary)
         elif show_code and item.endswith(".py"):
             code_structure = parse_python_file(full_path)
             for entry in code_structure:
@@ -467,9 +516,20 @@ if __name__ == "__main__":
         default=False,
         help="Shows file metadata and available document metadata",
     )
+    parser.add_argument(
+        "--folder",
+        action="store_true",
+        default=False,
+        help="Shows per-folder summaries instead of file details",
+    )
     args = parser.parse_args()
 
-    show_tree(args.path, show_code=args.show_code, show_details=args.details)
+    show_tree(
+        args.path,
+        show_code=args.show_code,
+        show_details=args.details,
+        show_folder_summary=args.folder,
+    )
 
     print('\nSymbol description:')
     print(f"{FOLDER_SYMBOL} - Directory")
