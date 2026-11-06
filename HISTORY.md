@@ -4,6 +4,191 @@ Changelog
 
 (unreleased)
 ------------
+
+Fix
+~~~
+- UnicodeEncodeError in show_tree.py unter Windows (cp1252) [Paul
+  Magister]
+
+  sys.stdout auf UTF-8 umstellen, damit Unicode-Symbole (Emojis,
+  Baum-Zeichen) auch unter Windows mit cp1252-Konsole ausgegeben
+  werden können.
+
+  Closes #48
+- Use Unix path separator in build-linux (closes #43) [Paul Magister]
+
+  config.yaml verwendet in build-linux das Windows-Pfadtrennzeichen ';',
+  unter Linux/macOS erwartet PyInstaller den Doppelpunkt ':'. Damit wird
+  config.yaml korrekt in den Linux-Build bündelt.
+
+Other
+~~~~~
+- Move globally useful guidelines to a AGENTS_GLOBAL.md that has to be
+  renamed and kept in the global folder for AGENTS.md files. [Paul
+  Magister]
+- Merge pull request #49 from
+  pamagister/dependabot/github_actions/actions/checkout-7. [Paul
+  Magister]
+
+  Bump actions/checkout from 4 to 7
+- Merge branch 'main' into dependabot/github_actions/actions/checkout-7.
+  [Paul Magister]
+- Merge pull request #50 from
+  pamagister/dependabot/github_actions/actions/setup-python-7. [Paul
+  Magister]
+
+  Bump actions/setup-python from 5 to 7
+- Bump actions/setup-python from 5 to 7. [dependabot[bot]]
+
+  Bumps [actions/setup-python](https://github.com/actions/setup-python) from 5 to 7.
+  - [Release notes](https://github.com/actions/setup-python/releases)
+  - [Commits](https://github.com/actions/setup-python/compare/v5...v7)
+
+  ---
+  updated-dependencies:
+  - dependency-name: actions/setup-python
+    dependency-version: '7'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Merge pull request #51 from
+  pamagister/dependabot/github_actions/codecov/codecov-action-7. [Paul
+  Magister]
+
+  Bump codecov/codecov-action from 5 to 7
+- Bump codecov/codecov-action from 5 to 7. [dependabot[bot]]
+
+  Bumps [codecov/codecov-action](https://github.com/codecov/codecov-action) from 5 to 7.
+  - [Release notes](https://github.com/codecov/codecov-action/releases)
+  - [Changelog](https://github.com/codecov/codecov-action/blob/main/CHANGELOG.md)
+  - [Commits](https://github.com/codecov/codecov-action/compare/v5...v7)
+
+  ---
+  updated-dependencies:
+  - dependency-name: codecov/codecov-action
+    dependency-version: '7'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Bump actions/checkout from 4 to 7. [dependabot[bot]]
+
+  Bumps [actions/checkout](https://github.com/actions/checkout) from 4 to 7.
+  - [Release notes](https://github.com/actions/checkout/releases)
+  - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+  - [Commits](https://github.com/actions/checkout/compare/v4...v7)
+
+  ---
+  updated-dependencies:
+  - dependency-name: actions/checkout
+    dependency-version: '7'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Merge pull request #39 from
+  pamagister/dependabot/github_actions/actions/setup-python-6. [Paul
+  Magister]
+
+  Bump actions/setup-python from 4 to 6
+- Merge branch 'main' into dependabot/github_actions/actions/setup-
+  python-6. [Paul Magister]
+- Merge pull request #40 from
+  pamagister/dependabot/github_actions/actions/checkout-6. [Paul
+  Magister]
+
+  Bump actions/checkout from 3 to 6
+- Merge branch 'main' into dependabot/github_actions/actions/checkout-6.
+  [Paul Magister]
+- Bump actions/checkout from 3 to 6. [dependabot[bot]]
+
+  Bumps [actions/checkout](https://github.com/actions/checkout) from 3 to 6.
+  - [Release notes](https://github.com/actions/checkout/releases)
+  - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+  - [Commits](https://github.com/actions/checkout/compare/v3...v6)
+
+  ---
+  updated-dependencies:
+  - dependency-name: actions/checkout
+    dependency-version: '6'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Merge branch 'main' into dependabot/github_actions/actions/setup-
+  python-6 resolve merge conflict manually. [Paul Magister]
+- Test: show_tree-Ausgabe unter Windows als UTF-8 dekodieren. [Paul
+  Magister]
+
+  subprocess.run(text=True) dekodiert unter Windows (cp1252) die
+  Kindprozess-Ausgabe; da show_tree.py UTF-8 ausgibt, muss der Test
+  encoding="utf-8" verwenden, damit Emoji- und Baum-Zeichen korrekt
+  erfasst werden.
+
+  Closes #48
+- #48: add github usage details. [Paul Magister]
+- Docs: Add SECURITY.md for vulnerability reporting (closes #45) [Paul
+  Magister]
+- Docs: Add SECURITY.md for vulnerability reporting (closes #45) [Paul
+  Magister]
+
+  Dokumentiert den Meldungsweg für Sicherheitslücken über die private
+  Schwachstellenmeldung von GitHub (Security -> Report a vulnerability),
+  da es keinen öffentlichen Kanal gab.
+- Ci: concurrency-Gruppen in allen Workflows (closes #42) [Paul
+  Magister]
+
+  Verhindert überlappende Läufe desselben Workflows (Gruppe nach
+  github.workflow und github.ref). Läufe bei Pull-Requests werden beim
+  erneuten Push abgebrochen; Tag-Releases und main-Pushes laufen weiter.
+- Ci: release_message.sh auch bei erstem Tag gültig (closes #46) [Paul
+  Magister]
+
+  Bei nur einem Tag lieferte 'git tag ... | sed -n 2p' keinen Vorgänger,
+  weshalb 'git shortlog ".."' fehlschlug oder einen leeren
+  Changelog erzeugte. Nun wird bei fehlendem Vorgänger-Tag die Historie
+  aller Commits einbezogen.
+- Ci: Checkout with fetch-depth 0 in deploy job (closes #44) [Paul
+  Magister]
+
+  setuptools_scm benötigt die Git-Tags, um die Version zu erzeugen.
+  Im deploy-Job von release.yml fehlte fetch-depth: 0 (shallow clone),
+  wodurch der PyPI-Upload fehlschlagen oder eine falsche Version
+  veröffentlichen konnte.
+- Squeeze AGENTS.md. [Paul Magister]
+- Feat(show_tree): use nice symbols. [Paul Magister]
+- Feat(show_tree): align folder details and add global summary. [Paul
+  Magister]
+
+  Show folder summaries whenever --details is used, restrict --folder output to directories without file names, and always print a recursive overall summary at the end.
+
+  Refs #41
+- Feat(show_tree): add per-folder summaries. [Paul Magister]
+
+  Add --folder to show direct subfolder/file counts, total size, and the top three file extensions per directory. File metadata is suppressed in this mode.
+
+  Refs #41
+- Feat(show_tree): add optional metadata details. [Paul Magister]
+
+  Add a --details flag that appends file size, timestamps, owner, directory entry counts, and best-effort document metadata from ODF, OOXML, and PDF files. The default tree output remains unchanged.
+
+  Closes #41
+- Add AGENTS.md and harmonize doc generation. [Paul Magister]
+- Bump actions/setup-python from 4 to 6. [dependabot[bot]]
+
+  Bumps [actions/setup-python](https://github.com/actions/setup-python) from 4 to 6.
+  - [Release notes](https://github.com/actions/setup-python/releases)
+  - [Commits](https://github.com/actions/setup-python/compare/v4...v6)
+
+  ---
+  updated-dependencies:
+  - dependency-name: actions/setup-python
+    dependency-version: '6'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+
+
+0.2.5 (2026-10-07)
+------------------
+- Docs: Update HISTORY.md for release 0.2.5. [Paul Magister]
 - Ich habe .readthedocs.yaml auf Read the Docs’ uv-Integration mit der
   Gruppe docs umgestellt. Hinweis: uv sync wählt standardmäßig auch die
   dev-Gruppe aus. [Paul Magister]
