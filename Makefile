@@ -68,7 +68,7 @@ build-win:    ## Build the Windows executable.
 .PHONY: build-linux
 build-linux:    ## Build the Linux executable.
 	## Build the Linux executable.
-	uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml;." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+	uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml:." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
 
 	rm -rf release
 	mkdir release
