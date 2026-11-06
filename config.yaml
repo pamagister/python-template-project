@@ -1,96 +1,41 @@
-# Configuration File
-# This file was auto-generated. Modify as needed.
-
-# CLI Configuration
-cli:
-  # Path to input (file or folder)
-  # Type: str
-  input: ''
-
-  # Path to output destination
-  # Type: str
-  output: ''
-
-  # Maximum distance between two waypoints
-  # Type: int
-  min_dist: 20
-
-  # Extract starting points of each track as waypoint
-  # Choices: [True, False]
-  # Type: bool
-  extract_waypoints: True
-
-  # Include elevation data in waypoints
-  # Choices: [True, False]
-  # Type: bool
-  elevation: True
-
-
-# APP Configuration
 app:
-  # Date format to use
-  # Type: str
+  # Date format to use | type=str
   date_format: '%Y-%m-%d'
-
-  # Logging level for the application
-  # Choices: ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
-  # Type: str
-  log_level: 'INFO'
-
-  # Maximum log file size in MB before rotation
-  # Type: int
+  # Logging level for the application | type=str | choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
+  log_level: INFO
+  # Maximum log file size in MB before rotation | type=int
   log_file_max_size: 10
-
-  # Number of backup log files to keep
-  # Type: int
+  # Number of backup log files to keep | type=int
   log_backup_count: 5
-
-  # Log message format style
-  # Choices: ['simple', 'detailed', 'json']
-  # Type: str
-  log_format: 'detailed'
-
-  # Maximum number of worker threads
-  # Type: int
+  # Log message format style | type=str | choices=['simple', 'detailed', 'json']
+  log_format: detailed
+  # Maximum number of worker threads | type=int
   max_workers: 4
-
-  # Enable logging to file
-  # Choices: [True, False]
-  # Type: bool
-  enable_file_logging: True
-
-  # Enable logging to console
-  # Choices: [True, False]
-  # Type: bool
-  enable_console_logging: True
-
-
-# GUI Configuration
+  # Enable logging to file | type=bool | choices=[True, False]
+  enable_file_logging: true
+  # Enable logging to console | type=bool | choices=[True, False]
+  enable_console_logging: true
+cli:
+  # Path to input (file or folder) | type=str | [CLI]
+  input: ''
+  # Path to output destination | type=str | [CLI]
+  output: ''
+  # Maximum distance between two waypoints | type=int | [CLI]
+  min_dist: 25
+  # Extract starting points of each track as waypoint | type=bool | [CLI] | choices=[True, False]
+  extract_waypoints: true
+  # Include elevation data in waypoints | type=bool | [CLI] | choices=[True, False]
+  elevation: true
 gui:
-  # GUI theme setting
-  # Choices: ['light', 'dark', 'auto']
-  # Type: str
-  theme: 'light'
-
-  # Default window width
-  # Type: int
+  # GUI theme setting | type=str | choices=['light', 'dark', 'auto']
+  theme: light
+  # Default window width | type=int
   window_width: 800
-
-  # Default window height
-  # Type: int
+  # Default window height | type=int
   window_height: 600
-
-  # Height of the log window in pixels
-  # Type: int
+  # Height of the log window in pixels | type=int
   log_window_height: 200
-
-  # Automatically scroll to newest log entries
-  # Choices: [True, False]
-  # Type: bool
-  auto_scroll_log: True
-
-  # Maximum number of log lines to keep in GUI
-  # Type: int
+  # Automatically scroll to the newest log entries | type=bool | choices=[True, False]
+  auto_scroll_log: true
+  # Maximum number of log lines to keep in GUI | type=int
   max_log_lines: 1000
-
-

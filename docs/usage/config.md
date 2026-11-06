@@ -3,17 +3,16 @@
 These parameters are available to configure the behavior of your application.
 The parameters in the cli category can be accessed via the command line interface.
 
-## Category "cli"
+## Configuration File Reference
 
-| Name              | Type | Description                                       | Default | Choices       |
-|-------------------|------|---------------------------------------------------|---------|---------------|
-| input             | str  | Path to input (file or folder)                    | ''      | -             |
-| output            | str  | Path to output destination                        | ''      | -             |
-| min_dist          | int  | Maximum distance between two waypoints            | 20      | -             |
-| extract_waypoints | bool | Extract starting points of each track as waypoint | True    | [True, False] |
-| elevation         | bool | Include elevation data in waypoints               | True    | [True, False] |
+The actual configuration is stored in [`config.yaml`](../../config.yaml). You can:
 
-## Category "app"
+- Edit the configuration file directly using your text editor
+- Use the `--config` command-line option to specify a custom config file
+- Place a `config.yaml` in your application's config
+  directory (typically `~/.config/config-cli-gui/`)
+
+## Category "app" {#app}
 
 | Name                   | Type | Description                                 | Default    | Choices                                           |
 |------------------------|------|---------------------------------------------|------------|---------------------------------------------------|
@@ -26,14 +25,24 @@ The parameters in the cli category can be accessed via the command line interfac
 | enable_file_logging    | bool | Enable logging to file                      | True       | [True, False]                                     |
 | enable_console_logging | bool | Enable logging to console                   | True       | [True, False]                                     |
 
-## Category "gui"
+## Category "cli" {#cli}
 
-| Name              | Type | Description                                | Default | Choices                   |
-|-------------------|------|--------------------------------------------|---------|---------------------------|
-| theme             | str  | GUI theme setting                          | 'light' | ['light', 'dark', 'auto'] |
-| window_width      | int  | Default window width                       | 800     | -                         |
-| window_height     | int  | Default window height                      | 600     | -                         |
-| log_window_height | int  | Height of the log window in pixels         | 200     | -                         |
-| auto_scroll_log   | bool | Automatically scroll to newest log entries | True    | [True, False]             |
-| max_log_lines     | int  | Maximum number of log lines to keep in GUI | 1000    | -                         |
+| Name              | Type | Description                                       | Default | Choices       |
+|-------------------|------|---------------------------------------------------|---------|---------------|
+| input             | str  | Path to input (file or folder)                    | ''      | -             |
+| output            | str  | Path to output destination                        | ''      | -             |
+| min_dist          | int  | Maximum distance between two waypoints            | 25      | -             |
+| extract_waypoints | bool | Extract starting points of each track as waypoint | True    | [True, False] |
+| elevation         | bool | Include elevation data in waypoints               | True    | [True, False] |
+
+## Category "gui" {#gui}
+
+| Name              | Type | Description                                    | Default | Choices                   |
+|-------------------|------|------------------------------------------------|---------|---------------------------|
+| theme             | str  | GUI theme setting                              | 'light' | ['light', 'dark', 'auto'] |
+| window_width      | int  | Default window width                           | 800     | -                         |
+| window_height     | int  | Default window height                          | 600     | -                         |
+| log_window_height | int  | Height of the log window in pixels             | 200     | -                         |
+| auto_scroll_log   | bool | Automatically scroll to the newest log entries | True    | [True, False]             |
+| max_log_lines     | int  | Maximum number of log lines to keep in GUI     | 1000    | -                         |
 

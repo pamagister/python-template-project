@@ -18,8 +18,7 @@ show:             ## Show the current environment.
 .PHONY: install
 install:          ## Install the project in dev mode.
 	$(MAKE) lock
-	$(MAKE) virtualenv
-	uv pip install -e .[dev,docs]
+	uv sync --all-groups
 
 .PHONY: lock
 lock:           ## builds the uv.make lock file and syncs the packages
@@ -40,6 +39,7 @@ fmt:              ## Format code using black & isort.
 	uv run ruff format tests/
 	uv run ruff check src/ --fix
 	uv run ruff check tests/ --fix
+	$(MAKE) syncdocs
 
 .PHONY: lint
 lint:             ## Run pep8, black, mypy linters.
@@ -64,6 +64,18 @@ build-win:    ## Build the Windows executable.
 	cp dist/python-template-project.exe release
 	cp config.yaml release
 	cp README.md release
+
+.PHONY: build-linux
+build-linux:    ## Build the Linux executable.
+	## Build the Linux executable.
+	uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml:." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+
+	rm -rf release
+	mkdir release
+	cp dist/python-template-project release
+	cp config.yaml release
+	cp README.md release
+
 
 .PHONY: build-macos
 build-macos:    ## Build the macOS executable.
@@ -119,6 +131,7 @@ virtualenv:       ## Create a virtual environment.
 
 .PHONY: release
 release:          ## Create a new tag for release.
+	$(MAKE) precommit
 	@echo "WARNING: This operation will create a version tag and push to GitHub"
 
 	# Get the latest Git tag if it exists, otherwise default to 0.0.0 for calculations
@@ -146,27 +159,28 @@ release:          ## Create a new tag for release.
 	echo "GitHub Actions will detect the new tag and trigger the release workflows."
 	echo "Add modified files to commit and push them to main"
 
-.PHONY: docs
-docs:             ## Build and sync the documentation.
+.PHONY: syncdocs
+syncdocs:         ## Sync the documentation.
 	@echo "sync documentation ..."
 	@uv run ./scripts/generate_config_docs.py
 	@uv run ./scripts/update_readme.py
 	@uv run ./.github/update_funding.py
-	@echo "building documentation ..."
-	@uv run mkdocs build
-	@uv run mkdocs serve
 
-.PHONY: list
-list:            ## Show project file list (excluding ignored folders)
-	@powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/show_filelist.ps1
+.PHONY: docs
+docs:             ## Build and sync the documentation.
+	## run syncdocs
+	$(MAKE) syncdocs
+	@echo "building documentation ..."
+	@uv run --group docs mkdocs build
+	@uv run --group docs mkdocs serve
 
 .PHONY: tree
 tree:            ## Show project tree (excluding ignored folders)
-	@powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/show_tree.ps1
+	@uv run ./scripts/show_tree.py
 
 .PHONY: pytree
 pytree:            ## Show project tree (excluding ignored folders)
-	@uv run ./scripts/show_tree.py
+	@uv run ./scripts/show_tree.py --show-code
 
 .PHONY: init
 init:             ## Initialize the project based on an application template.

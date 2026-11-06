@@ -4,6 +4,64 @@ Changelog
 
 (unreleased)
 ------------
+- Ich habe .readthedocs.yaml auf Read the Docs’ uv-Integration mit der
+  Gruppe docs umgestellt. Hinweis: uv sync wählt standardmäßig auch die
+  dev-Gruppe aus. [Paul Magister]
+- Updated pyproject.toml to remove Deptry’s deprecated setting, which
+  pointed at optional-dependency groups that this project doesn’t use.
+  Added a targeted exception for lxml, an intentional dependency that
+  Deptry otherwise flags as unused. [Paul Magister]
+- Bump version of config-cli-gui to latest version. [Paul Magister]
+- Improve makefile. [Paul Magister]
+
+
+0.2.4 (2025-11-30)
+------------------
+- Docs: Update HISTORY.md for release 0.2.4. [Paul Magister]
+- Add linux build workflow. [Paul Magister]
+- Avoid warning by adding lxml package. [Paul Magister]
+- Fix format. [Paul Magister]
+- Only use on py file to show tree with or without python classes. [Paul
+  Magister]
+- Switch to python scripts that print the project structure. [Paul
+  Magister]
+- Switch to pytest. [Paul Magister]
+- Update README.md from docs/index.md. [github-actions]
+- Typo with with. [Paul Magister]
+
+
+0.2.3 (2025-11-14)
+------------------
+- Docs: Update HISTORY.md for release 0.2.3. [Paul Magister]
+- Run precommit before building release for proper formatting. [Paul
+  Magister]
+- Valid app_name for cli configuration. [Paul Magister]
+- Proper run configurations. [Paul Magister]
+
+
+0.2.2 (2025-11-14)
+------------------
+- Docs: Update HISTORY.md for release 0.2.2. [Paul Magister]
+- Improved cli example, fix elevation cli param problem. [Paul Magister]
+- Update to new config: cli fixes. [Paul Magister]
+
+
+0.2.1 (2025-11-14)
+------------------
+- Docs: Update HISTORY.md for release 0.2.1. [Paul Magister]
+- Update to new config: use .value to be type save. [Paul Magister]
+- Contributing.md: troubleshooting make release issue. [Paul Magister]
+- Linux setup details. [paul]
+- Feat #34: generate cli and config.md on make docs. [Paul Magister]
+- Update README.md from docs/index.md. [github-actions]
+- Feat #34: update to config-cli-gui 0.1.1. [Paul Magister]
+- Feat #31: delete rename_project.yml. [Paul Magister]
+- Feat #34: use config-cli-gui library. [Paul Magister]
+- Feat #35: funding page centralized #35. [Paul Magister]
+
+
+0.2.0 (2025-06-22)
+------------------
 - Feat #34: prepare config and gui to be used as library: massive
   refactoring. [Paul Magister]
 - Feat #34: prepare config and gui to be used as library #34. [Paul

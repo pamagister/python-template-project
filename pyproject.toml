@@ -8,15 +8,15 @@ authors = [
 readme = "docs/index.md"
 requires-python = ">=3.10,<3.12"
 dependencies = [
-    "config-cli-gui>=0.1.1",
+    "config-cli-gui>=0.3.9",
     "fastkml>=1.1.0",
     "gpxpy>=1.6.2",
+    "lxml>=6.0.2",
     "shapely>=2.1.1",
     "srtm-py>=0.3.7",
 ]
 
-# Dev dependencies as optional dependencies
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "pytest>=8.4.0",
     "pytest-mock>=3.14.1",
@@ -49,8 +49,8 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 write_to = "src/python_template_project/_version.py"
 
-[tool.deptry]
-pep621_dev_dependency_groups = ["dev", "docs"]
+[tool.deptry.per_rule_ignores]
+DEP002 = ["lxml"]
 
 [tool.ruff]
 line-length = 100
