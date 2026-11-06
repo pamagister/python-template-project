@@ -3,10 +3,20 @@ import ast
 import inspect
 import os
 import re
+import sys
 import zipfile
 from collections import Counter
 from datetime import datetime
 from xml.etree import ElementTree
+
+# Stellen Sie sicher, dass stdout UTF-8 verwendet, damit Unicode-Symbole
+# (Emojis, Baum-Zeichen) auch unter Windows (Standardkodierung cp1252)
+# ohne UnicodeEncodeError ausgegeben werden können.
+if sys.stdout is not None and getattr(sys.stdout, "encoding", None) != "utf-8":
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, OSError, ValueError):
+        pass
 
 # Symbole
 FOLDER_SYMBOL = "📁"
