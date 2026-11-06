@@ -46,7 +46,7 @@ jobs:
         # setuptools_scm benötigt die Git-Tags für die Versionsnummer
         fetch-depth: 0
     - name: Set up Python
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         # Use a specific Python version, e.g., 3.11, consistent with your build
         python-version: '3.11'
