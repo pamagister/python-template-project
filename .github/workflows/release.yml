@@ -38,6 +38,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        # setuptools_scm benötigt die Git-Tags für die Versionsnummer
+        fetch-depth: 0
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
