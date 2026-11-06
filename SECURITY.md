@@ -1,31 +1,31 @@
-# Sicherheitsrichtlinie
+# Security Policy
 
-## Unterstützte Versionen
+## Supported Versions
 
-Aktuell wird nur der neueste Release des Templates unterstützt. Ältere
-Releases erhalten keine Sicherheitsupdates mehr.
+Currently, only the latest release of the template is supported. Older
+releases no longer receive security updates.
 
-## Schwachstellen melden
+## Reporting Vulnerabilities
 
-Bitte entdeckte Sicherheitslücken **nicht öffentlich** in Issues oder
-Pull-Requests offenlegen.
+Please do **not** disclose discovered security vulnerabilities publicly
+via issues or pull requests.
 
-Melde sie stattdessen über die private Schwachstellenmeldung von GitHub:
+Instead, report them using GitHub’s private vulnerability reporting feature:
 
-1. Öffne den Reiter **Security** des Repositorys.
-2. Klicke auf **Report a vulnerability** (oder **Advisories → New draft
-   security advisory**).
-3. Beschreibe das Problem, betroffene Versionen und mögliche
-   Auswirkungen so genau wie möglich.
+1. Open the **Security** tab of the repository.
+2. Click on **Report a vulnerability** (or **Advisories → New draft
+security advisory**).
+3. Describe the issue, the affected versions, and the potential
+impact as accurately as possible.
 
-Das GitHub-Sicherheitsteam leitet den Bericht an die Maintainer weiter.
-Du erhältst eine Bestätigung und wirst über den Fortschritt informiert.
+The GitHub security team will forward the report to the maintainers.
+You will receive an acknowledgment and be kept informed about the progress.
 
-## Erwarteter Ablauf
+## Expected Process
 
-* Bestätigung des Eingangs innerhalb von 5 Werktagen.
-* Erste Einschätzung und Priorisierung innerhalb von 14 Tagen.
-* Falls ein Fix erstellt wird: Veröffentlichung zusammen mit einem
-  Release und (falls sinnvoll) einem CVE.
+* Acknowledgment of receipt within 5 business days.
+* Initial assessment and prioritization within 14 days.
+* If a fix is ​​developed: publication alongside a new release and
+(where appropriate) a CVE.
 
-Vielen Dank, dass du dazu beiträgst, dieses Template sicher zu halten.
+Thank you for helping to keep this template secure.
