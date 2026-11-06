@@ -53,20 +53,13 @@ Check the Makefile and project configuration rather than assuming a command exis
   directly: update the relevant `ConfigCategory` definitions used by `ConfigManager` or
   `docs/index.md`, then run `make syncdocs`.
 
+## Specialized Instructions
 
-## github
+Additional instructions are maintained separately:
+- `AGENTS_GIT.md`: Git, GitHub and repository interaction.
+- `AGENTS_WORKFLOW.md`: Implementation modes and execution workflows.
 
-- use github cli to interact with github, see https://cli.github.com/manual/gh
-- if requested, use `gh issue list` to view a number of issues (--limit <int>) or filter JSON output using a jq expression (--jq <expression>) to view existing issues
-- Create issues via the GitHub web UI or `gh issue create`; templates are located in `.github/ISSUE_TEMPLATE/`.
-- to view details of an issue use `gh issue view {<number> | <url>} [flags]`
-- to append a comment to an issue use `gh issue comment {<number> | <url>} [flags]`
-- Check the status of an Actions pipeline using `gh run list` and `gh run view <run-id>`.
-- use this commit message format: (where type may be one of `feat` `fix` `docs` `refactor` `test` `ci` `revert`)
-  ```
-  <type>[optional scope]: <description>
-  
-  [optional body]
-  
-  [optional footer(s), e.g. `#<number>` for a github issue or `Fixes #` if the issue is completed on this commit]
-  ```
+**Read specialized instruction files only when relevant to the current task.**
+- For normal implementation tasks, consult `AGENTS_WORKFLOW.md`.
+- For Git/GitHub operations, consult `AGENTS_GIT.md`.
+- For autonomous implementation of larger plans, consult both.
