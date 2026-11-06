@@ -4,6 +4,10 @@ on: [workflow_dispatch]
 
 permissions: write-all
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   rename-project:
     if: ${{ !contains (github.repository, 'python-template-project') }}
