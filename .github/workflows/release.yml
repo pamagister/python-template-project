@@ -25,7 +25,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # by default, it uses a depth of 1
           # this fetches all history so that we can read each commit
@@ -41,7 +41,7 @@ jobs:
     needs: release
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
       with:
         # setuptools_scm benötigt die Git-Tags für die Versionsnummer
         fetch-depth: 0
