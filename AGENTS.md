@@ -8,6 +8,7 @@
   dependencies.
 - Keep code clear and maintainable; preserve type safety and compatibility. Surface errors with
   useful context; avoid broad catches and silent failures.
+- Use english language in doc strings, documentation and comments.
 
 ## Python
 
@@ -62,6 +63,23 @@ Check the Makefile and project configuration rather than assuming a command exis
   directly: update the relevant `ConfigCategory` definitions used by `ConfigManager` or
   `docs/index.md`, then run `make syncdocs`.
 
+
+## github
+
+- use github cli to interact with github, see https://cli.github.com/manual/gh
+- if requested, use `gh issue list` to view a number of issues (--limit <int>) or filter JSON output using a jq expression (--jq <expression>) to view existing issues
+- Create issues via the GitHub web UI or `gh issue create`; templates are located in `.github/ISSUE_TEMPLATE/`.
+- to view details of an issue use `gh issue view {<number> | <url>} [flags]`
+- to append a comment to an issue use `gh issue comment {<number> | <url>} [flags]`
+- Check the status of an Actions pipeline using `gh run list` and `gh run view <run-id>`.
+- use this commit message format: (where type may be one of `feat` `fix` `docs` `refactor` `test` `ci` `revert`)
+  ```
+  <type>[optional scope]: <description>
+  
+  [optional body]
+  
+  [optional footer(s), e.g. `#<number>` for a github issue or `Fixes #` if the issue is completed on this commit]
+  ```
 
 ## Decision Rules
 
