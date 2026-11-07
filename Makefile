@@ -176,7 +176,7 @@ docs:             ## Build and sync the documentation.
 
 .PHONY: tree
 tree:            ## Show project tree (excluding ignored folders)
-	@uv run ./scripts/show_tree.py
+	@uv run fs-tool --plain inspect tree . --ignore-dir .github --ignore-dir htmlcov --ignore-dir __main__ --ignore-dir site --ignore-dir .ruff --ignore-pattern '*.pyc'
 
 .PHONY: pytree
 pytree:            ## Show project tree (excluding ignored folders)
