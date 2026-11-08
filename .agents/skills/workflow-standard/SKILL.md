@@ -1,17 +1,19 @@
 ---
 name: workflow-standard
-description: Execute one bounded task or one feature. Covers the default task mode and feature mode, with different issue, staging and commit behavior.
+description: Execute a bounded task or one standalone feature. For any request to execute a plan or named plan phase, use workflow-autopilot instead, even when only one phase is selected.
 ---
 
 # Standard Workflow
 
-Use this skill for a single bounded task unless the user explicitly requests Autopilot.
+Use this skill for a bounded task or one standalone feature. Follow the workflow routing rules in the always-loaded `AGENTS.md`.
+
+Do not use this workflow for requests to implement, execute or continue a plan or any named phase/work package from a plan. Such requests use `workflow-autopilot`, even if the user selects only one phase.
 
 ## Select the mode
 
 - **Task mode (A):** review, typo fix, documentation adjustment, small refactor or similarly bounded change.
-- **Feature mode (B):** implement one feature or a self-contained bug fix that warrants a dedicated commit.
-- If the requested scope clearly describes a feature implementation, use Feature mode. Otherwise use Task mode.
+- **Feature mode (B):** implement one feature or a self-contained bug fix that is not framed as execution of a plan.
+- If the requested scope clearly describes a standalone feature implementation, use Feature mode. Otherwise use Task mode.
 
 ## Shared task loop
 
@@ -19,7 +21,7 @@ Use this skill for a single bounded task unless the user explicitly requests Aut
 2. Understand the acceptance criteria. Ask only if a consequential ambiguity cannot be resolved safely.
 3. Implement the smallest complete change.
 4. Review the diff before testing. Check scope, correctness, unintended changes and consistency with existing conventions.
-5. Run relevant tests and non-mutating checks. For a complete project check, use the actual configured commands (in this repository, `make test` runs lint and pytest). Do not assume a generic `make check` target exists.
+5. Run relevant tests and non-mutating checks. Use the project's actual configured commands; do not assume a generic `make check` target exists.
 6. Fix failures caused by the task and repeat the affected checks. Do not hide or weaken failing tests.
 7. Review the final diff again and report exactly which checks were run.
 
