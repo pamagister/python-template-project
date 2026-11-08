@@ -1,66 +1,39 @@
-# AGENTS.md
+# Repository Instructions
 
-## Python
+These rules apply to this Python project. Keep changes focused and follow the existing architecture.
 
-- Follow PEP 8 and the project's formatter and configuration.
-- Use descriptive names, type-hint function signatures, and document public APIs. Avoid `Any`
-  unless necessary.
-- Keep functions focused; use dataclasses for simple data containers when appropriate. Avoid
-  mutable defaults, and use `is` for `None`, `True`, and `False`.
-- Prefer explicit imports, f-strings, and context managers.
-- Avoid wildcard imports and redundant comments.
+## Python conventions
 
+- Target Python 3.11 as declared in `pyproject.toml`.
+- Follow PEP 8 and the repository's Ruff configuration: 4-space indentation, double quotes, 100-character line length.
+- Use `snake_case` for packages, modules, functions and variables; `PascalCase` for classes; and `UPPER_SNAKE_CASE` for constants.
+- Use `snake_case` for importable Python names. Use `kebab-case` for distribution/repository names, CLI commands and documentation paths.
+- Prefer descriptive names, type hints on public function signatures, explicit imports, context managers and focused functions.
+- Add or update deterministic pytest tests for behavior changes, bug fixes and important edge cases.
 
-## Workflow
+## Project tooling
 
-1. **Inspect** the relevant code, project structure, configuration, dependencies, and existing tests before making changes.
-2. **Plan** briefly for nontrivial tasks. Define concrete, verifiable success criteria.
-3. **Implement** the smallest complete solution, following existing project conventions.
-4. **Verify** changes with relevant tests, formatting, linting, and type checking. Fix issues introduced by the changes.
-5. **Report** what changed, which checks passed, and any remaining limitations.
+- Use `uv` for dependency and environment management. Declare dependencies in `pyproject.toml`.
+- Use Ruff for linting and formatting, and pytest for tests. Follow the existing configuration rather than introducing alternative tools.
+- Inspect the Makefile before using a target. Relevant targets:
+  - `make lint`: Ruff lint and format checks.
+  - `make test`: lint plus the test suite and coverage reports.
+  - `make fmt`: mutating formatting/fix operations and documentation synchronization.
+  - `make precommit`: runs formatting, tests and dependency checks; it is mutating and may install a tool.
+- Do not run mutating convenience targets merely as a substitute for understanding what they do.
 
-Do not claim that checks passed unless they were actually executed. If verification is impossible, explain why.
+## Generated documentation
 
-## Tests
+- `docs/index.md` is the source for `README.md`. Never edit `README.md` directly.
+- After changing `docs/index.md`, run `make syncdocs` when appropriate.
+- Check existing generation scripts before editing generated files.
 
-- Add or update "Tests with Teeth" for behavior changes and important edge/failure cases. Keep tests
-  deterministic, mock only when needed, and never weaken tests to pass.
-- Run relevant configured checks and report what actually ran; do not claim unrun checks passed.
+## Agent workflows
 
-## Dependencies and Tooling
+Load the relevant skill only when needed:
+- `workflow-standard`: bounded task mode, including small tasks and single-feature implementation.
+- `workflow-autopilot`: explicitly authorized multi-work-package plan execution.
+- `git-workflow`: Git, GitHub issues, commits, pushes and CI.
+- `mission-planning`: turn a mission or external specification into one executable plan.
 
-- Use `uv` for dependency management and virtual environments when available or when initializing a project.
-- Declare and manage dependencies in `pyproject.toml`. Avoid unnecessary dependencies and preserve existing project tooling.
-- Prefer established project commands and configuration over introducing new tools or conventions.
-- Use `ruff` for formatting and linting and `mypy` for static type checking when configured or appropriate.
-- Use `pytest` for tests. Add or update tests for new behavior, bug fixes, and meaningful edge cases. Mock external dependencies where appropriate.
-- Never introduce tooling or dependencies solely for marginal benefits.
-
-## Project workflows and generated files
-
-- Use existing Makefile targets when relevant; common checks are 
-
-```bash
-make fmt
-make lint
-make test
-```
-
-Check the Makefile and project configuration rather than assuming a command exists.
-- `README.md` is generated from `docs/index.md` and must never be edited directly. Change
-  `docs/index.md` and run `make syncdocs`.
-- `make syncdocs` runs `scripts/update_readme.py`, which copies `docs/index.md` to `README.md` and
-  rewrites relative documentation links for the repository root.
-
-## Specialized Instructions
-
-Additional instructions are maintained separately:
-- `AGENTS_GIT.md`: Git, GitHub and repository interaction.
-- `AGENTS_WORKFLOW_STANDARD.md`: Bounded one-shot implementation tasks.
-- `AGENTS_WORKFLOW_AUTOPILOT.md`: Autonomous, plan/tasklist-driven implementation.
-
-**Read specialized instruction files only when relevant to the current task.**
-- For normal implementation tasks, consult `AGENTS_WORKFLOW_STANDARD.md`.
-- For Git/GitHub operations, consult `AGENTS_GIT.md`.
-- For autonomous implementation of larger plans, consult
-  `AGENTS_WORKFLOW_AUTOPILOT.md` and `AGENTS_GIT.md`.
+The standard workflow is the default. Do not load the autopilot workflow unless the user explicitly requests autonomous execution of a larger plan.
