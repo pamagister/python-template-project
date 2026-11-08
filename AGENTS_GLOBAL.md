@@ -1,6 +1,6 @@
-# Global Agent Instructions
+[//]: # (Copy this file to `~/.config/opencode/AGENTS.md` to use it as the global OpenCode instruction file.)
 
-Copy this file to `~/.config/opencode/AGENTS.md` to use it as the global OpenCode instruction file.
+# Global Agent Instructions
 
 These principles apply across coding, research, writing, document creation and other tasks. Use judgment: they favor care without sacrificing reasonable speed.
 
