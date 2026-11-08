@@ -28,12 +28,18 @@ These rules apply to this Python project. Keep changes focused and follow the ex
 - After changing `docs/index.md`, run `make syncdocs` when appropriate.
 - Check existing generation scripts before editing generated files.
 
-## Agent workflows
+## Agent workflow routing
 
-Load the relevant skill only when needed:
-- `workflow-standard`: bounded task mode, including small tasks and single-feature implementation.
-- `workflow-autopilot`: explicitly authorized multi-work-package plan execution.
+Choose the workflow from the user's requested scope, not from whether they know or use the internal mode name.
+
+- **Task mode:** A bounded change such as a review, typo fix or small documentation adjustment. Load `workflow-standard`.
+- **Feature mode:** One self-contained feature or bug fix not framed as execution of a plan phase. Load `workflow-standard`.
+- **Autopilot:** Whenever the user asks to implement, execute or continue a plan, or names one or more phases/work packages from a plan. This includes a single selected phase. Phrases such as "implement the first phase", "execute phase 2", "continue plan.md" or "implement autonomously" are sufficient; the user does not need to say "Autopilot". Load `workflow-autopilot` and `git-workflow`.
+
+A plan-phase request always takes precedence over the ordinary single-feature workflow, even when the selected phase is the only requested scope. Execute only the phase/work packages the user selected; do not continue into later phases without authorization.
+
+Load the supporting skills as needed:
+- `workflow-standard`: Task and Feature modes.
+- `workflow-autopilot`: plan and phase execution.
 - `git-workflow`: Git, GitHub issues, commits, pushes and CI.
 - `mission-planning`: turn a mission or external specification into one executable plan.
-
-The standard workflow is the default. Do not load the autopilot workflow unless the user explicitly requests autonomous execution of a larger plan.
