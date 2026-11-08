@@ -1,3 +1,5 @@
+[//]: # (Outdated, deprecated)
+
 # AGENTS_WORKFLOW.md
 
 ## Purpose

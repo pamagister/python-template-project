@@ -47,19 +47,20 @@ make test
 ```
 
 Check the Makefile and project configuration rather than assuming a command exists.
-- `make syncdocs` runs `scripts/generate_config_docs.py`, `scripts/update_readme.py`, and
-  `.github/update_funding.py`. It regenerates `config.yaml`, `docs/usage/config.md`,
-  `docs/usage/cli.md`, `README.md`, and `docs/funding/funding.md`. Do not edit these outputs
-  directly: update the relevant `ConfigCategory` definitions used by `ConfigManager` or
-  `docs/index.md`, then run `make syncdocs`.
+- `README.md` is generated from `docs/index.md` and must never be edited directly. Change
+  `docs/index.md` and run `make syncdocs`.
+- `make syncdocs` runs `scripts/update_readme.py`, which copies `docs/index.md` to `README.md` and
+  rewrites relative documentation links for the repository root.
 
 ## Specialized Instructions
 
 Additional instructions are maintained separately:
 - `AGENTS_GIT.md`: Git, GitHub and repository interaction.
-- `AGENTS_WORKFLOW.md`: Implementation modes and execution workflows.
+- `AGENTS_WORKFLOW_STANDARD.md`: Bounded one-shot implementation tasks.
+- `AGENTS_WORKFLOW_AUTOPILOT.md`: Autonomous, plan/tasklist-driven implementation.
 
 **Read specialized instruction files only when relevant to the current task.**
-- For normal implementation tasks, consult `AGENTS_WORKFLOW.md`.
+- For normal implementation tasks, consult `AGENTS_WORKFLOW_STANDARD.md`.
 - For Git/GitHub operations, consult `AGENTS_GIT.md`.
-- For autonomous implementation of larger plans, consult both.
+- For autonomous implementation of larger plans, consult
+  `AGENTS_WORKFLOW_AUTOPILOT.md` and `AGENTS_GIT.md`.
