@@ -107,8 +107,8 @@ Getting started on developing your own project based on this template
 * ✅ **Code Formatting and Linting:** Pre-commit hook with the [RUFF auto-formatter](https://docs.astral.sh/ruff/) to ensure consistent code style.
 * 🧪 **Testing:** Unit testing framework with [pytest](https://docs.pytest.org/en/latest/).
 * 📊 **Code coverage reports** using [codecov](https://about.codecov.io/sign-up/)
-* 🔄 **CI/CD:**  [GitHub Actions](https://github.com/features/actions) for automated builds (Windows, macOS), unit tests, and code checks.
-* 💾 **Automated Builds:** GitHub pipeline for automatically building a Windows executable and a macOS installer.
+* 🔄 **CI/CD:**  [GitHub Actions](https://github.com/features/actions) for Linux checks on every push, with opt-in Windows and macOS runs via `--all`.
+* 💾 **Automated Builds:** GitHub pipeline for a Linux executable, plus opt-in Windows and macOS builds via `--all`.
 * 💬 **Parameter-Driven Automation:**
     * Automatic generation of a configuration file from parameter definitions.
     * Automatic generation of a Command-Line Interface (CLI) from the same parameters.

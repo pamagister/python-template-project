@@ -39,7 +39,7 @@ Changelog
   consolidated release.yml DAG: flags -> quality (lint + tests via make test)
   -> release/deploy -> builds. Deploy and GitHub Release only after green
   tests. Linux build always on tag; Windows/macOS builds only with --all flag.
-  All build artefacts are uploaded to the same release, avoiding races.
+  All build artifacts are uploaded to the same release, avoiding races.
 
   Refs #56
 - Ci(main): slim CI with --all flag over commit message. [Paul Magister]

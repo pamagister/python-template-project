@@ -1,5 +1,23 @@
 name: Release
 
+# Triggered by a tag push, normally created by `make release`.
+#
+# Linux-only release (default):
+#   make release
+#
+# Release for Linux, Windows and macOS:
+#   make release ALL=1
+#   This appends `--all` to the tagged HISTORY.md commit. The `flags` job
+#   reads that commit message, so the tag itself must point at the commit
+#   carrying the marker.
+#
+# Re-run the pipeline for an existing tag (for example to add the optional
+# Windows/macOS artifacts without creating a new release):
+#   gh workflow run release.yml --ref <tag> -f all=true
+#
+# A tag push always runs the quality gate, creates the GitHub release,
+# publishes to PyPI and builds Linux. Windows/macOS builds are opt-in.
+
 permissions:
   contents: write
 
@@ -7,15 +25,47 @@ on:
   push:
     tags:
       - '*'
+  workflow_dispatch:
+    inputs:
+      all:
+        description: 'Also build Windows and macOS'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Quality gate: lint + unit tests before any release artefact is created.
-  quality:
+  # Detects `--all` in the tagged commit message (or the manual `all` input)
+  # and exposes it as a job output. Environment variables from $GITHUB_ENV do
+  # not cross job boundaries, so a proper output is required here.
+  flags:
     runs-on: ubuntu-latest
+    outputs:
+      build_all: ${{ steps.detect.outputs.build_all }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: detect
+        shell: bash
+        env:
+          INPUT_ALL: ${{ github.event.inputs.all }}
+        run: |
+          COMMIT_MSG="$(git log -1 --format=%B)"
+          if [[ "$COMMIT_MSG" == *"--all"* || "$INPUT_ALL" == "true" ]]; then
+            echo "build_all=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "build_all=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Quality gate: lint + unit tests before any release artifact is created.
+  quality:
+    needs: flags
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
         with:
@@ -33,6 +83,7 @@ jobs:
   release:
     needs: quality
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
         with:
@@ -47,6 +98,7 @@ jobs:
   deploy:
     needs: quality
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
         with:
@@ -67,10 +119,12 @@ jobs:
           python -m build
           twine upload dist/*
 
+  # The Linux build is part of every release. Build jobs upload their archive
+  # to the same GitHub release, so they wait for the `release` job to finish.
   build-linux:
     needs: [release]
-    if: always() && needs.quality.result == 'success'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
         with:
@@ -93,5 +147,70 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: package-linux.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Optional build jobs: `--all` in the tagged commit or the manual `all`
+  # input. They run only after the GitHub release exists and keep the release
+  # pipeline Linux-only by default.
+  build-windows:
+    needs: [release, flags]
+    if: needs.flags.outputs.build_all == 'true'
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - name: Setup Environment # Composite Action
+        uses: ./.github/actions/setup-environment
+        with:
+          python-version: '3.11'
+      - name: Build Unified EXE with PyInstaller
+        run: make build-win
+      - name: Prepare ZIP file for release
+        run: |
+          echo "  - Double-click to start GUI" >> release\USAGE.txt
+          echo "  - Run from command line for CLI options" >> release\USAGE.txt
+          powershell Compress-Archive -Path release\* -DestinationPath installer-win.zip
+      - name: Upload ZIP to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: installer-win.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    needs: [release, flags]
+    if: needs.flags.outputs.build_all == 'true'
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - name: Setup Environment # Composite Action
+        uses: ./.github/actions/setup-environment
+        with:
+          python-version: '3.11'
+      - name: Build Unified Executable and App Bundle with PyInstaller
+        run: |
+          make build-macos
+      - name: Prepare ZIP file for release
+        run: |
+          cd release
+          zip -r ../package-macOS.zip .
+      - name: Upload ZIP to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: package-macOS.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
