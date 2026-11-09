@@ -1,34 +1,71 @@
-name: Upload Python Package
+name: Release
+
 permissions:
   contents: write
 
-# if you get a Permission denied error on executing the sh file, you have to execute:
-# git update-index --chmod=+x ./.github/release_message.sh
-
 on:
   push:
-    # Sequence of patterns matched against refs/tags
     tags:
-      - '*' # Push events to matching v*, i.e. v1.0, v20.15.10
-
-  # Allows you to run this workflow manually from the Actions tab
+      - '*'
   workflow_dispatch:
+    inputs:
+      all:
+        description: 'Also build Windows and macOS'
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  release:
-    name: Create Release
+  # Detects the `--all` flag in the triggering commit message so that
+  # Windows/macOS builds can opt in per run.
+  flags:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
+    outputs:
+      build_all: ${{ steps.detect.outputs.build_all }}
     steps:
       - uses: actions/checkout@v7
         with:
-          # by default, it uses a depth of 1
-          # this fetches all history so that we can read each commit
+          fetch-depth: 0
+      - id: detect
+        shell: bash
+        env:
+          INPUT_ALL: ${{ github.event.inputs.all }}
+        run: |
+          MSG="$(git log -1 --format=%B)"
+          if [[ "$MSG" == *"--all"* || "$INPUT_ALL" == "true" ]]; then
+            echo "build_all=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "build_all=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  # Quality gate: lint + unit tests before any release artefact is created.
+  quality:
+    needs: flags
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+      - name: Setup Environment # Composite Action
+        uses: ./.github/actions/setup-environment
+        with:
+          python-version: '3.11'
+      - name: Run quality gate (lint + tests)
+        run: make test
+
+  release:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
           fetch-depth: 0
       - name: Generate Changelog
         run: .github/release_message.sh > release_message.md
@@ -38,28 +75,113 @@ jobs:
           body_path: release_message.md
 
   deploy:
-    needs: release
+    needs: quality
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v7
-      with:
-        # setuptools_scm benötigt die Git-Tags für die Versionsnummer
-        fetch-depth: 0
-    - name: Set up Python
-      uses: actions/setup-python@v7
-      with:
-        # Use a specific Python version, e.g., 3.11, consistent with your build
-        python-version: '3.11'
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        # install build for modern packaging, and twine
-        pip install build twine
-    - name: Build and publish
-      env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-      run: |
-        # Use 'python -m build' for modern packaging
-        python -m build
-        twine upload dist/*
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
+      - name: Build and publish
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          python -m build
+          twine upload dist/*
+
+  build-linux:
+    needs: [release, flags]
+    if: always() && needs.quality.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - name: Setup Environment # Composite Action
+        uses: ./.github/actions/setup-environment
+        with:
+          python-version: '3.11'
+      - name: Build Unified Linux Executable with PyInstaller
+        run: make build-linux
+      - name: Prepare ZIP file for release
+        run: |
+          cd release
+          zip -r ../package-linux.zip .
+      - name: Upload ZIP to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: package-linux.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-windows:
+    needs: [release, flags]
+    if: always() && needs.quality.result == 'success' && needs.flags.outputs.build_all == 'true'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - name: Setup Environment # Composite Action
+        uses: ./.github/actions/setup-environment
+        with:
+          python-version: '3.11'
+      - name: Build Unified EXE with PyInstaller
+        run: make build-win
+      - name: Prepare ZIP file for release
+        run: |
+          echo "  - Double-click to start GUI" >> release\USAGE.txt
+          echo "  - Run from command line for CLI options" >> release\USAGE.txt
+          powershell Compress-Archive -Path release\* -DestinationPath installer-win.zip
+      - name: Upload ZIP to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: installer-win.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-macos:
+    needs: [release, flags]
+    if: always() && needs.quality.result == 'success' && needs.flags.outputs.build_all == 'true'
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.11'
+      - name: Setup Environment # Composite Action
+        uses: ./.github/actions/setup-environment
+        with:
+          python-version: '3.11'
+      - name: Build Unified Executable and App Bundle with PyInstaller
+        run: |
+          make build-macos
+      - name: Prepare ZIP file for release
+        run: |
+          cd release
+          zip -r ../package-macOS.zip .
+      - name: Upload ZIP to GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: package-macOS.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
