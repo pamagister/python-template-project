@@ -16,11 +16,18 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  # Superseded runs for the same ref are cancelled, so the latest commit
+  # gets its result sooner and no CI minutes are wasted on stale pushes.
+  cancel-in-progress: true
 
 jobs:
-  linter:
+  # `make test` depends on `lint` (see Makefile) and therefore runs Ruff
+  # first and stops on the first failing check before pytest runs. Keeping
+  # both in one job avoids a second checkout/setup/uv-sync cycle and gives
+  # fail-fast feedback.
+  tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
@@ -32,25 +39,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run linter
-        run: make lint
-
-  tests-ubuntu:
-    needs: linter
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-
-      - name: Setup Environment # Composite Action
-        uses: ./.github/actions/setup-environment
-        with:
-          python-version: '3.11'
-
-      - name: Run tests
+      - name: Run linter and tests
         run: make test
 
-      - name: "Upload coverage to Codecov"
-        uses: codecov/codecov-action@v7
+      # Disabled: tokenless uploads are rejected with
+      # "Token required - not valid tokenless upload". See #59.
+      # - name: "Upload coverage to Codecov"
+      #   uses: codecov/codecov-action@v7
