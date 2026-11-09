@@ -130,7 +130,7 @@ virtualenv:       ## Create a virtual environment.
 	uv venv
 
 .PHONY: release
-release:          ## Create a new tag for release.
+release:          ## Create a new tag for release. Use ALL=1 to also build Windows and macOS.
 	$(MAKE) precommit
 	@echo "WARNING: This operation will create a version tag and push to GitHub"
 
@@ -147,10 +147,14 @@ release:          ## Create a new tag for release.
 	# Prompt the user for the new tag, suggesting the next patch version by default
 	read -e -i "$$NEXT_PATCH_VERSION" -p "Enter the new release tag (e.g., 1.0.0, 1.1.0, 1.1.1): " NEW_TAG
 
+	# Append --all to commit message when ALL=1, so that the release pipeline
+	# also builds Windows and macOS.
+	@if [ "$${ALL}" = "1" ]; then ALL_SUFFIX=" --all"; else ALL_SUFFIX=""; fi
+
 	# Generate changelog *before* tagging, based on existing history up to the new tag point
 	uv run gitchangelog > HISTORY.md
 	git add HISTORY.md
-	git commit -m "docs: Update HISTORY.md for release $${NEW_TAG}"
+	git commit -m "docs: Update HISTORY.md for release $${NEW_TAG}$${ALL_SUFFIX}"
 
 	echo "Creating git tag : $${NEW_TAG}"
 	git tag "$${NEW_TAG}"
