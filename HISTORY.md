@@ -4,6 +4,53 @@ Changelog
 
 (unreleased)
 ------------
+- Merge pull request #53 from
+  pamagister/dependabot/github_actions/softprops/action-gh-release-3.
+  [Paul Magister]
+
+  build(deps): bump softprops/action-gh-release from 2 to 3
+- Build(deps): bump softprops/action-gh-release from 2 to 3.
+  [dependabot[bot]]
+
+  Bumps [softprops/action-gh-release](https://github.com/softprops/action-gh-release) from 2 to 3.
+  - [Release notes](https://github.com/softprops/action-gh-release/releases)
+  - [Changelog](https://github.com/softprops/action-gh-release/blob/master/CHANGELOG.md)
+  - [Commits](https://github.com/softprops/action-gh-release/compare/v2...v3)
+
+  ---
+  updated-dependencies:
+  - dependency-name: softprops/action-gh-release
+    dependency-version: '3'
+    dependency-type: direct:production
+    update-type: version-update:semver-major
+  ...
+- Docs(agent): strengthen plan phase execution workflow (Refs #52) [Paul
+  Magister]
+- Docs(agent): clarify standard workflow scope (Refs #52) [Paul
+  Magister]
+- Docs(agent): clarify workflow routing (Refs #52) [Paul Magister]
+- Docs(agent): comment-out copy instructions. [Paul Magister]
+- Docs(agent): remove superseded instructions. [Paul Magister]
+- Docs(agent): remove superseded instructions. [Paul Magister]
+- Docs(agent): remove superseded instructions. [Paul Magister]
+- Docs(agent): remove superseded instructions. [Paul Magister]
+- Docs(agent): remove superseded instructions. [Paul Magister]
+- Docs(agent): remove superseded instructions. [Paul Magister]
+- Docs(agent): remove superseded instructions. [Paul Magister]
+- Docs(agent): add mission-planning skill. [Paul Magister]
+- Docs(agent): add workflow-autopilot skill. [Paul Magister]
+- Docs(agent): add git-workflow skill. [Paul Magister]
+- Docs(agent): add workflow-standard skill. [Paul Magister]
+- Docs(agent): consolidate repository instructions. [Paul Magister]
+- Docs(agent): consolidate repository instructions. [Paul Magister]
+- Throw all agent.md things into this repo for later consolidation.
+  [Paul Magister]
+- Use new lib for tree. [Paul Magister]
+- Add specific workflow files. [Paul Magister]
+
+
+0.2.6 (2026-11-06)
+------------------
 
 Fix
 ~~~
@@ -23,6 +70,7 @@ Fix
 
 Other
 ~~~~~
+- Docs: Update HISTORY.md for release 0.2.6. [Paul Magister]
 - Move globally useful guidelines to a AGENTS_GLOBAL.md that has to be
   renamed and kept in the global folder for AGENTS.md files. [Paul
   Magister]
