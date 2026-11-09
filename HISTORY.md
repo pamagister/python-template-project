@@ -4,6 +4,64 @@ Changelog
 
 (unreleased)
 ------------
+- Ci: Linux only – remove Windows and macOS from CI. [Paul Magister]
+
+  Remove platform jobs (tests-windows, tests-macos, build-windows,
+  build-macos) and the flags/--all detection from main.yml and release.yml.
+  CI now runs linter + Ubuntu tests on every push, and the release pipeline
+  runs quality gate + Linux build + PyPI deploy on every tag.
+
+  Simplify Makefile release target (no ALL=1) and remove the ALL=1 tip
+  from docs/develop/pypi_release.md.
+
+  Refs #54 #55 #56 #57 #58
+- Fix(ci): setup-uv v10.3.3 instead of nonexistent v10 tag. [Paul
+  Magister]
+
+  The astral-sh/setup-uv action only provides Major.Minor.Patch tags
+  (v10.3.3, v10.3.2, ...), not a bare v10 tag. Pin to v10.3.3 which is
+  the current latest release.
+
+  Refs #54
+- Ci(build): release ALL=1 flag + README sync permissions. [Paul
+  Magister]
+
+  Add ALL=1 support to make release: appends --all to the HISTORY commit
+  message so the release pipeline also builds Windows and macOS.
+  Add contents: write permission to update_readme.yml job.
+  Document make release ALL=1 in docs/develop/pypi_release.md.
+
+  Refs #57 #58
+- Ci(release): consolidate into single workflow with quality gate. [Paul
+  Magister]
+
+  Replace four parallel tag workflows (release.yml + 3 build-*.yml) with one
+  consolidated release.yml DAG: flags -> quality (lint + tests via make test)
+  -> release/deploy -> builds. Deploy and GitHub Release only after green
+  tests. Linux build always on tag; Windows/macOS builds only with --all flag.
+  All build artefacts are uploaded to the same release, avoiding races.
+
+  Refs #56
+- Ci(main): slim CI with --all flag over commit message. [Paul Magister]
+
+  Restructure main.yml around a flags job that reads  from the
+  triggering commit message (git log -1) and exposes build_all as a job
+  output. Linter and Ubuntu tests always run; Windows/macOS tests run only
+  when build_all == true, in parallel. Pushes touching only HISTORY.md are
+  ignored (covered by the release pipeline's quality gate). workflow_dispatch
+  gains an optional  boolean input.
+
+  Refs #55
+- Ci(shared-foundation): setup-uv v10 with uv sync --all-groups. [Paul
+  Magister]
+
+  Replace setup-uv@v3 (Node-20 deprecation warning) with @v10 including
+  uv cache (uv.lock). Simplify setup-environment to uv venv + uv sync
+  --all-groups, removing the redundant uv pip install -e '.[dev]' (dev is
+  a dependency group, not an extra) and the manual VIRTUAL_ENV export.
+
+  Refs #54
+- Docs: Update HISTORY.md for release. [Paul Magister]
 - Docs: Update HISTORY.md for release. [Paul Magister]
 - Docs: Update HISTORY.md for release. [Paul Magister]
 - Docs: Update HISTORY.md for release. [Paul Magister]
