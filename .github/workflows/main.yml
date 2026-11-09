@@ -13,43 +13,13 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-    inputs:
-      all:
-        description: 'Also build/test Windows and macOS'
-        required: false
-        type: boolean
-        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Detects the `--all` flag in the triggering commit message so that
-  # platform jobs (Windows/macOS) can opt in per run. Output is readable
-  # across jobs because $GITHUB_ENV does not propagate job-to-job.
-  flags:
-    runs-on: ubuntu-latest
-    outputs:
-      build_all: ${{ steps.detect.outputs.build_all }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - id: detect
-        shell: bash
-        env:
-          INPUT_ALL: ${{ github.event.inputs.all }}
-        run: |
-          MSG="$(git log -1 --format=%B)"
-          if [[ "$MSG" == *"--all"* || "$INPUT_ALL" == "true" ]]; then
-            echo "build_all=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "build_all=false" >> "$GITHUB_OUTPUT"
-          fi
-
   linter:
-    needs: flags
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -66,7 +36,7 @@ jobs:
         run: make lint
 
   tests-ubuntu:
-    needs: [flags, linter]
+    needs: linter
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -84,39 +54,3 @@ jobs:
 
       - name: "Upload coverage to Codecov"
         uses: codecov/codecov-action@v7
-
-  tests-windows:
-    needs: [flags, linter]
-    if: needs.flags.outputs.build_all == 'true'
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-
-      - name: Setup Environment # Composite Action
-        uses: ./.github/actions/setup-environment
-        with:
-          python-version: '3.11'
-
-      - name: Run tests
-        run: uv run pytest -s -vvvv -l --tb=long tests
-
-  tests-macos:
-    needs: [flags, linter]
-    if: needs.flags.outputs.build_all == 'true'
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-
-      - name: Setup Environment # Composite Action
-        uses: ./.github/actions/setup-environment
-        with:
-          python-version: '3.11'
-
-      - name: Run tests
-        run: make test

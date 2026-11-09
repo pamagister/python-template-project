@@ -218,10 +218,6 @@ Once your `pyproject.toml` (or `setup.py`) is in place, and your GitHub Actions 
 
     This will trigger both your `build` workflow (if it's also on tags) and your `release.yml` workflow (`release` and `deploy` jobs).
 
-    > **Tip:** To also build Windows and macOS executables, run `make release ALL=1`
-    > instead of `make release`. This appends `--all` to the release commit so that
-    > the CI builds all platforms.
-
   * **For manual trigger:** Go to the "Actions" tab in your GitHub repository, select your "Upload Python Package" workflow, and click "Run workflow".
 
 ## 7\. Verifying the PyPI Release

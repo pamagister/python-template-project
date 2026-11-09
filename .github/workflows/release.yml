@@ -7,44 +7,14 @@ on:
   push:
     tags:
       - '*'
-  workflow_dispatch:
-    inputs:
-      all:
-        description: 'Also build Windows and macOS'
-        required: false
-        type: boolean
-        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Detects the `--all` flag in the triggering commit message so that
-  # Windows/macOS builds can opt in per run.
-  flags:
-    runs-on: ubuntu-latest
-    outputs:
-      build_all: ${{ steps.detect.outputs.build_all }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - id: detect
-        shell: bash
-        env:
-          INPUT_ALL: ${{ github.event.inputs.all }}
-        run: |
-          MSG="$(git log -1 --format=%B)"
-          if [[ "$MSG" == *"--all"* || "$INPUT_ALL" == "true" ]]; then
-            echo "build_all=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "build_all=false" >> "$GITHUB_OUTPUT"
-          fi
-
   # Quality gate: lint + unit tests before any release artefact is created.
   quality:
-    needs: flags
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -98,7 +68,7 @@ jobs:
           twine upload dist/*
 
   build-linux:
-    needs: [release, flags]
+    needs: [release]
     if: always() && needs.quality.result == 'success'
     runs-on: ubuntu-latest
     steps:
@@ -123,65 +93,5 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: package-linux.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-windows:
-    needs: [release, flags]
-    if: always() && needs.quality.result == 'success' && needs.flags.outputs.build_all == 'true'
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v7
-        with:
-          python-version: '3.11'
-      - name: Setup Environment # Composite Action
-        uses: ./.github/actions/setup-environment
-        with:
-          python-version: '3.11'
-      - name: Build Unified EXE with PyInstaller
-        run: make build-win
-      - name: Prepare ZIP file for release
-        run: |
-          echo "  - Double-click to start GUI" >> release\USAGE.txt
-          echo "  - Run from command line for CLI options" >> release\USAGE.txt
-          powershell Compress-Archive -Path release\* -DestinationPath installer-win.zip
-      - name: Upload ZIP to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v3
-        with:
-          files: installer-win.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  build-macos:
-    needs: [release, flags]
-    if: always() && needs.quality.result == 'success' && needs.flags.outputs.build_all == 'true'
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-python@v7
-        with:
-          python-version: '3.11'
-      - name: Setup Environment # Composite Action
-        uses: ./.github/actions/setup-environment
-        with:
-          python-version: '3.11'
-      - name: Build Unified Executable and App Bundle with PyInstaller
-        run: |
-          make build-macos
-      - name: Prepare ZIP file for release
-        run: |
-          cd release
-          zip -r ../package-macOS.zip .
-      - name: Upload ZIP to GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v3
-        with:
-          files: package-macOS.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
