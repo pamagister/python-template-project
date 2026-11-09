@@ -6,6 +6,7 @@ Changelog
 ------------
 - Docs: Update HISTORY.md for release. [Paul Magister]
 - Docs: Update HISTORY.md for release. [Paul Magister]
+- Docs: Update HISTORY.md for release. [Paul Magister]
 - Merge pull request #53 from
   pamagister/dependabot/github_actions/softprops/action-gh-release-3.
   [Paul Magister]
