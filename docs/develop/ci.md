@@ -6,7 +6,7 @@ Windows and macOS jobs on demand. The short version:
 | Goal                          | Command / action                                  |
 | ----------------------------- | ------------------------------------------------- |
 | Normal CI (Linux only)        | Push to `main` or open a pull request             |
-| CI on Linux, Windows + macOS  | Put `--all` in the commit message or PR title     |
+| CI on Linux, Windows + macOS  | Put `--all` in the commit subject or PR title     |
 | Manual full CI run            | `gh workflow run main.yml --ref main -f all=true` |
 | Linux-only release            | `make release`                                    |
 | Release for all platforms     | `make release ALL=1`                              |
@@ -22,24 +22,27 @@ cross-platform run.
 Both workflows contain a small `flags` job. It sets the job output
 `build_all` to `true` when any of these is true:
 
-* the checked-out commit message contains the literal text `--all`;
+* the checked-out commit **subject** contains the literal text `--all`;
 * the pull request title contains `--all` (CI workflow only);
 * the manual `all` input was enabled (`workflow_dispatch`).
+
+Only the subject line is scanned. A commit body that merely describes the
+flag therefore does not start an expensive full run.
 
 The optional jobs use `if: needs.flags.outputs.build_all == 'true'`. A job
 output is necessary because variables written to `$GITHUB_ENV` are only
 visible inside the job that writes them.
 
 For a release, the flag must be in the **tagged commit**. `make release
-ALL=1` takes care of that by appending `--all` to the `HISTORY.md` commit
-message before creating the tag. Adding `--all` only to the tag name is not
-enough.
+ALL=1` takes care of that by appending `--all` to the subject of the
+`HISTORY.md` commit before creating the tag. Adding `--all` only to the tag
+name is not enough.
 
 ## Testing on all platforms
 
 ### From a push or pull request
 
-Add `--all` to the commit message:
+Add `--all` to the commit subject:
 
 ```bash
 git commit -m "test: verify cross-platform paths --all"
@@ -89,7 +92,7 @@ With `ALL=1`, the generated release commit ends with `--all`, for example:
 docs: Update HISTORY.md for release 0.2.8 --all
 ```
 
-The release workflow reads that commit message, so the optional jobs run.
+The release workflow reads that commit subject, so the optional jobs run.
 The resulting GitHub release contains:
 
 | Artifacts           | Platform | Job             |
@@ -122,7 +125,7 @@ on `refs/tags/*`. Dispatching on a branch is not a release trigger.
 ## Troubleshooting
 
 * **No Windows/macOS jobs appeared.** Check that `--all` is in the commit
-  message or PR title, or trigger the workflow manually with the input.
+  subject or PR title, or trigger the workflow manually with the input.
   The match is a plain substring, so `--all-platforms` also counts.
 * **The release has no Windows/macOS archives.** The tagged commit did not
   contain `--all`. Create a new tag with `make release ALL=1`, or re-run the

@@ -5,7 +5,7 @@ name: CI
 # runner-minute costs of those platforms.
 #
 # Opt in with any of these:
-#   * put `--all` in the pushed commit message
+#   * put `--all` in the pushed commit subject
 #       git commit -m "test: verify cross-platform behaviour --all"
 #   * put `--all` in the pull request title
 #   * run this workflow manually with the `all` input enabled
@@ -58,8 +58,10 @@ jobs:
           INPUT_ALL: ${{ github.event.inputs.all }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          COMMIT_MSG="$(git log -1 --format=%B)"
-          if [[ "$COMMIT_MSG" == *"--all"* || "$PR_TITLE" == *"--all"* || "$INPUT_ALL" == "true" ]]; then
+          # Only the subject is scanned, so a commit body that merely
+          # describes the flag does not start an expensive full run.
+          COMMIT_SUBJECT="$(git log -1 --format=%s)"
+          if [[ "$COMMIT_SUBJECT" == *"--all"* || "$PR_TITLE" == *"--all"* || "$INPUT_ALL" == "true" ]]; then
             echo "build_all=true" >> "$GITHUB_OUTPUT"
           else
             echo "build_all=false" >> "$GITHUB_OUTPUT"

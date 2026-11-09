@@ -7,9 +7,9 @@ name: Release
 #
 # Release for Linux, Windows and macOS:
 #   make release ALL=1
-#   This appends `--all` to the tagged HISTORY.md commit. The `flags` job
-#   reads that commit message, so the tag itself must point at the commit
-#   carrying the marker.
+#   This appends `--all` to the subject of the tagged HISTORY.md commit.
+#   The `flags` job reads that subject, so the tag itself must point at the
+#   commit carrying the marker.
 #
 # Re-run the pipeline for an existing tag (for example to add the optional
 # Windows/macOS artifacts without creating a new release):
@@ -38,7 +38,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # Detects `--all` in the tagged commit message (or the manual `all` input)
+  # Detects `--all` in the tagged commit subject (or the manual `all` input)
   # and exposes it as a job output. Environment variables from $GITHUB_ENV do
   # not cross job boundaries, so a proper output is required here.
   flags:
@@ -54,8 +54,8 @@ jobs:
         env:
           INPUT_ALL: ${{ github.event.inputs.all }}
         run: |
-          COMMIT_MSG="$(git log -1 --format=%B)"
-          if [[ "$COMMIT_MSG" == *"--all"* || "$INPUT_ALL" == "true" ]]; then
+          COMMIT_SUBJECT="$(git log -1 --format=%s)"
+          if [[ "$COMMIT_SUBJECT" == *"--all"* || "$INPUT_ALL" == "true" ]]; then
             echo "build_all=true" >> "$GITHUB_OUTPUT"
           else
             echo "build_all=false" >> "$GITHUB_OUTPUT"
