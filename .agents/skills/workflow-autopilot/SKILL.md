@@ -78,7 +78,7 @@ A selected phase is complete only when:
 - All phase changes, including plan status updates, are committed and pushed.
 - Relevant GitHub Actions CI is green.
 
-Then mark the phase `[x]` and commit/push that final plan status update if it was not already included in the verified phase commit. Close the phase issue only if the agent created it during this run. Never close a reused issue.
+Then mark the phase `[x]` and commit/push that final plan status update if it was not already included in the verified phase commit. Close the phase issue only if the agent created it during this run. Never close a reused issue. You may close an issue by one of those keywords in the commit message: 'closes', 'fixes', 'resolve' e.g. in the last commit after the CI was successful and you update the plan.md status.
 
 ## Context handoff and plan report
 
