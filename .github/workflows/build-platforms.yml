@@ -1,0 +1,73 @@
+name: Build platform packages
+
+# Platform-specific PyInstaller builds are intentionally manual. Run this
+# workflow from Actions when a Windows and/or macOS release artifact is needed.
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: 'Which platform to build'
+        required: true
+        type: choice
+        options:
+          - all
+          - windows
+          - macos
+        default: all
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build / ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJSON(inputs.platform == 'all' && '["windows","macos"]' || format('["{0}"]', inputs.platform)) }}
+    runs-on: ${{ matrix.platform == 'windows' && 'windows-latest' || 'macos-latest' }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Setup Environment
+        uses: ./.github/actions/setup-environment
+        with:
+          python-version: '3.11'
+
+      - name: Build Windows executable
+        if: matrix.platform == 'windows'
+        shell: bash
+        run: |
+          uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml;." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+          mkdir -p release
+          cp dist/python-template-project.exe release/
+          cp config.yaml README.md release/
+
+      - name: Build macOS executable and app
+        if: matrix.platform == 'macos'
+        shell: bash
+        run: |
+          uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml:." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+          uv run pyinstaller --windowed --name "TemplateApp" src/main.py --add-data "config.yaml:." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+          mkdir -p release
+          cp dist/python-template-project release/
+          cp -R dist/TemplateApp.app release/
+          cp config.yaml README.md release/
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-template-project-${{ matrix.platform }}
+          path: release/
+          if-no-files-found: error
+          retention-days: 14
