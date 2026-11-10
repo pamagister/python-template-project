@@ -1,26 +1,20 @@
 name: CI
 
-# Linux is the always-on default. Windows and macOS only run when you opt in,
-# which keeps the normal push/PR feedback loop fast and avoids the higher
-# runner-minute costs of those platforms.
+# Linux is the always-on quality gate. Cross-platform tests are opt-in to keep
+# normal feedback fast and runner usage predictable.
 #
-# Opt in with any of these:
-#   * put `--all` in the pushed commit subject
-#       git commit -m "test: verify cross-platform behaviour --all"
-#   * put `--all` in the pull request title
-#   * run this workflow manually with the `all` input enabled
-#       gh workflow run main.yml --ref main -f all=true
+# Opt in by:
+#   - adding --all to the commit subject or pull request title
+#   - running this workflow manually with all=true
 #
-# The `flags` job turns those inputs into the `build_all` job output. A job
-# output is required because variables exported through $GITHUB_ENV are only
-# visible inside the job that sets them.
+# A feature branch under ci/** also runs on push, which makes it possible to
+# validate CI changes before opening a pull request.
 
-# Controls when the workflow will run
 on:
   push:
-    branches: [ main ]
-    # The release commit (HISTORY.md only) is covered by the release
-    # pipeline's quality gate; no need to re-run the full CI here.
+    branches:
+      - main
+      - 'ci/**'
     paths-ignore:
       - 'HISTORY.md'
   pull_request:
@@ -55,11 +49,9 @@ jobs:
       - id: detect
         shell: bash
         env:
-          INPUT_ALL: ${{ github.event.inputs.all }}
+          INPUT_ALL: ${{ inputs.all }}
           PR_TITLE: ${{ github.event.pull_request.title }}
         run: |
-          # Only the subject is scanned, so a commit body that merely
-          # describes the flag does not start an expensive full run.
           COMMIT_SUBJECT="$(git log -1 --format=%s)"
           if [[ "$COMMIT_SUBJECT" == *"--all"* || "$PR_TITLE" == *"--all"* || "$INPUT_ALL" == "true" ]]; then
             echo "build_all=true" >> "$GITHUB_OUTPUT"
@@ -67,11 +59,8 @@ jobs:
             echo "build_all=false" >> "$GITHUB_OUTPUT"
           fi
 
-  # `make test` depends on `lint` (see Makefile) and therefore runs Ruff
-  # first and stops on the first failing check before pytest runs. Keeping
-  # both in one job avoids a second checkout/setup/uv-sync cycle and gives
-  # fail-fast feedback.
   tests:
+    name: Linux / lint + tests
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -79,58 +68,31 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-
-      - name: Setup Environment # Composite Action
+      - name: Setup Environment
         uses: ./.github/actions/setup-environment
         with:
           python-version: '3.11'
-
       - name: Run linter and tests
         run: make test
 
-      # Disabled: tokenless uploads are rejected with
-      # "Token required - not valid tokenless upload". See #59.
-      # - name: "Upload coverage to Codecov"
-      #   uses: codecov/codecov-action@v7
-
-  # Optional jobs: only run with `--all`, after the Linux tests passed, so a
-  # known-broken commit does not spend Windows/macOS minutes. `make` is
-  # available on macOS runners; Windows uses pytest directly for the same
-  # reason as the old CI setup and to avoid Makefile shell differences.
-  tests-windows:
+  tests-cross-platform:
+    name: Tests / ${{ matrix.os }}
     needs: [flags, tests]
     if: needs.flags.outputs.build_all == 'true'
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v6
         with:
           python-version: '3.11'
-
-      - name: Setup Environment # Composite Action
+      - name: Setup Environment
         uses: ./.github/actions/setup-environment
         with:
           python-version: '3.11'
-
       - name: Run tests
         run: uv run pytest -s -vvvv -l --tb=long tests
-
-  tests-macos:
-    needs: [flags, tests]
-    if: needs.flags.outputs.build_all == 'true'
-    runs-on: macos-latest
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-
-      - name: Setup Environment # Composite Action
-        uses: ./.github/actions/setup-environment
-        with:
-          python-version: '3.11'
-
-      - name: Run tests
-        run: make test
