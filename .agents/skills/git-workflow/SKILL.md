@@ -6,6 +6,7 @@ description: Repository Git and GitHub conventions for issue lookup and creation
 # Git and GitHub Workflow
 
 Use this skill whenever a task involves GitHub issues, staging, commits, branches, pushes or Actions.
+Write issues in english.
 
 ## Safety
 

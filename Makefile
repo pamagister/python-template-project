@@ -190,3 +190,8 @@ pytree:            ## Show project tree (excluding ignored folders)
 .PHONY: init
 init:             ## Initialize the project based on an application template.
 	@./.github/init.sh
+
+.PHONY: mirror-agents
+mirror-skills:    ## Mirror OpenCode skills and AGENTS_GLOBAL.md to the global OpenCode skills directory.
+	./scripts/mirror-opencode-skills.sh
+	./scripts/mirror-opencode-agents.sh

@@ -3,6 +3,7 @@
 # Global Agent Instructions
 
 These principles apply across coding, research, writing, document creation and other tasks. Use judgment: they favor care without sacrificing reasonable speed.
+Allways document, comment and plan in english. 
 
 ## Think Before Acting
 
