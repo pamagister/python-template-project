@@ -29,13 +29,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - platform: windows
-            os: windows-latest
-          - platform: macos
-            os: macos-latest
-    if: inputs.platform == 'all' || inputs.platform == matrix.platform
-    runs-on: ${{ matrix.os }}
+        platform: ${{ fromJSON(inputs.platform == 'all' && '["windows","macos"]' || format('["{0}"]', inputs.platform)) }}
+    runs-on: ${{ matrix.platform == 'windows' && 'windows-latest' || 'macos-latest' }}
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
