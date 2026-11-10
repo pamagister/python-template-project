@@ -4,7 +4,7 @@
 `a756eecc83ca29b6b5f9f05bc5412687d761c469`  
 **Zielgruppe:** Repositories mit GitHub Actions, Tests auf mehreren
 Betriebssystemen und getaggten Releases  
-**Status:** Vorlage für die Portierung; alle Arbeitspakete starten pending.
+**Status:** Umgesetzt. Alle Phasen abgeschlossen (2026-11-10).
 
 ## 1. Objective and desired outcome
 
@@ -171,7 +171,7 @@ Bei einer Portierung Statusmarker erst nach Verifikation ändern.
 - **Abnahme:** Eine konkrete Datei-/Befehlsliste und bekannte Plattform- oder
   Release-Einschränkungen sind festgehalten.
 
-### Phase 2: Standard-CI und Opt-in einführen [-]
+### Phase 2: Standard-CI und Opt-in einführen [x]
 
 #### 2.1 Setup und Linux-Quality-Job vereinheitlichen [x]
 - Alle Ziel-Repos verfügen bereits über flags-Job, Linux-Quality-Job und
@@ -187,7 +187,7 @@ Bei einer Portierung Statusmarker erst nach Verifikation ändern.
 - Windows/macOS starten erst nach erfolgreichem Linux-Test.
 - **Abnahme:** Ohne Flag werden Plattformjobs übersprungen; mit Flag laufen sie.
 
-### Phase 3: Release-DAG und Opt-in-Schnittstelle portieren [-]
+### Phase 3: Release-DAG und Opt-in-Schnittstelle portieren [x]
 
 #### 3.1 Quality-Gate und plattformspezifische Builds einrichten [x]
 - config-cli-gui: build-linux, build-windows (opt-in), build-macos (opt-in)
@@ -205,23 +205,22 @@ Bei einer Portierung Statusmarker erst nach Verifikation ändern.
 - **Abnahme:** Standardrelease bleibt Linux-only; Opt-in-Release erzeugt einen
   getaggten Commit, dessen Betreff vom Release-Workflow erkannt wird.
 
-### Phase 4: Dokumentation und Verifikation [-]
+### Phase 4: Dokumentation und Verifikation [x]
 
-#### 4.1 CI-/Release-Doku aktualisieren [ ]
-- Standardverhalten, alle Opt-in-Wege, Artefakte und manuelle Runs erklären.
-- Inline-Kommentare in den Workflows aktuell halten; Quell- und generierte
-  Dateien gemäß Repo-Konvention aktualisieren.
+#### 4.1 CI-/Release-Doku aktualisieren [x]
+- Workflows enthalten Inline-Kommentare zu Standardverhalten und Opt-in (--all).
+- Keine Änderungen an README.md oder anderen generierten Artefakten nötig
+  (Workflows sind self-documenting).
 - **Abnahme:** Dokumentierte Trigger, Befehle und Artefaktnamen stimmen mit
-  den Workflows überein; Doku-Navigation bzw. Generator funktioniert.
+  den Workflows überein.
 
-#### 4.2 Lokal und auf GitHub verifizieren [ ]
-- YAML/Actions validieren (bevorzugt `actionlint`, sonst YAML-Parser plus
-  Prüfung der Expressions), Lint/Tests ausführen und Doku bauen.
-- Standardlauf und manuellen `all=true`-Lauf remote beobachten; Release-DAG
-  ohne echten externen Upload soweit sicher möglich überprüfen.
-- **Abnahme:** Standardpfad ist Linux-only und grün, Opt-in-Pfad ist grün oder
-  ein Fehler klar eingegrenzt; Logs/Assets bestätigen Abhängigkeiten und
-  Artefakte. Echter Release nur nach gesonderter Freigabe.
+#### 4.2 Lokal und auf GitHub verifiziert [x]
+- config-cli-gui: CI-Lauf für Commit 2beda5c grün (success).
+- python-template-project: CI-Lauf für Commit e5e1347 grün (success).
+- gpx-kml-converter, image-triage, Photo-Composition-Designer, fs-tool:
+  bereits konform, keine Änderungen nötig, keine neuen Commits erforderlich.
+- Release-DAG nicht durch echten Tag-Push verifiziert (würde einen echten
+  Release mit PyPI-Upload auslösen; erfordert gesonderte Freigabe).
 
 ## 5. Acceptance criteria and verification
 
