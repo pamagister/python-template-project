@@ -5,7 +5,7 @@ description: Convert a user mission, rough requirements or an external project p
 
 # Mission Planning
 
-Your task is to turn the supplied mission into a clear implementation plan. Do not implement the plan. Write the plan in english.
+Your task is to turn the supplied mission into a clear implementation plan. Do not implement the plan. Write the plan in English.
 
 ## Understand the mission
 
@@ -15,11 +15,16 @@ Your task is to turn the supplied mission into a clear implementation plan. Do n
 - Resolve important ambiguity with the user; do not silently invent product requirements.
 - Prefer the simplest design that satisfies the mission.
 
+## When to use this skill
+
+Use this skill when the mission is large, architectural or naturally multi-phase and needs a durable plan for `workflow-autopilot`. For a single self-contained feature or bug fix, use `workflow-feature` and keep the plan lightweight. Do not duplicate repository-wide coding or Git rules in the plan.
+
 ## Produce one plan
 
-Produce one self-contained Markdown plan, ready to paste into an agent prompt or save at any user-chosen path. Do not require or generate a separate tasklist, progress file or repository instruction file.
+Produce one self-contained Markdown plan, ready to paste into an agent prompt or save at any user-chosen path. Do not require or generate a separate task list, progress file or repository instruction file.
 
 Include only sections that add value:
+
 1. Objective and desired outcome.
 2. Scope, constraints and explicit non-goals.
 3. Architecture and decisions (including rationale where useful).
@@ -30,10 +35,13 @@ Include only sections that add value:
 ## Work-package quality
 
 - Organize work in a logical dependency order.
+- Give phases and work packages stable identifiers, for example `P1`, `P1-W01`, so Autopilot and commits can reference them.
 - Make each work package small enough to implement, review, test and commit independently, but avoid trivial micro-tasks.
 - State observable acceptance criteria, not implementation narration.
 - Identify integration boundaries and meaningful phase gates.
+- Describe the plan content as binding and the order as flexible when Autopilot may combine or reorder phases. Dependencies and acceptance criteria remain binding.
 - Include tests, documentation and migration considerations where relevant.
+- Use repository-specific verification commands only when they are known; otherwise describe the verification goal and let the implementation agent discover the command.
 - Do not prescribe details the implementation agent can safely decide.
 - Do not duplicate repository-wide coding or Git rules in the plan.
 
@@ -53,12 +61,12 @@ Example:
 
 **Objective:** Establish the common architecture before adding additional features.
 
-- [ ] P1-W01: Review existing `xxx`, metadata extraction, Python analysis and output models.
+- [ ] P1-W01: Review existing components, data extraction and output models.
 - [ ] P1-W02: Define the internal provider interface.
-- [ ] P1-W03: Define capability identifiers and capability model.
+- [ ] P1-W03: Define capability identifiers and the capability model.
 - [ ] P1-W04: Define the central registry.
 - [ ] P1-W05: Define stable error codes and diagnostic references.
-- [ ] P1-W06: Update `docs/xxx.md` with the approved architecture.
+- [ ] P1-W06: Update the architecture documentation with the approved design.
 - [ ] P1-W07: Add focused unit tests for the registry and availability mechanism.
 
 **Acceptance criteria**
@@ -69,32 +77,14 @@ Example:
 - Core modules remain independent of CLI and output formatting.
 - Architecture documentation describes the actual agreed design.
 
-**Phase gate:** Do not proceed until the provider and capability interfaces are stable and documented.
-
-### Phase 6 – Documentation, Integration and Quality Assurance
-
-**Objective:** Complete the implementation and ensure consistency across code, documentation and tests.
-
-- [ ] P6-W01: Finalize `docs/....md`.
-- [ ] P6-W02: Document the provider and capability architecture.
-- [ ] P6-W03: Document all new CLI commands.
-- [ ] P6-W04: Document new features.
-- [ ] P6-W05: Run the full test suite.
-- [ ] P6-W06: Run Ruff, formatting checks and mypy.
-- [ ] P6-W07: Run `make precommit`.
-- [ ] P6-W08: Build the package and verify optional extras.
-- [ ] P6-W09: Perform an end-to-end test with and without optional dependencies and models.
-
-**Acceptance criteria**
-
-- Architecture documentation matches the implementation.
-- User documentation contains complete setup instructions.
-- CLI help is sufficient to discover the relevant commands.
-- Existing functionality remains intact.
-- Full test, lint, type-check and build workflows pass.
-
-**Final phase gate:** The implementation is complete only when functionality, tests, CLI help and documentation agree.
+**Phase gate:** Verify that the provider and capability interfaces are stable and documented before relying on them in later work.
 ```
+
+Phase gates are verification checkpoints. Autopilot fixes failures autonomously and interrupts only for a blocker or a critical decision.
+
+## Handoff convention
+
+Autopilot appends a dated `## Progress / Handoff` section at the end of the plan when context is large, at a phase boundary or at completion. The plan author does not need to create this section; leave room for it and do not duplicate it.
 
 The plan must be usable whether pasted into a prompt or saved as a Markdown file. Its path is supplied by the user, not assumed.
 

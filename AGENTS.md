@@ -22,6 +22,20 @@ These rules apply to this Python project. Keep changes focused and follow the ex
   - `make precommit`: runs formatting, tests and dependency checks; it is mutating and may install a tool.
 - Do not run mutating convenience targets merely as a substitute for understanding what they do.
 
+## GitHub CLI
+
+GitHub CLI (`gh`) is available for repository management and GitHub operations.
+
+Useful commands:
+
+```bash
+gh --help
+gh issue list
+gh issue create --label bug
+```
+
+Prefer `gh` for GitHub issues, pull requests, and repository operations when appropriate. Check command help before using unfamiliar options. For workflow conventions around issues, commits, pushes and CI, load `git-workflow`.
+
 ## Generated documentation
 
 - `docs/index.md` is the source for `README.md`. Never edit `README.md` directly.
@@ -32,14 +46,16 @@ These rules apply to this Python project. Keep changes focused and follow the ex
 
 Choose the workflow from the user's requested scope, not from whether they know or use the internal mode name.
 
-- **Task mode:** A bounded change such as a review, typo fix or small documentation adjustment. Load `workflow-standard`.
-- **Feature mode:** One self-contained feature or bug fix not framed as execution of a plan phase. Load `workflow-standard`.
-- **Autopilot:** Whenever the user asks to implement, execute or continue a plan, or names one or more phases/work packages from a plan. This includes a single selected phase. Phrases such as "implement the first phase", "execute phase 2", "continue plan.md" or "implement autonomously" are sufficient; the user does not need to say "Autopilot". Load `workflow-autopilot` and `git-workflow`.
+- **Task mode:** A bounded change such as a review, typo fix, small refactor or small documentation adjustment. Load `workflow-task`.
+- **Feature mode:** One self-contained feature or bug fix that needs a short design step, issue tracking, a commit, a push and CI verification. Load `workflow-feature`.
+- **Autopilot:** Whenever the user asks to implement, execute or continue a plan, or names one or more phases/work packages from a plan. This includes a single selected phase. Phrases such as "implement the first phase", "execute phase 2", "continue plan.md" or "implement autonomously" are sufficient; the user does not need to say "Autopilot". Load `workflow-autopilot`. By default it executes the full plan; if the user names phases or work packages, it executes only those.
 
-A plan-phase request always takes precedence over the ordinary single-feature workflow, even when the selected phase is the only requested scope. Execute only the phase/work packages the user selected; do not continue into later phases without authorization.
+A plan or phase request always takes precedence over the single-feature workflow, even when the selected phase is the only requested scope.
 
-Load the supporting skills as needed:
-- `workflow-standard`: Task and Feature modes.
-- `workflow-autopilot`: plan and phase execution.
-- `git-workflow`: Git, GitHub issues, commits, pushes and CI.
+Load the shared and supporting skills as needed:
+- `workflow-core`: shared task loop, safety, verification, reporting and authorization rules.
+- `workflow-task`: bounded implementation without commit, push or issue tracking.
+- `workflow-feature`: standalone feature implementation with issue, commit, push and CI.
+- `workflow-autopilot`: full-plan or selected-phase execution.
+- `git-workflow`: Git, GitHub issues, `gh` CLI, commits, pushes and CI.
 - `mission-planning`: turn a mission or external specification into one executable plan.
