@@ -40,19 +40,19 @@ Write issues in English.
 
 ## Commits
 
-Use Conventional Commits:
+Use Conventional Commits with the issue reference at the end of the subject line:
 
 ```text
-<type>(<scope>): <imperative description>
+<type>(<scope>): <imperative description> Refs #<issue-number>
 
 <optional body>
-
-Refs #<issue-number>
 ```
+
+Example: `fix(parser): handle empty input Refs #42`
 
 Use `Fixes #N` only when the commit itself fully resolves the issue, the issue was created by this run and closing it at commit time is explicitly authorized. Otherwise use `Refs #N`.
 
-When a commit covers multiple phases or issues, reference all of them, for example `Refs #12, #15`.
+When a commit covers multiple phases or issues, list all references at the end of the subject line, for example `<type>(<scope>): <description> Refs #12, #15`.
 
 Common types:
 

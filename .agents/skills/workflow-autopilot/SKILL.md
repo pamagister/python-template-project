@@ -50,7 +50,7 @@ For each work package:
 4. Review the diff before testing for scope, correctness and unintended changes.
 5. Run the relevant local checks using the project's actual commands. Fix failures and repeat the affected checks. Do not bypass or weaken failing tests.
 6. Once the work package is implemented and locally verified, update its plan checkbox to `[x]` **before committing**. Include the plan update in the same commit when the plan is inside the repository.
-7. Review the combined code-and-plan diff, stage only work-package changes and create one coherent Conventional Commit. Reference every phase issue the commit relates to, for example `Refs #12, #15`.
+7. Review the combined code-and-plan diff, stage only work-package changes and create one coherent Conventional Commit. Put every related phase issue at the end of the subject line, for example `fix(parser): handle empty input Refs #12, #15`.
 8. If the commit cannot be created, do not leave the work package marked complete: restore its status to `[-]` or `[~]` and explain the blocker.
 9. Add a concise progress comment to the relevant phase issue when useful.
 

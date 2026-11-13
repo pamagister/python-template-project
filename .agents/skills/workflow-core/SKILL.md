@@ -51,8 +51,8 @@ A plan or phase request takes precedence over a single-feature request. If the s
 | Mode | Stage | Commit | Push | GitHub issue | Close issue |
 |---|---|---|---|---|---|
 | Task | Only task files/hunks | No; suggest a Conventional Commit message | No | No | No |
-| Feature | Only task files/hunks | Yes; Conventional Commit, `Refs #N` by default | Yes; direct to the default branch after local checks | Search and reuse an accurate open issue; otherwise create one | Agent-created issue only, after relevant CI is green; never a reused issue |
-| Autopilot | Only work-package files/hunks | Yes; Conventional Commit, reference all relevant phase issues | Yes; batch approximately 3–6 commits or push at a logical boundary | Ensure one issue per phase upfront; reuse or create | Agent-created phase issue only, after its work is verified and relevant CI is green; never a reused issue |
+| Feature | Only task files/hunks | Yes; Conventional Commit with `Refs #N` at the end of the subject line by default | Yes; direct to the default branch after local checks | Search and reuse an accurate open issue; otherwise create one | Agent-created issue only, after relevant CI is green; never a reused issue |
+| Autopilot | Only work-package files/hunks | Yes; Conventional Commit with all relevant phase issues at the end of the subject line | Yes; batch approximately 3–6 commits or push at a logical boundary | Ensure one issue per phase upfront; reuse or create | Agent-created phase issue only, after its work is verified and relevant CI is green; never a reused issue |
 
 Mode-specific details and exceptions are defined in the mode skill. This matrix is the default; a mode may add constraints but must not weaken the safety rules.
 

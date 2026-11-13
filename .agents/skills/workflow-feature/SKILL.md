@@ -36,8 +36,9 @@ Follow the shared task loop in `workflow-core`:
 ## 4. Commit
 
 - Stage only task-related files and hunks.
-- Create a coherent Conventional Commit. Use `Refs #N` by default.
-- Use `Fixes #N` only when the commit itself fully resolves the issue, the issue was created by this run, and closing it at commit time is explicitly authorized. Prefer `Refs #N` plus an explicit close after CI.
+- Create a coherent Conventional Commit with the issue reference at the end of the subject line, for example `fix(parser): handle empty input Refs #42`.
+- Use `Refs #N` on the subject line by default.
+- Use `Fixes #N` on the subject line only when the commit itself fully resolves the issue, the issue was created by this run, and closing it at commit time is explicitly authorized. Prefer `Refs #N` plus an explicit close after CI.
 - Do not amend, rewrite history or force-push.
 
 ## 5. Push and watch CI
