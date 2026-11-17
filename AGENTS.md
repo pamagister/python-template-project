@@ -1,20 +1,46 @@
 # Repository Instructions
 
-These rules apply to this Python project. Keep changes focused and follow the existing architecture.
+## Core Principles
 
-## Python conventions
+- **Think before coding.** Identify the goal, assumptions, constraints, and success criteria before implementation. If ambiguity materially affects the solution, ask before proceeding. Point out simpler alternatives and relevant trade-offs.
+- **Simplicity first.** Implement the simplest solution that fully meets the requirements. Avoid speculative features, unnecessary abstractions, premature optimization, and unrequested configurability.
+- **Surgical changes.** Modify only what the task requires. Preserve existing conventions and avoid unrelated refactoring. Remove only dead code made obsolete by your changes; report unrelated issues without fixing them.
+- **Correctness over cleverness.** Prioritize clarity, maintainability, reliability, and measurable performance. Optimize algorithms, memory usage, and runtime where justified by actual requirements. Use vectorization or parallelization when beneficial.
 
-- Target Python 3.11 as declared in `pyproject.toml`.
-- Follow PEP 8 and the repository's Ruff configuration: 4-space indentation, double quotes, 100-character line length.
-- Use `snake_case` for packages, modules, functions and variables; `PascalCase` for classes; and `UPPER_SNAKE_CASE` for constants.
-- Use `snake_case` for importable Python names. Use `kebab-case` for distribution/repository names, CLI commands and documentation paths.
-- Prefer descriptive names, type hints on public function signatures, explicit imports, context managers and focused functions.
-- Add or update deterministic pytest tests for behavior changes, bug fixes and important edge cases.
+## Workflow
+
+1. **Inspect** the relevant code, project structure, configuration, dependencies, and existing tests before making changes.
+2. **Plan** briefly for nontrivial tasks. Define concrete, verifiable success criteria.
+3. **Implement** the smallest complete solution, following existing project conventions.
+4. **Verify** changes with relevant tests, formatting, linting, and type checking. Fix issues introduced by the changes.
+5. **Report** what changed, which checks passed, and any remaining limitations.
+
+Do not claim that checks passed unless they were actually executed. If verification is impossible, explain why.
+
+## Python Code Quality
+
+- Follow PEP 8 and the existing project style. Use 4 spaces for indentation and keep lines within 100 characters where practical.
+- Use descriptive names, `snake_case` for functions and variables, `PascalCase` for classes, and `UPPER_CASE` for constants.
+- Add type hints to all function signatures. Avoid `Any` unless genuinely necessary.
+- Write docstrings for public functions, classes, and methods. Document parameters, return values, and raised exceptions where relevant.
+- Prefer small, focused functions and classes with clear responsibilities. Limit function parameters to five where practical; use early returns to reduce nesting.
+- Never use mutable default arguments. Use `is` for comparisons with `None`, `True`, and `False`.
+- Prefer f-strings, context managers, and explicit imports. Avoid wildcard imports and redundant comments.
+- Handle errors explicitly. Catch specific exceptions, provide meaningful context, and never silently suppress unexpected failures.
+- Use dataclasses for simple data containers and composition over inheritance where appropriate.
+- Never use emoji or emoji-like Unicode characters in code, comments, or documentation unless explicitly required for tests or functionality.
+
+## Dependencies and Tooling
+
+- Use `uv` for dependency management and virtual environments when available or when initializing a project.
+- Declare and manage dependencies in `pyproject.toml`. Avoid unnecessary dependencies and preserve existing project tooling.
+- Prefer established project commands and configuration over introducing new tools or conventions.
+- Use `ruff` for formatting and linting and `mypy` for static type checking when configured or appropriate.
+- Use `pytest` for tests. Add or update tests for new behavior, bug fixes, and meaningful edge cases. Mock external dependencies where appropriate.
+- Never introduce tooling or dependencies solely for marginal benefits.
 
 ## Project tooling
 
-- Use `uv` for dependency and environment management. Declare dependencies in `pyproject.toml`.
-- Use Ruff for linting and formatting, and pytest for tests. Follow the existing configuration rather than introducing alternative tools.
 - Inspect the Makefile before using a target. Relevant targets:
   - `make lint`: Ruff lint and format checks.
   - `make test`: lint plus the test suite and coverage reports.
