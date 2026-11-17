@@ -52,10 +52,10 @@ Choose the workflow from the user's requested scope, not from whether they know 
 
 A plan or phase request always takes precedence over the single-feature workflow, even when the selected phase is the only requested scope.
 
-Load the shared and supporting skills as needed:
-- `workflow-core`: shared task loop, safety, verification, reporting and authorization rules.
+Load only the skills needed for the current phase:
+- `workflow-core`: shared task loop, context discipline, safety, verification, reporting and authorization rules.
 - `workflow-task`: bounded implementation without commit, push or issue tracking.
 - `workflow-feature`: standalone feature implementation with issue, commit, push and CI.
-- `workflow-autopilot`: full-plan or selected-phase execution.
+- `workflow-autopilot`: full-plan or selected-phase execution, including fresh-session handoff.
 - `git-workflow`: Git, GitHub issues, `gh` CLI, commits, pushes and CI.
-- `mission-planning`: turn a mission or external specification into one executable plan.
+- `mission-planning`: turn a mission or external specification into one executable plan with a durable handoff block.

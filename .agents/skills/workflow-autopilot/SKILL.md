@@ -1,41 +1,35 @@
 ---
 name: workflow-autopilot
-description: Execute a complete plan or selected phases autonomously. Ensures one GitHub issue per phase upfront, loops the feature cycle per work package, updates plan status, pushes directly to the default branch, gates on CI and interrupts only for blockers or critical decisions. Use even for a single selected phase.
+description: Execute a complete plan or selected phases autonomously. Ensures one GitHub issue per phase, loops the feature cycle per work package, pushes in batches, gates on CI, updates the plan handoff block, and starts a fresh session at phase boundaries when context is large. Use even for a single selected phase.
 ---
 
 # Autopilot Workflow
 
-Use this skill whenever the user asks to implement, execute or continue a plan, or selects one or more phases/work packages from a plan. This applies even when only one phase is selected. The user does not need to say "Autopilot".
+Use this skill whenever the user asks to implement, execute or continue a plan, or selects one or more phases/work packages. The user does not need to say "Autopilot".
 
 Execute the authorized scope autonomously. Do not ask for permission to continue, create issues or push when this workflow authorizes it.
 
 ## Input plan
 
-The plan may be:
+The plan may be Markdown pasted into the prompt or any user-specified Markdown file path.
 
-- Markdown pasted directly into the prompt, or
-- Any user-specified Markdown file path.
-
-Do not require a fixed filename or a separate task list. The plan is the single source of truth for scope, decisions, acceptance criteria and progress.
-
-A useful plan contains an objective, scope and non-goals, decisions, phases, coherent work packages, stable identifiers, acceptance criteria, dependencies and risks. If the plan is too vague to execute safely, ask only the blocking questions via the `question` tool.
-
-If the plan was pasted into the prompt rather than supplied as a writable file, maintain progress in the session and provide an updated plan/status in the final response. Do not create a second tracking file unless explicitly requested.
+- Do not require a fixed filename or separate task list.
+- The plan is the single source of truth for scope, decisions, acceptance criteria and progress.
+- If the plan is too vague to execute safely, ask only blocking questions via `question`.
 
 ## Preparation
 
-1. Load `workflow-core`, `workflow-feature` and `git-workflow`. Load `mission-planning` only if the plan itself must be repaired or extended.
-2. Inspect repository status, the current branch, repository instructions and the supplied plan. Preserve all pre-existing user changes.
-3. Reconcile plan status with the actual repository: inspect implementation, tests, documentation and Git status. Status markers are progress hints, not proof that work is implemented or committed. Do not redo verified work; do not trust unchecked boxes blindly.
-4. Determine the authorized scope:
+1. Load `workflow-core` and `git-workflow`. Load `workflow-feature` only for the per-work-package feature cycle. Load `mission-planning` only if the plan must be repaired or extended.
+2. Inspect repository status, current branch, repository instructions and the supplied plan. Preserve pre-existing user changes.
+3. Reconcile plan status with the repository: inspect implementation, tests, docs and Git status. Status markers are hints, not proof.
+4. Determine authorized scope:
    - If the user names phases or work packages, execute only those.
    - Otherwise execute the full plan, including all pending phases.
-   - The plan content is binding; the order is not rigid. Dependencies and acceptance criteria remain binding.
+   - Plan content is binding; order is flexible. Dependencies and acceptance criteria remain binding.
 5. Ensure one GitHub issue per phase exists before implementation:
    - Search open issues and reuse an accurate issue for a phase.
-   - Create a missing phase issue autonomously. Include the phase objective, scope, acceptance criteria and plan reference.
-   - Never edit the metadata or state of an issue that existed before this run. Comments are allowed.
-   - Record the issue references in the plan or progress report.
+   - Create a missing phase issue autonomously with objective, scope and acceptance criteria.
+   - Never edit pre-existing issue metadata or state. Comments are allowed.
    - If `gh` is unavailable or unauthenticated, continue without issue tracking and report the limitation.
    - If the plan has no explicit phases, use one issue for the whole plan.
 6. Start with the first pending, unblocked work package.
@@ -45,52 +39,81 @@ If the plan was pasted into the prompt rather than supplied as a writable file, 
 For each work package:
 
 1. Set its status to `[-]` when beginning, if the plan is a writable file.
-2. Inspect the relevant implementation, tests, configuration and documentation.
-3. Implement the smallest complete change satisfying the acceptance criteria.
-4. Review the diff before testing for scope, correctness and unintended changes.
-5. Run the relevant local checks using the project's actual commands. Fix failures and repeat the affected checks. Do not bypass or weaken failing tests.
-6. Once the work package is implemented and locally verified, update its plan checkbox to `[x]` **before committing**. Include the plan update in the same commit when the plan is inside the repository.
+2. Inspect the relevant implementation, tests, configuration and documentation. Use `explore` for broad discovery; follow `workflow-core` context discipline.
+3. Implement the smallest complete change satisfying acceptance criteria.
+4. Review the diff before testing.
+5. Run relevant local checks. Fix failures and repeat affected checks. Do not bypass or weaken tests.
+6. Update the work-package checkbox to `[x]` **before committing**, if the plan is a writable file.
 7. Review the combined code-and-plan diff, stage only work-package changes and create one coherent Conventional Commit. Put every related phase issue at the end of the subject line, for example `fix(parser): handle empty input Refs #12, #15`.
-8. If the commit cannot be created, do not leave the work package marked complete: restore its status to `[-]` or `[~]` and explain the blocker.
+8. If the commit cannot be created, restore the work package to `[-]` or `[~]` and explain the blocker.
 9. Add a concise progress comment to the relevant phase issue when useful.
 
-A work package may combine closely related small tasks. Avoid both giant commits and artificial micro-commits.
+A work package may combine closely related small tasks. Avoid giant commits and artificial micro-commits.
 
-## Combining and reordering phases
+## Phase completion
 
-- The plan content is binding, but the implementation order is not rigid.
-- Phases or work packages may be combined or reordered when dependencies and acceptance criteria still hold and the change improves implementation.
-- A commit that covers multiple phases must reference all relevant phase issues.
-- When phases are combined, update all involved work packages and phase statuses. Mark a phase `[x]` only when its acceptance criteria are satisfied and its relevant CI is green.
-- If a phase is dropped or deferred, mark it `[~]` with a short explanation. Do not mark it complete.
+A phase is complete only when:
+
+- Every selected work package and acceptance criterion is satisfied.
+- Relevant local tests and checks pass.
+- All phase changes, including plan status updates, are committed and pushed.
+- Relevant CI is green.
+
+Then mark the phase `[x]` and update the handoff block. Close the phase issue only if this run created it and CI is green. Never close a pre-existing issue.
 
 ## Push and CI gate
 
 - Push directly to the repository's default branch.
 - If the current branch is not the default branch, do not silently switch or push. Ask the user or follow an explicit repository instruction.
-- Track coherent commits since the last successful push. Push after approximately 3–6 commits, or at a logical phase boundary if earlier. Do not exceed six commits solely to preserve batching.
-- Run the relevant local checks before every push. Never push known-failing changes.
-- After each push, monitor the relevant CI runs until they reach a definitive result. Do not treat pending, missing or timed-out results as success.
-- If CI fails, inspect the logs, reproduce the failure locally where possible, fix the cause, run the relevant checks, commit the correction, push and monitor again.
-- Allow at most two repair cycles. If the failure is not clearly resolved, or CI is non-reproducible and requires user input, stop and report the blocker.
+- Track coherent commits since the last successful push. Push after approximately 3–6 commits or at a logical phase boundary. Do not exceed six commits solely to preserve batching.
+- Run relevant local checks before every push. Never push known-failing changes.
+- After each push, monitor relevant CI until a definitive result. Do not treat pending, missing or timed-out results as success.
+- If CI fails, inspect logs, reproduce locally, fix the cause, run checks, commit, push and monitor again.
+- Allow at most two repair cycles. If unresolved, stop and report the blocker.
 - If the repository has no CI, state that and rely on local checks.
 
-## Status markers
+## Context handoff and session boundaries
 
-Use these markers directly in phase and work-package headings:
+Update the plan's `## Progress / Handoff` block at each phase boundary and whenever context becomes large.
 
-- `[ ]` pending
-- `[-]` in progress
-- `[x]` completed
-- `[~]` deferred or blocked
+Start a fresh session when any of these is true:
 
-A work package may be marked `[x]` after its acceptance criteria pass local verification; commit the code and plan update together. A phase must remain `[-]` until all its selected work packages are complete, its changes are pushed and relevant CI is green. Only then mark the phase `[x]`. Use `[~]` with a short explanation for blocked or deferred work; never mark incomplete work complete.
+- Context reaches roughly 60–70% of the model's usable window.
+- About 120–150 assistant requests have run in the current session.
+- A phase boundary is reached and the next phase is large or independent.
+- The handoff block says `needs-fresh-session`.
 
-Phase gates in the plan are verification checkpoints, not authorization stops. If a gate fails, fix the cause. Stop only if resolving it requires a critical decision.
+Fresh-session procedure:
+
+1. Ensure the handoff block contains: completed work, active work, next work, relevant files with line ranges, decisions, blockers, last verification and context status.
+2. Start a new session with the current model and build agent, for example:
+
+   ```bash
+   opencode run --agent build --session autopilot-<plan-slug>-<phase> \
+     "Continue the plan at <path>. Read the Progress / Handoff block first, then resume at <next>."
+   ```
+
+3. Do not paste the full prior transcript. The handoff block is the contract.
+
+Use compaction only when the current task thread is important and exact recent details do not fit the handoff block:
+
+```bash
+opencode api post /api/session/$OPENCODE_SESSION_ID/compact --data '{}'
+```
+
+Compaction is lossy. Prefer a fresh session with a precise handoff over reflex compaction.
+
+## Combining and reordering phases
+
+- Plan content is binding; implementation order is flexible.
+- Phases or work packages may be combined or reordered when dependencies and acceptance criteria hold.
+- A commit covering multiple phases must reference all relevant phase issues.
+- Update all involved work packages and phase statuses when combining.
+- If a phase is dropped or deferred, mark it `[~]` with a short explanation. Never mark incomplete work complete.
 
 ## Autonomy and interruption
 
-The agent is fully autonomous for the authorized plan. Interrupt the user only when:
+Interrupt the user only when:
 
 - A blocker prevents correct completion.
 - A critical decision affects scope, architecture, data safety, irreversibility, acceptance criteria, credentials or permissions.
@@ -100,27 +123,7 @@ Routine implementation choices are made independently and reported. Do not ask f
 
 ## Plan files outside the repository
 
-Update the plan file in place if it is writable, even when it is outside the repository. Include it in a commit only when it is inside the repository. Otherwise report its path and state that it is not versioned.
-
-## Context handoff and progress
-
-When context is becoming large, before handing off, or at a phase boundary:
-
-- Ensure the current work-package status is accurate.
-- Append a short dated `## Progress / Handoff` entry to the plan file when it is writable. Include completed work, current state, next work package, relevant issue/commit/push/CI references, blockers and important decisions.
-- Append a new entry rather than rewriting useful history.
-- If the plan is prompt-only, provide the handoff summary in the conversation.
-
-## Phase completion and issue closing
-
-A selected phase is complete only when:
-
-- Every selected work package and acceptance criterion is satisfied.
-- Relevant local tests and checks pass.
-- All phase changes, including plan status updates, are committed and pushed.
-- Relevant CI is green.
-
-Then mark the phase `[x]` and commit/push the final status update if it was not already included. Close the phase issue only when this run created it, its work is verified and relevant CI is green. Never close an issue that existed before this run.
+Update the plan file in place if writable, even when outside the repository. Include it in a commit only when inside the repository. Otherwise report its path and state that it is not versioned.
 
 ## Final report
 
