@@ -117,6 +117,7 @@ Getting started on developing your own project based on this template
 * 📃 **Documentation:** Configuration for publishing documentation on [Read the Docs](https://about.readthedocs.com/) using [mkdocs](https://www.mkdocs.org/) .
 * 🖼️ **Minimalist GUI:** Comes with a basic GUI based on [tkinker](https://tkdocs.com/tutorial/index.html) that includes an auto-generated settings menu based on your defined parameters.
 * 🖥️ **Workflow Automation:** A `Makefile` is included to simplify and automate common development tasks.
+* 🧭 **Agentic Workflows:** Context-sparing OpenCode workflows (task, feature, autopilot, mission planning) — see [docs/workflows.md](workflows.md).
 * 🛳️ **Release pipeline:** Automated releases unsing the Makefile `make release` command, which creates a new tag and pushes it to the remote repo. The `release` pipeline will automatically create a new release on GitHub and trigger a release on  [PyPI](https://pypi.org.
     * **[setuptools](https://pypi.org/project/setuptools/)** is used to package the project and manage dependencies.
     * **[setuptools-scm](https://pypi.org/project/setuptools-scm/)** is used to automatically generate the `_version.py` file from the `pyproject.toml` file.
