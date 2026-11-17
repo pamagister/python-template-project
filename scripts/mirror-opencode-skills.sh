@@ -8,7 +8,7 @@
 #   workflow-feature, workflow-autopilot
 #
 # from .agents/skills/ (source, relative to repository root) to
-# /home/paul/.config/opencode/skills/ (target, overridable via
+# $HOME/.config/opencode/skills/ (target, overridable via
 # OPENCODE_SKILLS_DIR).
 #
 # Same-named existing skills in the target are removed before copying and
@@ -21,7 +21,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 SOURCE_DIR="$REPO_ROOT/.agents/skills"
-TARGET_DIR="${OPENCODE_SKILLS_DIR:-/home/paul/.config/opencode/skills}"
+TARGET_DIR="${OPENCODE_SKILLS_DIR:-$HOME/.config/opencode/skills}"
 
 # The skills to mirror (order arbitrary, exactly these six).
 SKILLS=(
