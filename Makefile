@@ -51,9 +51,13 @@ lint:             ## Run the Ruff linter and format check.
 
 .PHONY: test
 test: lint        ## Run tests and generate coverage report.
-	uv run pytest -v --cov-config .coveragerc --cov=src -l --tb=short --maxfail=1 tests/
+	uv run pytest -v --cov=src -l --tb=short --maxfail=1 tests/
 	uv run coverage xml
 	uv run coverage html
+	@echo ""
+	@echo "Coverage reports written:"
+	@echo "  Terminal summary: uv run coverage report"
+	@echo "  HTML report:      xdg-open htmlcov/index.html"
 
 .PHONY: build-linux
 build-linux:    ## Build the Linux executable (includes the web UI assets and Pillow).

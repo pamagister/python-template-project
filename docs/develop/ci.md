@@ -16,7 +16,10 @@ Linux-only: there are no Windows or macOS jobs.
 branches) and on every pull request targeting `main`. It performs a single
 Linux job:
 
-* `make test` — Ruff lint, format check, pytest and coverage.
+* `make test` runs the Ruff lint, a pytest run with coverage enabled, and writes
+both `coverage.xml` and an HTML report to `htmlcov/index.html`. Open the HTML
+report in a browser (for example with `xdg-open htmlcov/index.html`) or run
+`uv run coverage report` for a terminal summary.
 
 `HISTORY.md`-only changes are ignored so changelog commits do not trigger a run.
 
@@ -50,9 +53,8 @@ The `--ref` must be a tag, because the release and upload steps only operate on
 
 ## Troubleshooting
 
-* **Coverage upload is missing.** The Codecov step is intentionally disabled
-  until the token issue is resolved (see issue #59). Run `make test` locally and
-  open `htmlcov/index.html` for the coverage report.
+* **Coverage report is empty or stale.** Run `make test` locally and open
+  `htmlcov/index.html` for the coverage report.
 * **The release has no Linux archive.** Confirm the workflow ran on a tag, not a
   branch, and inspect the `build-linux` job logs.
 

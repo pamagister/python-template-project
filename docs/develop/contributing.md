@@ -48,6 +48,10 @@ Run `make lint` to run the linter.
 
 Run `make test` to run the tests.
 
+`make test` also generates a coverage report. Open `htmlcov/index.html` in a
+browser (e.g. `xdg-open htmlcov/index.html`) to see which lines are covered,
+or run `uv run coverage report` for a terminal summary.
+
 Ensure code coverage report shows `100%` coverage, add tests to your PR.
 
 ## Build the docs locally
