@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Sequence
 from datetime import datetime
 from pathlib import Path
 
@@ -65,7 +66,7 @@ def _unique_target(output_dir: Path, stem: str, suffix: str) -> Path:
 
 
 def export_images(
-    files: list[str | Path],
+    files: Sequence[str | Path],
     output_root: str | Path,
     fmt: str = "jpg",
     quality: int = 85,
