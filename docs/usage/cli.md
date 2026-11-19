@@ -8,8 +8,7 @@ matches the actual CLI.
 ## `python_template_project`
 
 ```
-usage: python-template-project [-h] [--config CONFIG] [-v | -q]
-                               {gui,export,config} ...
+usage: python-template-project [-h] [--config CONFIG] [-v | -q] {gui,export,config} ...
 ```
 
 Local web UI and image export helper.
@@ -23,8 +22,7 @@ Local web UI and image export helper.
 ## `python_template_project gui`
 
 ```
-usage: python-template-project gui [-h] [--host HOST] [--port PORT]
-                                   [--open-browser | --no-open-browser]
+usage: python-template-project gui [-h] [--host HOST] [--port PORT] [--open-browser | --no-open-browser]
 ```
 
 | Option | Type | Description | Default | Choices |
@@ -36,12 +34,7 @@ usage: python-template-project gui [-h] [--host HOST] [--port PORT]
 ## `python_template_project export`
 
 ```
-usage: python-template-project export [-h] [--source SOURCE_DIR]
-                                      [--output OUTPUT_ROOT]
-                                      [--format {jpg,png}]
-                                      [--quality JPG_QUALITY]
-                                      [--reduce | --no-reduce]
-                                      [--max-side MAX_LONG_SIDE]
+usage: python-template-project export [-h] [--source SOURCE_DIR] [--output OUTPUT_ROOT] [--format {jpg,png}] [--quality JPG_QUALITY] [--reduce | --no-reduce] [--max-side MAX_LONG_SIDE]
 ```
 
 | Option | Type | Description | Default | Choices |
