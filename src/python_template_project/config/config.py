@@ -1,194 +1,308 @@
-"""Central configuration management for config-cli-gui project.
+"""In-repo configuration layer.
 
-This module provides a single source of truth for all configuration parameters
-organized in categories (CLI, App, GUI). It can generate config files, CLI modules,
-and documentation from the parameter definitions.
+A single source of truth for application parameters. Parameters are grouped
+into categories and can be persisted to a commented YAML file. Parameters
+flagged with ``is_cli`` are turned into argparse arguments and documented by
+the CLI and config doc generators.
 """
 
-from config_cli_gui.config import ConfigCategory, ConfigManager, ConfigParameter
-from config_cli_gui.docs import DocumentationGenerator
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+APP_NAME = "python_template_project"
 
 
-class CliConfig(ConfigCategory):
-    """CLI-specific configuration parameters."""
-
-    def get_category_name(self) -> str:
-        return "cli"
-
-    # Positional argument
-    input: ConfigParameter = ConfigParameter(
-        name="input",
-        value="",
-        help="Path to input (file or folder)",
-        required=True,
-        is_cli=True,
-    )
-
-    # Optional CLI arguments
-    output: ConfigParameter = ConfigParameter(
-        name="output",
-        value="",
-        help="Path to output destination",
-        is_cli=True,
-    )
-
-    min_dist: ConfigParameter = ConfigParameter(
-        name="min_dist",
-        value=25,
-        help="Maximum distance between two waypoints",
-        is_cli=True,
-    )
-
-    extract_waypoints: ConfigParameter = ConfigParameter(
-        name="extract_waypoints",
-        value=True,
-        help="Extract starting points of each track as waypoint",
-        is_cli=True,
-    )
-
-    elevation: ConfigParameter = ConfigParameter(
-        name="elevation",
-        value=True,
-        help="Include elevation data in waypoints",
-        is_cli=True,
-    )
+def _default_pictures_dir() -> str:
+    """Return the OS-specific default pictures directory."""
+    return str(Path.home() / "Pictures")
 
 
-class AppConfig(ConfigCategory):
-    """Application-specific configuration parameters."""
+@dataclass
+class ConfigParameter:
+    """A single configuration parameter."""
 
-    def get_category_name(self) -> str:
-        return "app"
+    name: str
+    value: Any
+    help: str = ""
+    type: str = "str"
+    choices: list[Any] | None = None
+    required: bool = False
+    is_cli: bool = False
+    cli_group: str | None = None
+    cli_flag: str | None = None
 
-    date_format: ConfigParameter = ConfigParameter(
-        name="date_format",
-        value="%Y-%m-%d",
-        help="Date format to use",
-    )
+    @property
+    def flag(self) -> str:
+        """Return the CLI flag (without leading dashes)."""
+        return self.cli_flag or self.name
 
-    log_level: ConfigParameter = ConfigParameter(
-        name="log_level",
-        value="INFO",
-        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
-        help="Logging level for the application",
-    )
-
-    log_file_max_size: ConfigParameter = ConfigParameter(
-        name="log_file_max_size",
-        value=10,
-        help="Maximum log file size in MB before rotation",
-    )
-
-    log_backup_count: ConfigParameter = ConfigParameter(
-        name="log_backup_count",
-        value=5,
-        help="Number of backup log files to keep",
-    )
-
-    log_format: ConfigParameter = ConfigParameter(
-        name="log_format",
-        value="detailed",
-        choices=["simple", "detailed", "json"],
-        help="Log message format style",
-    )
-
-    max_workers: ConfigParameter = ConfigParameter(
-        name="max_workers",
-        value=4,
-        help="Maximum number of worker threads",
-    )
-
-    enable_file_logging: ConfigParameter = ConfigParameter(
-        name="enable_file_logging",
-        value=True,
-        help="Enable logging to file",
-    )
-
-    enable_console_logging: ConfigParameter = ConfigParameter(
-        name="enable_console_logging",
-        value=True,
-        help="Enable logging to console",
-    )
+    def coerce(self, raw: Any) -> Any:
+        """Coerce a raw (usually string) value into the parameter type."""
+        if self.choices is not None:
+            for choice in self.choices:
+                if isinstance(choice, bool):
+                    if isinstance(raw, str) and raw.strip().lower() in {
+                        "true",
+                        "1",
+                        "yes",
+                        "on",
+                    }:
+                        return True
+                    if isinstance(raw, str) and raw.strip().lower() in {
+                        "false",
+                        "0",
+                        "no",
+                        "off",
+                    }:
+                        return False
+                if str(choice) == str(raw):
+                    return choice
+        if self.type == "bool":
+            if isinstance(raw, bool):
+                return raw
+            if isinstance(raw, str):
+                return raw.strip().lower() in {"true", "1", "yes", "on"}
+            return bool(raw)
+        if self.type == "int":
+            return int(raw)
+        if self.type == "float":
+            return float(raw)
+        return str(raw)
 
 
-class GuiConfig(ConfigCategory):
-    """GUI-specific configuration parameters."""
+@dataclass
+class ConfigCategory:
+    """An ordered group of configuration parameters."""
 
-    def get_category_name(self) -> str:
-        return "gui"
+    name: str
+    parameters: list[ConfigParameter] = field(default_factory=list)
 
-    theme: ConfigParameter = ConfigParameter(
-        name="theme",
-        value="light",
-        choices=["light", "dark", "auto"],
-        help="GUI theme setting",
-    )
+    def add(self, parameter: ConfigParameter) -> ConfigParameter:
+        """Append a parameter and return it."""
+        self.parameters.append(parameter)
+        return parameter
 
-    window_width: ConfigParameter = ConfigParameter(
-        name="window_width",
-        value=800,
-        help="Default window width",
-    )
+    def get(self, name: str) -> ConfigParameter:
+        """Return a parameter by name."""
+        for parameter in self.parameters:
+            if parameter.name == name:
+                return parameter
+        raise KeyError(f"Unknown config parameter: {self.name}.{name}")
 
-    window_height: ConfigParameter = ConfigParameter(
-        name="window_height",
-        value=600,
-        help="Default window height",
-    )
+    def has(self, name: str) -> bool:
+        """Return whether a parameter with this name exists."""
+        return any(parameter.name == name for parameter in self.parameters)
 
-    log_window_height: ConfigParameter = ConfigParameter(
-        name="log_window_height",
-        value=200,
-        help="Height of the log window in pixels",
-    )
-
-    auto_scroll_log: ConfigParameter = ConfigParameter(
-        name="auto_scroll_log",
-        value=True,
-        help="Automatically scroll to the newest log entries",
-    )
-
-    max_log_lines: ConfigParameter = ConfigParameter(
-        name="max_log_lines",
-        value=1000,
-        help="Maximum number of log lines to keep in GUI",
-    )
+    def as_dict(self) -> dict[str, Any]:
+        """Return the parameter values as a plain dictionary."""
+        return {parameter.name: parameter.value for parameter in self.parameters}
 
 
-class ConfigParameterManager(ConfigManager):  # Inherit from ConfigManager
-    """Main configuration manager that handles all parameter categories."""
+class ConfigManager:
+    """Holds categories of parameters and handles YAML persistence."""
 
-    cli: CliConfig
-    app: AppConfig
-    gui: GuiConfig
+    def __init__(self, categories: list[ConfigCategory], config_file: str | Path | None = None):
+        self.categories: dict[str, ConfigCategory] = {
+            category.name: category for category in categories
+        }
+        self.config_file = Path(config_file) if config_file else Path("config.yaml")
+        if self.config_file.exists():
+            self.load(self.config_file)
 
-    def __init__(self, config_file: str | None = None, **kwargs):
-        # Erst den Parent initialisieren
-        categories = (CliConfig(), AppConfig(), GuiConfig())
-        super().__init__(categories, config_file, **kwargs)
+    def category(self, name: str) -> ConfigCategory:
+        """Return a category by name."""
+        return self.categories[name]
+
+    def get(self, category: str, name: str) -> ConfigParameter:
+        """Return a single parameter."""
+        return self.category(category).get(name)
+
+    def set(self, key: str, value: Any) -> None:
+        """Set a parameter value using a ``category.name`` or ``name`` key."""
+        if "." in key:
+            category_name, name = key.split(".", 1)
+            self.get(category_name, name).value = self.get(category_name, name).coerce(value)
+            return
+        for category in self.categories.values():
+            if category.has(key):
+                parameter = category.get(key)
+                parameter.value = parameter.coerce(value)
+                return
+        raise KeyError(f"Unknown config key: {key}")
+
+    def get_cli_parameters(self, group: str | None = None) -> list[ConfigParameter]:
+        """Return CLI parameters, optionally filtered by subcommand group."""
+        result: list[ConfigParameter] = []
+        for category in self.categories.values():
+            for parameter in category.parameters:
+                if parameter.is_cli and parameter.cli_group == group:
+                    result.append(parameter)
+        return result
 
     @staticmethod
     def get_app_name() -> str:
-        return "python_template_project"
+        """Return the application name."""
+        return APP_NAME
+
+    def load(self, path: str | Path | None = None) -> None:
+        """Load values from a YAML file, ignoring unknown keys."""
+        path = Path(path) if path else self.config_file
+        if not path.exists():
+            return
+        data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+        for category_name, values in data.items():
+            category = self.categories.get(category_name)
+            if category is None or not isinstance(values, dict):
+                continue
+            for name, raw in values.items():
+                if category.has(name):
+                    category.get(name).value = category.get(name).coerce(raw)
+
+    def save(self, path: str | Path | None = None) -> None:
+        """Persist the current values using a plain YAML document."""
+        path = Path(path) if path else self.config_file
+        data = {name: category.as_dict() for name, category in self.categories.items()}
+        path.write_text(
+            yaml.safe_dump(data, sort_keys=False, default_flow_style=False),
+            encoding="utf-8",
+        )
 
 
-def main():
-    """Main function to generate config file and documentation."""
-    default_config: str = "config.yaml"
-    default_cli_doc: str = "docs/usage/cli.md"
-    default_config_doc: str = "docs/usage/config.md"
-    config_manager = ConfigParameterManager()
-    app_name = config_manager.get_app_name()
-    doc_gen = DocumentationGenerator(config_manager)
-    doc_gen.generate_default_config_file(output_file=default_config)
-    print(f"Generated: {default_config}")
+def build_default_config() -> ConfigManager:
+    """Create the default configuration for this template."""
+    app = ConfigCategory("app")
+    app.add(
+        ConfigParameter(
+            name="log_level",
+            value="INFO",
+            help="Logging level for the application",
+            type="str",
+            choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        )
+    )
+    app.add(
+        ConfigParameter(
+            name="enable_file_logging",
+            value=True,
+            help="Enable logging to a file",
+            type="bool",
+        )
+    )
+    app.add(
+        ConfigParameter(
+            name="enable_console_logging",
+            value=True,
+            help="Enable logging to the console",
+            type="bool",
+        )
+    )
 
-    doc_gen.generate_config_markdown_doc(output_file=default_config_doc)
-    print(f"Generated: {default_config_doc}")
+    paths = ConfigCategory("paths")
+    paths.add(
+        ConfigParameter(
+            name="source_dir",
+            value=_default_pictures_dir(),
+            help="Default directory that contains the source images",
+            type="str",
+            is_cli=True,
+            cli_group="export",
+            cli_flag="source",
+        )
+    )
+    paths.add(
+        ConfigParameter(
+            name="output_root",
+            value=_default_pictures_dir(),
+            help="Root directory below which export folders are created",
+            type="str",
+            is_cli=True,
+            cli_group="export",
+            cli_flag="output",
+        )
+    )
 
-    doc_gen.generate_cli_markdown_doc(output_file=default_cli_doc, app_name=app_name)
-    print(f"Generated: {default_cli_doc}")
+    export = ConfigCategory("export")
+    export.add(
+        ConfigParameter(
+            name="format",
+            value="jpg",
+            help="Export image format",
+            type="str",
+            choices=["jpg", "png"],
+            is_cli=True,
+            cli_group="export",
+        )
+    )
+    export.add(
+        ConfigParameter(
+            name="jpg_quality",
+            value=85,
+            help="JPEG quality (1-100)",
+            type="int",
+            is_cli=True,
+            cli_group="export",
+            cli_flag="quality",
+        )
+    )
+    export.add(
+        ConfigParameter(
+            name="reduce_resolution",
+            value=False,
+            help="Resize images so the longest side matches max_long_side",
+            type="bool",
+            is_cli=True,
+            cli_group="export",
+            cli_flag="reduce",
+        )
+    )
+    export.add(
+        ConfigParameter(
+            name="max_long_side",
+            value=1200,
+            help="Longest side in pixels when reducing resolution",
+            type="int",
+            is_cli=True,
+            cli_group="export",
+            cli_flag="max-side",
+        )
+    )
 
+    server = ConfigCategory("server")
+    server.add(
+        ConfigParameter(
+            name="host",
+            value="127.0.0.1",
+            help="Host interface the web UI binds to",
+            type="str",
+            is_cli=True,
+            cli_group="gui",
+        )
+    )
+    server.add(
+        ConfigParameter(
+            name="port",
+            value=8765,
+            help="Port the web UI listens on",
+            type="int",
+            is_cli=True,
+            cli_group="gui",
+        )
+    )
+    server.add(
+        ConfigParameter(
+            name="open_browser",
+            value=True,
+            help="Open the web UI in the default browser on start",
+            type="bool",
+            is_cli=True,
+            cli_group="gui",
+            cli_flag="open-browser",
+        )
+    )
 
-if __name__ == "__main__":
-    main()
+    return ConfigManager([app, paths, export, server])

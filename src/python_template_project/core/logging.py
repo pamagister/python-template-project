@@ -1,219 +1,126 @@
-"""Centralized logging configuration for python_template_project.
+"""Centralized logging configuration for python-template-project.
 
-This module provides a unified logging setup that supports:
-- File logging with rotation
-- GUI integration via custom handler
-- Configurable log levels from config
-- Structured logging with consistent formatting
+Provides file logging, console logging and an in-memory ring buffer that the
+web UI can read to render recent log lines.
 """
 
 import logging
 import logging.handlers
 import sys
+from collections import deque
 from pathlib import Path
 
-from python_template_project.config.config import ConfigParameterManager
+from python_template_project.config.config import ConfigManager
 
 
-class GuiLogHandler(logging.Handler):
-    """Custom logging handler that can write to GUI text widgets."""
+class RingBufferHandler(logging.Handler):
+    """Keep the most recent log records in memory for the web log view."""
 
-    def __init__(self, gui_writer=None):
+    def __init__(self, capacity: int = 500) -> None:
         super().__init__()
-        self.gui_writer = gui_writer
-        self.setFormatter(
-            logging.Formatter("%(asctime)s - %(levelname)s - %(message)s", datefmt="%H:%M:%S")
-        )
+        self.capacity = capacity
+        self.records: deque[str] = deque(maxlen=capacity)
+        self.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
 
-    def emit(self, record):
-        """Emit a log record to the GUI if writer is available."""
-        if self.gui_writer:
-            try:
-                msg = self.format(record) + "\n"
-                self.gui_writer.write(msg)
-            except Exception:
-                # Fail silently to avoid recursive logging errors
-                pass
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            self.records.append(self.format(record))
+        except Exception:  # pragma: no cover - logging must never raise
+            pass
+
+    def recent(self, limit: int | None = None) -> list[str]:
+        """Return the most recent log lines, oldest first."""
+        if limit is None or limit >= len(self.records):
+            return list(self.records)
+        return list(self.records)[-limit:]
 
 
 class LoggerManager:
     """Manages all logging configuration and handlers."""
 
-    def __init__(self, config: ConfigParameterManager):
+    def __init__(self, config: ConfigManager):
         self.config = config
         self.logger = logging.getLogger("python_template_project")
-        self.gui_handler = None
-        self.file_handler = None
-        self.console_handler = None
+        self.file_handler: logging.Handler | None = None
+        self.console_handler: logging.Handler | None = None
+        self.ring_handler = RingBufferHandler()
         self._setup_logging()
 
-    def _setup_logging(self):
+    def _setup_logging(self) -> None:
         """Configure all logging handlers and formatters."""
-        # Clear any existing handlers
         self.logger.handlers.clear()
 
-        # Set log level from config
-        log_level = getattr(logging, self.config.app.log_level.value.upper())
-        self.logger.setLevel(log_level)
+        app = self.config.category("app")
+        log_level = app.get("log_level").value.upper() if app else "INFO"
+        self.logger.setLevel(getattr(logging, log_level, logging.INFO))
 
-        # Create formatters
         detailed_formatter = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
         )
         simple_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
 
-        # Setup file handler with rotation
-        self._setup_file_handler(detailed_formatter)
+        if app and app.get("enable_file_logging").value:
+            self._setup_file_handler(detailed_formatter)
+        if app and app.get("enable_console_logging").value:
+            self._setup_console_handler(simple_formatter)
 
-        # Setup console handler
-        self._setup_console_handler(simple_formatter)
+        self.logger.addHandler(self.ring_handler)
 
-        # Setup GUI handler (will be connected later if needed)
-        self._setup_gui_handler()
-
-    def _setup_file_handler(self, formatter):
+    def _setup_file_handler(self, formatter: logging.Formatter) -> None:
         """Setup rotating file handler."""
         log_dir = Path("logs")
         log_dir.mkdir(exist_ok=True)
-
         log_file = log_dir / "python_template_project.log"
-
-        # Use RotatingFileHandler to prevent huge log files
         self.file_handler = logging.handlers.RotatingFileHandler(
             log_file,
-            maxBytes=10 * 1024 * 1024,  # 10MB
+            maxBytes=10 * 1024 * 1024,
             backupCount=5,
             encoding="utf-8",
         )
         self.file_handler.setFormatter(formatter)
         self.logger.addHandler(self.file_handler)
 
-    def _setup_console_handler(self, formatter):
+    def _setup_console_handler(self, formatter: logging.Formatter) -> None:
         """Setup console handler for CLI output."""
         self.console_handler = logging.StreamHandler(sys.stdout)
         self.console_handler.setFormatter(formatter)
         self.logger.addHandler(self.console_handler)
 
-    def _setup_gui_handler(self):
-        """Setup GUI handler (initially without writer)."""
-        self.gui_handler = GuiLogHandler()
-        # Don't add to logger yet - will be done when GUI connects
-
-    def connect_gui_writer(self, gui_writer):
-        """Connect a GUI writer to the logging system.
-
-        Args:
-            gui_writer: Object with write() method (like the LogHandler from gui.py)
-        """
-        if self.gui_handler:
-            # Remove old handler if it exists
-            if self.gui_handler in self.logger.handlers:
-                self.logger.removeHandler(self.gui_handler)
-
-        # Create new handler with GUI writer
-        self.gui_handler = GuiLogHandler(gui_writer)
-        self.logger.addHandler(self.gui_handler)
-
-    def disconnect_gui_writer(self):
-        """Disconnect GUI writer (useful when GUI closes)."""
-        if self.gui_handler and self.gui_handler in self.logger.handlers:
-            self.logger.removeHandler(self.gui_handler)
-
-    def get_logger(self, name: str = None) -> logging.Logger:
-        """Get a logger instance.
-
-        Args:
-            name: Logger name (defaults to main project logger)
-
-        Returns:
-            Logger instance
-        """
+    def get_logger(self, name: str | None = None) -> logging.Logger:
+        """Get a logger instance."""
         if name:
             return logging.getLogger(f"python_template_project.{name}")
         return self.logger
 
-    def set_log_level(self, level: str):
-        """Change log level dynamically.
+    def set_log_level(self, level: str) -> None:
+        """Change log level dynamically."""
+        self.logger.setLevel(getattr(logging, level.upper(), logging.INFO))
+        app = self.config.category("app")
+        if app and app.has("log_level"):
+            app.get("log_level").value = level.upper()
 
-        Args:
-            level: New log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-        """
-        log_level = getattr(logging, level.upper())
-        self.logger.setLevel(log_level)
-
-        # Update config
-        self.config.app.log_level.value = level.upper()
-
-    def log_config_summary(self):
-        """Log current configuration summary."""
-        self.logger.info("=== Configuration Summary ===")
-        self.logger.info(f"Log level: {self.config.app.log_level.value}")
-        self.logger.info(f"Input: {self.config.cli.input.value}")
-        self.logger.info(f"Output: {self.config.cli.output.value}")
-        self.logger.info(f"Max workers: {self.config.app.max_workers.value}")
-        self.logger.info("==============================")
+    def recent_logs(self, limit: int | None = None) -> list[str]:
+        """Return recent log lines from the in-memory ring buffer."""
+        return self.ring_handler.recent(limit)
 
 
-# Global logger manager instance
-_logger_manager = None
+_logger_manager: LoggerManager | None = None
 
 
-def initialize_logging(config: ConfigParameterManager) -> LoggerManager:
-    """Initialize the global logging system.
-
-    Args:
-        config: Configuration manager instance
-
-    Returns:
-        LoggerManager instance
-    """
+def initialize_logging(config: ConfigManager) -> LoggerManager:
+    """Initialize the global logging system."""
     global _logger_manager
     _logger_manager = LoggerManager(config)
     return _logger_manager
 
 
-def get_logger(name: str = None) -> logging.Logger:
-    """Get a logger instance.
-
-    Args:
-        name: Logger name (optional)
-
-    Returns:
-        Logger instance
-
-    Raises:
-        RuntimeError: If logging not initialized
-    """
-    if _logger_manager is None:
-        raise RuntimeError("Logging not initialized. Call initialize_logging() first.")
-    return _logger_manager.get_logger(name)
-
-
 def get_logger_manager() -> LoggerManager:
-    """Get the global logger manager.
-
-    Returns:
-        LoggerManager instance
-
-    Raises:
-        RuntimeError: If logging not initialized
-    """
+    """Return the global logger manager, raising if it was not initialized."""
     if _logger_manager is None:
         raise RuntimeError("Logging not initialized. Call initialize_logging() first.")
     return _logger_manager
 
 
-def connect_gui_logging(gui_writer):
-    """Connect GUI writer to logging system.
-
-    Args:
-        gui_writer: GUI writer object with write() method
-    """
-    if _logger_manager:
-        _logger_manager.connect_gui_writer(gui_writer)
-
-
-def disconnect_gui_logging():
-    """Disconnect GUI from logging system."""
-    if _logger_manager:
-        _logger_manager.disconnect_gui_writer()
+def get_logger(name: str | None = None) -> logging.Logger:
+    """Return a logger instance from the global manager."""
+    return get_logger_manager().get_logger(name)

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>python-template-project</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">python-template-project</div>
+    <nav class="menu">
+      <button id="settings-button" class="menu-button">Settings</button>
+      <div class="dropdown">
+        <button id="help-button" class="menu-button">Help</button>
+        <div id="help-menu" class="dropdown-content hidden">
+          <a id="docs-link" href="https://python-template-project.readthedocs.io/en/stable/" target="_blank" rel="noopener">Documentation</a>
+          <button id="about-button">About</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <section class="pathbar">
+    <label for="path-input">Folder</label>
+    <input id="path-input" type="text" spellcheck="false" placeholder="/path/to/images">
+    <button id="browse-button">Browse</button>
+    <button id="open-button">Open</button>
+    <span id="path-status" class="status"></span>
+  </section>
+
+  <section id="browser" class="browser hidden">
+    <button id="browse-up">..</button>
+    <div id="browse-list" class="browse-list"></div>
+  </section>
+
+  <main class="layout">
+    <section class="tiles-section">
+      <div class="tiles-header">
+        <h2>Images</h2>
+        <label><input type="checkbox" id="select-all"> Select all</label>
+      </div>
+      <div id="tiles" class="tiles"></div>
+    </section>
+
+    <aside class="panel">
+      <h2>Export</h2>
+      <label>Format
+        <select id="export-format">
+          <option value="jpg">jpg</option>
+          <option value="png">png</option>
+        </select>
+      </label>
+      <label>Quality
+        <input id="export-quality" type="number" min="1" max="100" value="85">
+      </label>
+      <label class="checkbox"><input id="export-reduce" type="checkbox"> Reduce resolution</label>
+      <label>Max side
+        <input id="export-max-side" type="number" min="1" value="1200">
+      </label>
+      <label>Output root
+        <input id="export-output" type="text" spellcheck="false" placeholder="output root">
+      </label>
+      <button id="export-button" class="primary">Export selected</button>
+      <div id="export-status" class="status"></div>
+
+      <h2>Log</h2>
+      <pre id="log" class="log"></pre>
+      <button id="refresh-log">Refresh log</button>
+    </aside>
+  </main>
+
+  <dialog id="settings-dialog">
+    <form method="dialog">
+      <h2>Settings</h2>
+      <div id="settings-form" class="settings-form"></div>
+      <menu>
+        <button value="cancel">Cancel</button>
+        <button id="save-settings" value="save">Save</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <dialog id="about-dialog">
+    <form method="dialog">
+      <h2>About</h2>
+      <p>python-template-project &mdash; a slim, local-first image export template.</p>
+      <menu><button value="close">Close</button></menu>
+    </form>
+  </dialog>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,8 +1,8 @@
-"""Entry point for python_template_project."""
+"""Enable ``python -m python_template_project``."""
 
-import sys  # pragma: no cover
+import sys
 
-from .cli.cli import main  # pragma: no cover
+from python_template_project.cli.cli import main
 
 if __name__ == "__main__":  # pragma: no cover
     sys.exit(main())

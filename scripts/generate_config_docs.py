@@ -1,39 +1,33 @@
-from pathlib import Path
+"""Generate the default config file and the config/CLI Markdown docs."""
 
-from config_cli_gui.docs import DocumentationGenerator
+from python_template_project.cli.cli import build_parser
+from python_template_project.cli.docgen import generate_cli_markdown
+from python_template_project.config.config import build_default_config
+from python_template_project.config.docgen import (
+    generate_config_markdown,
+    generate_default_config_file,
+)
 
-from python_template_project.config.config import ConfigParameterManager
+DEFAULT_CONFIG = "config.yaml"
+DEFAULT_CLI_DOC = "docs/usage/cli.md"
+DEFAULT_CONFIG_DOC = "docs/usage/config.md"
 
-"""function to generate config file and documentation."""
+
+def main() -> None:
+    """Generate all derived configuration artifacts."""
+    config = build_default_config()
+
+    generate_default_config_file(config, DEFAULT_CONFIG)
+    print(f"Generated: {DEFAULT_CONFIG}")
+
+    generate_config_markdown(config, DEFAULT_CONFIG_DOC)
+    print(f"Generated: {DEFAULT_CONFIG_DOC}")
+
+    generate_cli_markdown(
+        build_parser(config), DEFAULT_CLI_DOC, app_name=config.get_app_name()
+    )
+    print(f"Generated: {DEFAULT_CLI_DOC}")
 
 
-default_config: str = "config.yaml"
-default_cli_doc: str = "docs/usage/cli.md"
-default_config_doc: str = "docs/usage/config.md"
-
-config_manager = ConfigParameterManager()
-
-docGen = DocumentationGenerator(config_manager)
-docGen.generate_default_config_file(output_file=default_config)
-print(f"Generated: {default_config}")
-
-docGen.generate_config_markdown_doc(output_file=default_config_doc)
-print(f"Generated: {default_config_doc}")
-
-docGen.generate_cli_markdown_doc(output_file=default_cli_doc, app_name=config_manager.get_app_name())
-print(f"Generated: {default_cli_doc}")
-
-additional_cli_content = """
-
-# More parameter
-
-For your specific projects that inherit from the library, 
-you can add more parameters to the CLI and config file 
-by creating your own ConfigManager subclass 
-and adding more ConfigParameter instances. 
-The documentation generator will automatically include them 
-in the generated documentation.
-"""
-
-with Path(default_cli_doc).open("a", encoding="utf-8") as cli_doc:
-    cli_doc.write(additional_cli_content)
+if __name__ == "__main__":
+    main()

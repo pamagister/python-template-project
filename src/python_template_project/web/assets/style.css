@@ -1,0 +1,201 @@
+:root {
+  --bg: #f5f6f8;
+  --panel: #ffffff;
+  --border: #d7dae0;
+  --accent: #2f6feb;
+  --text: #1c1f24;
+  --muted: #6b7280;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 1rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.brand { font-weight: 600; }
+
+.menu { display: flex; gap: 0.5rem; position: relative; }
+
+.menu-button, button {
+  font: inherit;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+button:hover { border-color: var(--accent); }
+
+button.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.dropdown { position: relative; }
+
+.dropdown-content {
+  position: absolute;
+  right: 0;
+  top: 110%;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  min-width: 160px;
+  padding: 0.25rem;
+  z-index: 10;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.dropdown-content a, .dropdown-content button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  padding: 0.4rem 0.6rem;
+  text-decoration: none;
+  color: var(--text);
+  border-radius: 4px;
+}
+
+.dropdown-content a:hover, .dropdown-content button:hover { background: var(--bg); }
+
+.hidden { display: none; }
+
+.pathbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.pathbar input[type="text"] {
+  flex: 1;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+
+.browser {
+  padding: 0.6rem 1rem;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+}
+
+.browse-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.4rem; }
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 1rem;
+  padding: 1rem;
+  align-items: start;
+}
+
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 0.8rem;
+}
+
+.tile {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tile.selected { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+
+.tile img {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  background: #e5e7eb;
+}
+
+.tile label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 0.8rem;
+  word-break: break-all;
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.panel h2 { margin: 0.6rem 0 0; font-size: 1rem; }
+.panel h2:first-child { margin-top: 0; }
+
+.panel label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.85rem; }
+.panel label.checkbox { flex-direction: row; align-items: center; }
+
+.panel input[type="text"], .panel input[type="number"], .panel select {
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font: inherit;
+}
+
+.status { font-size: 0.85rem; color: var(--muted); }
+
+.log {
+  background: #0f172a;
+  color: #d1d5db;
+  padding: 0.5rem;
+  border-radius: 6px;
+  max-height: 220px;
+  overflow: auto;
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+}
+
+dialog {
+  border: none;
+  border-radius: 10px;
+  padding: 1.2rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  min-width: 360px;
+}
+
+dialog::backdrop { background: rgba(0, 0, 0, 0.35); }
+
+.settings-form { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+.settings-form label { display: flex; flex-direction: column; gap: 0.2rem; font-size: 0.85rem; }
+.settings-form input, .settings-form select {
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  font: inherit;
+}
+
+dialog menu { display: flex; justify-content: flex-end; gap: 0.5rem; }

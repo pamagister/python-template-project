@@ -1,84 +1,66 @@
 # Command Line Interface
 
-Command line options for python_template_project
+Command line options for python_template_project.
 
-```bash
-python-template-project [OPTIONS] <input>
+This document is generated from the live argparse parser, so it always
+matches the actual CLI.
+
+## `python_template_project`
+
+```
+usage: python-template-project [-h] [--config CONFIG] [-v | -q]
+                               {gui,export,config} ...
 ```
 
-For development from a source checkout, the equivalent module invocation is:
+Local web UI and image export helper.
 
-```bash
-python -m python_template_project [OPTIONS] <input>
+| Option | Type | Description | Default | Choices |
+|--------|------|-------------|---------|---------|
+| `--config` | - | Path to a configuration file (defaults to ./config.yaml) | - | - |
+| `-v, --verbose` | - | Enable debug logging | False | - |
+| `-q, --quiet` | - | Show warnings and errors only | False | - |
+
+## `python_template_project gui`
+
+```
+usage: python-template-project gui [-h] [--host HOST] [--port PORT]
+                                   [--open-browser | --no-open-browser]
 ```
 
-## Options
+| Option | Type | Description | Default | Choices |
+|--------|------|-------------|---------|---------|
+| `--host` | str | Host interface the web UI binds to | 127.0.0.1 | - |
+| `--port` | int | Port the web UI listens on | 8765 | - |
+| `--open-browser, --no-open-browser` | - | Open the web UI in the default browser on start | True | - |
 
-| Option                | Type | Description                                       | Default    | Choices       |
-|-----------------------|------|---------------------------------------------------|------------|---------------|
-| --config              | str  | Path to configuration file                        | -          | -             |
-| -v, --verbose         | bool | Enable debug logging                              | False      | [True, False] |
-| -q, --quiet           | bool | Show warnings and errors only                     | False      | [True, False] |
-| `input`               | str  | Path to input (file or folder)                    | *required* | -             |
-| `--output`            | str  | Path to output destination                        | *required* | -             |
-| `--min_dist`          | int  | Maximum distance between two waypoints            | 25         | -             |
-| `--extract_waypoints` | bool | Extract starting points of each track as waypoint | True       | [True, False] |
-| `--elevation`         | bool | Include elevation data in waypoints               | True       | [True, False] |
+## `python_template_project export`
 
-
-## Examples
-
-
-### 1. Basic usage
-
-```bash
-python-template-project input
+```
+usage: python-template-project export [-h] [--source SOURCE_DIR]
+                                      [--output OUTPUT_ROOT]
+                                      [--format {jpg,png}]
+                                      [--quality JPG_QUALITY]
+                                      [--reduce | --no-reduce]
+                                      [--max-side MAX_LONG_SIDE]
 ```
 
-### 2. With verbose logging
+| Option | Type | Description | Default | Choices |
+|--------|------|-------------|---------|---------|
+| `--source` | str | Default directory that contains the source images | /home/paul/Pictures | - |
+| `--output` | str | Root directory below which export folders are created | /home/paul/Pictures | - |
+| `--format` | str | Export image format | jpg | jpg, png |
+| `--quality` | int | JPEG quality (1-100) | 85 | - |
+| `--reduce, --no-reduce` | - | Resize images so the longest side matches max_long_side | False | - |
+| `--max-side` | int | Longest side in pixels when reducing resolution | 1200 | - |
 
-```bash
-python-template-project -v input
-python-template-project --verbose input
+## `python_template_project config`
+
+```
+usage: python-template-project config [-h] [--show] [--set KEY=VALUE] [--path]
 ```
 
-### 3. With quiet mode
-
-```bash
-python-template-project -q input
-python-template-project --quiet input
-```
-
-### 4. With output parameter
-
-```bash
-python-template-project --output  input
-```
-
-### 5. With min_dist parameter
-
-```bash
-python-template-project --min_dist 25 input
-```
-
-### 6. With extract_waypoints parameter
-
-```bash
-python-template-project --extract_waypoints True input
-```
-
-### Developer usage
-
-```bash
-python -m python_template_project --help
-python -m python_template_project input
-```
-
-# More parameter
-
-For your specific projects that inherit from the library, 
-you can add more parameters to the CLI and config file 
-by creating your own ConfigManager subclass 
-and adding more ConfigParameter instances. 
-The documentation generator will automatically include them 
-in the generated documentation.
+| Option | Type | Description | Default | Choices |
+|--------|------|-------------|---------|---------|
+| `--show` | - | Print the effective configuration | False | - |
+| `--set` | - | Set a configuration value (repeatable) | [] | - |
+| `--path` | - | Print the configuration file path | False | - |

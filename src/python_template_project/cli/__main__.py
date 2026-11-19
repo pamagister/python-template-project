@@ -1,8 +1,8 @@
-"""CLI entry point for project_name."""
+"""CLI entry point for ``python -m python_template_project.cli``."""
 
-import sys  # pragma: no cover
+import sys
 
-from .cli import main  # pragma: no cover
+from python_template_project.cli.cli import main
 
 if __name__ == "__main__":  # pragma: no cover
     sys.exit(main())

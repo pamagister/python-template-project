@@ -1,41 +1,31 @@
 app:
-  # Date format to use | type=str
-  date_format: '%Y-%m-%d'
   # Logging level for the application | type=str | choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL']
-  log_level: INFO
-  # Maximum log file size in MB before rotation | type=int
-  log_file_max_size: 10
-  # Number of backup log files to keep | type=int
-  log_backup_count: 5
-  # Log message format style | type=str | choices=['simple', 'detailed', 'json']
-  log_format: detailed
-  # Maximum number of worker threads | type=int
-  max_workers: 4
-  # Enable logging to file | type=bool | choices=[True, False]
+  log_level: 'INFO'
+  # Enable logging to a file | type=bool
   enable_file_logging: true
-  # Enable logging to console | type=bool | choices=[True, False]
+  # Enable logging to the console | type=bool
   enable_console_logging: true
-cli:
-  # Path to input (file or folder) | type=str | [CLI]
-  input: ''
-  # Path to output destination | type=str | [CLI]
-  output: ''
-  # Maximum distance between two waypoints | type=int | [CLI]
-  min_dist: 25
-  # Extract starting points of each track as waypoint | type=bool | [CLI] | choices=[True, False]
-  extract_waypoints: true
-  # Include elevation data in waypoints | type=bool | [CLI] | choices=[True, False]
-  elevation: true
-gui:
-  # GUI theme setting | type=str | choices=['light', 'dark', 'auto']
-  theme: light
-  # Default window width | type=int
-  window_width: 800
-  # Default window height | type=int
-  window_height: 600
-  # Height of the log window in pixels | type=int
-  log_window_height: 200
-  # Automatically scroll to the newest log entries | type=bool | choices=[True, False]
-  auto_scroll_log: true
-  # Maximum number of log lines to keep in GUI | type=int
-  max_log_lines: 1000
+
+paths:
+  # Default directory that contains the source images | type=str | CLI
+  source_dir: '/home/paul/Pictures'
+  # Root directory below which export folders are created | type=str | CLI
+  output_root: '/home/paul/Pictures'
+
+export:
+  # Export image format | type=str | choices=['jpg', 'png'] | CLI
+  format: 'jpg'
+  # JPEG quality (1-100) | type=int | CLI
+  jpg_quality: 85
+  # Resize images so the longest side matches max_long_side | type=bool | CLI
+  reduce_resolution: false
+  # Longest side in pixels when reducing resolution | type=int | CLI
+  max_long_side: 1200
+
+server:
+  # Host interface the web UI binds to | type=str | CLI
+  host: '127.0.0.1'
+  # Port the web UI listens on | type=int | CLI
+  port: 8765
+  # Open the web UI in the default browser on start | type=bool | CLI
+  open_browser: true

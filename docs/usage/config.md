@@ -1,48 +1,41 @@
 # Configuration Parameters
 
-These parameters are available to configure the behavior of your application.
-The parameters in the cli category can be accessed via the command line interface.
+These parameters configure the behavior of python-template-project. Parameters marked as CLI options can also be set on the command line.
 
-## Configuration File Reference
+The configuration is stored in [`config.yaml`](../../config.yaml). You can:
 
-The actual configuration is stored in [`config.yaml`](../../config.yaml). You can:
-
-- Edit the configuration file directly using your text editor
-- Use the `--config` command-line option to specify a custom config file
-- Place a `config.yaml` in your application's config
-  directory (typically `~/.config/config-cli-gui/`)
+- Edit the file directly with a text editor.
+- Point to a different file with `--config`.
+- Change values from the web UI settings panel or the `config` subcommand.
 
 ## Category "app" {#app}
 
-| Name                   | Type | Description                                 | Default    | Choices                                           |
-|------------------------|------|---------------------------------------------|------------|---------------------------------------------------|
-| date_format            | str  | Date format to use                          | '%Y-%m-%d' | -                                                 |
-| log_level              | str  | Logging level for the application           | 'INFO'     | ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] |
-| log_file_max_size      | int  | Maximum log file size in MB before rotation | 10         | -                                                 |
-| log_backup_count       | int  | Number of backup log files to keep          | 5          | -                                                 |
-| log_format             | str  | Log message format style                    | 'detailed' | ['simple', 'detailed', 'json']                    |
-| max_workers            | int  | Maximum number of worker threads            | 4          | -                                                 |
-| enable_file_logging    | bool | Enable logging to file                      | True       | [True, False]                                     |
-| enable_console_logging | bool | Enable logging to console                   | True       | [True, False]                                     |
+| Name | Type | Description | Default | Choices |
+|------|------|-------------|---------|---------|
+| log_level | str | Logging level for the application | 'INFO' | ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'] |
+| enable_file_logging | bool | Enable logging to a file | True | - |
+| enable_console_logging | bool | Enable logging to the console | True | - |
 
-## Category "cli" {#cli}
+## Category "paths" {#paths}
 
-| Name              | Type | Description                                       | Default | Choices       |
-|-------------------|------|---------------------------------------------------|---------|---------------|
-| input             | str  | Path to input (file or folder)                    | ''      | -             |
-| output            | str  | Path to output destination                        | ''      | -             |
-| min_dist          | int  | Maximum distance between two waypoints            | 25      | -             |
-| extract_waypoints | bool | Extract starting points of each track as waypoint | True    | [True, False] |
-| elevation         | bool | Include elevation data in waypoints               | True    | [True, False] |
+| Name | Type | Description | Default | Choices |
+|------|------|-------------|---------|---------|
+| source_dir | str | Default directory that contains the source images | '/home/paul/Pictures' | - |
+| output_root | str | Root directory below which export folders are created | '/home/paul/Pictures' | - |
 
-## Category "gui" {#gui}
+## Category "export" {#export}
 
-| Name              | Type | Description                                    | Default | Choices                   |
-|-------------------|------|------------------------------------------------|---------|---------------------------|
-| theme             | str  | GUI theme setting                              | 'light' | ['light', 'dark', 'auto'] |
-| window_width      | int  | Default window width                           | 800     | -                         |
-| window_height     | int  | Default window height                          | 600     | -                         |
-| log_window_height | int  | Height of the log window in pixels             | 200     | -                         |
-| auto_scroll_log   | bool | Automatically scroll to the newest log entries | True    | [True, False]             |
-| max_log_lines     | int  | Maximum number of log lines to keep in GUI     | 1000    | -                         |
+| Name | Type | Description | Default | Choices |
+|------|------|-------------|---------|---------|
+| format | str | Export image format | 'jpg' | ['jpg', 'png'] |
+| jpg_quality | int | JPEG quality (1-100) | 85 | - |
+| reduce_resolution | bool | Resize images so the longest side matches max_long_side | False | - |
+| max_long_side | int | Longest side in pixels when reducing resolution | 1200 | - |
 
+## Category "server" {#server}
+
+| Name | Type | Description | Default | Choices |
+|------|------|-------------|---------|---------|
+| host | str | Host interface the web UI binds to | '127.0.0.1' | - |
+| port | int | Port the web UI listens on | 8765 | - |
+| open_browser | bool | Open the web UI in the default browser on start | True | - |
