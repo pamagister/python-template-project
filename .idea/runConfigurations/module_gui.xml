@@ -8,13 +8,16 @@
       <env name="PYTHONUNBUFFERED" value="1" />
     </envs>
     <option name="SDK_HOME" value="" />
+    <option name="SDK_NAME" value="~/PycharmProjects/python-template-project/.venv" />
     <option name="WORKING_DIRECTORY" value="$ProjectFileDir$" />
     <option name="IS_MODULE_SDK" value="true" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="python_template_project.gui" />
-    <option name="PARAMETERS" value="" />
+    <option name="RUN_TOOL" value="true" />
+    <option name="RUN_AS_SCRIPT" value="false" />
+    <option name="SCRIPT_NAME" value="python_template_project" />
+    <option name="PARAMETERS" value="gui" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="true" />
