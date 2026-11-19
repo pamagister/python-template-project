@@ -201,3 +201,6 @@ cython_debug/
 /release/config.yaml
 /release/python-template-project.exe
 /release/README.md
+/.idea/vcs.xml
+/.idea/workspace.xml
+/.idea/shelf/*
