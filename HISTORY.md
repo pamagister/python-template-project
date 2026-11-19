@@ -4,6 +4,118 @@ Changelog
 
 (unreleased)
 ------------
+- Chore: ignore release/ and .thumbcache/ build artifacts. [Paul
+  Magister]
+- Cli doc. [Paul Magister]
+- Valid gui run config. [Paul Magister]
+- Docs: add web UI refactor mission plan. [Paul Magister]
+- Ci: Linux-only build/release and slim docs Refs #65. [Paul Magister]
+- Feat: replace GPX/tkinter stack with local web UI image exporter Refs
+  #64, #68, #66, #69, #67. [Paul Magister]
+- Extend gitignore. [Paul Magister]
+- Docs(AGENTS): sync AGENTS.md. [Paul Magister]
+- Docs(workflows): add workflow bundle overview and example prompts.
+  [Paul Magister]
+
+  Document task, feature, autopilot and mission-planning use cases plus the plan-to-execution handoff.
+- Build(opencode): mirror scripts use generic home directory via $HOME.
+  [Paul Magister]
+- Refactor(workflow): context-sparing task, feature and autopilot modes.
+  [Paul Magister]
+
+  Add context discipline, a durable handoff block and fresh-session boundaries to the workflow skills.
+- Docs(skills): put issue refs on the commit subject line Refs #63.
+  [Paul Magister]
+
+  Keep the issue reference visible in git log --oneline.
+- Refactor(skills): consolidate workflow harness into task, feature and
+  autopilot. [Paul Magister]
+
+  Refs #62
+- Improve skills, mirror skills and AGENTS_GLOBAL.md in makefile. [Paul
+  Magister]
+- Build: add opencode skills mirror script. [Paul Magister]
+
+  Add scripts/mirror-opencode-skills.sh which copies the four Opencode
+  skills (git-workflow, mission-planning, workflow-autopilot,
+  workflow-standard) from .agents/skills/ to the global skills directory
+  (/home/paul/.config/opencode/skills/). Existing same-named target skills
+  are removed first and freshly copied; all other global skills remain
+  untouched. The script is idempotent.
+
+  Closes #61
+- Improve skills. [Paul Magister]
+- Docs: mark plan as fully implemented. [Paul Magister]
+
+  All phases of the CI/CD refactor are completed. config-cli-gui received
+  PyInstaller build jobs and Makefile targets; other repos were already
+  conformant with the reference CI structure.
+- Docs: update plan status after CI refactor implementation. [Paul
+  Magister]
+
+  Mark phases 1-3 as completed following implementation across target repos.
+  config-cli-gui received PyInstaller build jobs and Makefile targets;
+  other repos were already conformant with the reference CI structure.
+- Streamline only main.yml. [Paul Magister]
+- Revert "ci: streamline cross-platform test workflow" [Paul Magister]
+
+  This reverts commit 0c40f091946377dd2eaea070a207b57a207748f1.
+- Revert "ci: add manual native platform builds" [Paul Magister]
+
+  This reverts commit 98409d0a35a0e5baf0443be5ff4ad09007aca87c.
+- Revert "ci: fix platform build matrix selection" [Paul Magister]
+
+  This reverts commit d57eb5eb30fb1c3f90f04e49b5173951ec178e48.
+- Merge pull request #60 from pamagister/ci/streamline-cross-platform.
+  [Paul Magister]
+
+  Ci/streamline cross platform
+- Ci: run complete validation --all. [Paul Magister]
+- Ci: fix platform build matrix selection. [Paul Magister]
+- Ci: validate cross-platform workflow --all. [Paul Magister]
+- Ci: add manual native platform builds. [Paul Magister]
+- Ci: streamline cross-platform test workflow. [Paul Magister]
+- Ci: detect the opt-in flag in the commit subject only. [Paul Magister]
+
+  The flags job previously scanned the whole commit message, so a commit
+  body that documented the flag also triggered the Windows and macOS jobs.
+  Scan only the subject line in both workflows and clarify this in the CI
+  documentation.
+
+  Refs #55
+- Ci: restore --all opt-in and document platform jobs. [Paul Magister]
+
+  Bring back the flags job in main.yml and release.yml so Windows and
+  macOS tests/builds run only when --all is present in the commit, the PR
+  title or the manual workflow input. Keep Linux as the fast default.
+
+  Re-add ALL=1 to make release, which appends --all to the tagged
+  HISTORY.md commit so the release pipeline builds all three platforms.
+
+  Add docs/develop/ci.md and update the release docs, feature list and
+  generated README to describe the opt-in behaviour.
+
+  Refs #55 #56 #58
+- Ci: fail-fast single test job, disable codecov upload. [Paul Magister]
+
+  Merge the linter and tests-ubuntu jobs into one tests job. make test already
+  depends on lint, so the previous setup ran Ruff twice and needed a second
+  checkout/setup/uv-sync cycle. A single job stops at the first failing check
+  and cuts job startup and dependency installation overhead.
+
+  Cancel superseded runs for the same ref (cancel-in-progress: true) and add a
+  job timeout. Install only the dev group in setup-environment; the docs group
+  is only needed by Read the Docs.
+
+  Comment out the Codecov upload because tokenless uploads fail with
+  "Token required - not valid tokenless upload". Tracked in #59.
+
+  Refs #59
+
+
+0.2.7 (2026-11-09)
+------------------
+- Docs: Update HISTORY.md for release 0.2.7. [Paul Magister]
 - Ci: Linux only – remove Windows and macOS from CI. [Paul Magister]
 
   Remove platform jobs (tests-windows, tests-macos, build-windows,
@@ -39,7 +151,7 @@ Changelog
   consolidated release.yml DAG: flags -> quality (lint + tests via make test)
   -> release/deploy -> builds. Deploy and GitHub Release only after green
   tests. Linux build always on tag; Windows/macOS builds only with --all flag.
-  All build artifacts are uploaded to the same release, avoiding races.
+  All build artefacts are uploaded to the same release, avoiding races.
 
   Refs #56
 - Ci(main): slim CI with --all flag over commit message. [Paul Magister]
