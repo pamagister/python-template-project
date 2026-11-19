@@ -218,10 +218,9 @@ Once your `pyproject.toml` (or `setup.py`) is in place, and your GitHub Actions 
 
     This will trigger both your `build` workflow (if it's also on tags) and your `release.yml` workflow (`release` and `deploy` jobs).
 
-  * **Release Windows and macOS too:** run `make release ALL=1` instead of
-    `make release`. This appends `--all` to the release commit so the release
-    pipeline also builds the Windows and macOS artifacts. See
-    [CI/CD Pipelines](ci.md) for the platform jobs and manual re-runs.
+  * **Linux executable:** The release pipeline also builds a single-file Linux
+    binary and attaches `package-linux.zip` to the GitHub release. See
+    [CI/CD Pipelines](ci.md).
 
   * **For manual trigger:** Go to the "Actions" tab in your GitHub repository, select your "Upload Python Package" workflow, and click "Run workflow".
 

@@ -2,7 +2,7 @@
 
 These parameters configure the behavior of python-template-project. Parameters marked as CLI options can also be set on the command line.
 
-The configuration is stored in [`config.yaml`](../../config.yaml). You can:
+The configuration is stored in `config.yaml` in the project root. You can:
 
 - Edit the file directly with a text editor.
 - Point to a different file with `--config`.

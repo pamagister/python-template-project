@@ -1,14 +1,7 @@
 name: CI
 
-# Linux is the always-on quality gate. Cross-platform tests are opt-in to keep
-# normal feedback fast and runner usage predictable.
-#
-# Opt in by:
-#   - adding --all to the commit subject or pull request title
-#   - running this workflow manually with all=true
-#
-# A feature branch under ci/** also runs on push, which makes it possible to
-# validate CI changes before opening a pull request.
+# Linux is the quality gate for every push and pull request. There are no
+# Windows/macOS jobs: the project only ships a Linux binary.
 
 on:
   push:
@@ -22,12 +15,6 @@ on:
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
-    inputs:
-      all:
-        description: 'Also test Windows and macOS'
-        required: false
-        type: boolean
-        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -36,29 +23,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Detects the `--all` opt-in once per run. It runs in parallel with `tests`
-  # and publishes the result as a job output for the optional platform jobs.
-  flags:
-    runs-on: ubuntu-latest
-    outputs:
-      build_all: ${{ steps.detect.outputs.build_all }}
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - id: detect
-        shell: bash
-        env:
-          INPUT_ALL: ${{ inputs.all }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: |
-          COMMIT_SUBJECT="$(git log -1 --format=%s)"
-          if [[ "$COMMIT_SUBJECT" == *"--all"* || "$PR_TITLE" == *"--all"* || "$INPUT_ALL" == "true" ]]; then
-            echo "build_all=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "build_all=false" >> "$GITHUB_OUTPUT"
-          fi
-
   tests:
     name: Linux / lint + tests
     runs-on: ubuntu-latest
@@ -74,25 +38,3 @@ jobs:
           python-version: '3.11'
       - name: Run linter and tests
         run: make test
-
-  tests-cross-platform:
-    name: Tests / ${{ matrix.os }}
-    needs: [flags, tests]
-    if: needs.flags.outputs.build_all == 'true'
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-      - name: Setup Environment
-        uses: ./.github/actions/setup-environment
-        with:
-          python-version: '3.11'
-      - name: Run tests
-        run: uv run pytest -s -vvvv -l --tb=long tests

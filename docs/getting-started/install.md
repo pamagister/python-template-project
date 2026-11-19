@@ -1,7 +1,7 @@
 # Installation
 
 
-## 🐍 PyPI
+## PyPI
 
 ### Install the package from PyPI
 
@@ -11,30 +11,37 @@ Download from [PyPI](https://pypi.org/):
 pip install python-template-project
 ```
 
-### Run CLI from command line
+### Run the web UI
+
 ```bash
-python-template-project [OPTIONS] path/to/file
+python-template-project
 ```
 
-### Run GUI from command line
+The command starts a local server (bound to `127.0.0.1` by default) and opens the
+browser. Use `python-template-project gui --help` for host, port and browser options.
+
+### Run the CLI
+
 ```bash
-python-template-project-gui
+python-template-project --help
+python-template-project export --source ./photos --output ~/Pictures --format jpg
+python-template-project config --show
 ```
 
-## 🔽 Executable
+## Executable
 
-Download the latest executable:
+Download the latest Linux executable from the
+[GitHub releases page](https://github.com/pamagister/python-template-project/releases/latest).
 
-- [⬇️ Download for Windows](https://github.com/pamagister/python-template-project/releases/latest/download/installer-win.zip)
-- [⬇️ Download for macOS](https://github.com/pamagister/python-template-project/releases/latest/download/package-macos.zip)
+The project only ships a Linux binary. On other platforms install from PyPI or
+run from source.
 
-
-## 👩🏼‍💻 Run from source
+## Run from source
 
 ### Clone the repository
 
 ```bash
-git clone
+git clone https://github.com/pamagister/python-template-project
 ```
 
 ### Navigate to the project directory
@@ -46,21 +53,17 @@ cd python-template-project
 ### Install dependencies
 
 ```bash
-uv venv
-uv pip install -e .[dev,docs]
+make install
 ```
 
-
-### Run with CLI from source
+### Run the web UI from source
 
 ```bash
-python -m python_template_project.cli [OPTIONS] path/to/file
+python -m python_template_project gui
 ```
 
-
-### Run with GUI from source
+### Run the CLI from source
 
 ```bash
-python -m python_template_project.gui
+python -m python_template_project --help
 ```
-

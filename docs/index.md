@@ -1,6 +1,6 @@
 # Welcome to python-template-project
 
-A feature-rich Python project template with auto-generated CLI, GUI and parameterized configuration.
+A slim, local-first Python project template with a browser-based image exporter.
 
 [![Github CI Status](https://github.com/pamagister/python-template-project/actions/workflows/main.yml/badge.svg)](https://github.com/pamagister/python-template-project/actions)
 [![GitHub release](https://img.shields.io/github/v/release/pamagister/python-template-project)](https://github.com/pamagister/python-template-project/releases)
@@ -10,38 +10,39 @@ A feature-rich Python project template with auto-generated CLI, GUI and paramete
 [![PyPI](https://img.shields.io/pypi/v/python-template-project)](https://pypi.org/project/python-template-project/)
 [![Downloads](https://pepy.tech/badge/python-template-project)](https://pepy.tech/project/python-template-project/)
 
-
-This template provides a solid foundation for your next Python project, incorporating best practices for testing, automation, and distribution. It streamlines the development process with a comprehensive set of pre-configured tools and workflows, allowing you to focus on writing code.
+This template provides a solid foundation for your next Python project. It keeps a
+battle-tested tooling setup (uv, Ruff, pytest, mkdocs, PyInstaller, tag-based
+releases) while staying small: the only runtime dependencies are **PyYAML** and
+**Pillow**.
 
 ---
 
 ## How to use this template
 
-Getting started on developing your own project based on this template
+Getting started on developing your own project based on this template.
 
-> **DO NOT FORK** 
-> This project is meant to be used from **[Use this template](https://github.com/pamagister/python-template-project/generate)** feature.
+> **DO NOT FORK**
+> This project is meant to be used from the **[Use this template](https://github.com/pamagister/python-template-project/generate)** feature.
 
 ---
 
-1. **Create a new repository using GitHub template**  
+1. **Create a new repository using GitHub template**
    Click on **[Use this template](https://github.com/pamagister/python-template-project/generate)**.
 
-2. **Give a name to your project**  
-   For example: `my-python-project`  
+2. **Give a name to your project**
+   For example: `my-python-project`
    *(Hyphens may be used as project name; they are converted during renaming internally to underscores for packages.)*
 
-3. **Set write permissions**  
-   Go to: `Repository -> Settings -> Actions -> General -> Workflow permissions`  
+3. **Set write permissions**
+   Go to: `Repository -> Settings -> Actions -> General -> Workflow permissions`
    Select: `Read and write permissions`, then click **Save**.
 
-4. **Trigger rename workflow**  
-   Navigate to `Actions` tab → Select **Rename Action** → Run workflow on the `main` branch.
+4. **Trigger rename workflow**
+   Navigate to the `Actions` tab, select **Rename Action** and run the workflow on the `main` branch.
 
 5. **Wait for the workflow to finish**
 
-6. **Clone the repository**  
-   Run:  
+6. **Clone the repository**
    ```bash
    git clone [your-github-url]
    ```
@@ -49,8 +50,6 @@ Getting started on developing your own project based on this template
 7. **Open the project in your IDE**
 
 8. **Install dependencies and create virtual environment**
-   Run:
-
    ```bash
    make install
    ```
@@ -63,93 +62,87 @@ Getting started on developing your own project based on this template
 
 11. **Clean up template scripts**
     Delete the files:
-
     * `rename_project.yml`
     * `rename_project.sh`
 
 12. **Format your codebase**
-    Run:
-
     ```bash
     make fmt
     ```
 
-    This will auto-format your files and reorder imports (based on any name changes).
-
 13. **Enable pre-commit hooks**
-    Run:
-
     ```bash
     uv run pre-commit install
     ```
 
-14. **Add repository to ReadTheDocs**
+14. **Add repository to Read the Docs**
     Visit: [https://app.readthedocs.org/dashboard/import/](https://app.readthedocs.org/dashboard/import/)
 
 15. **Configure PyPI publishing**
-
     * Generate a **PyPI API token** from your PyPI account.
-    * Go to **GitHub → Settings → Secrets and variables → Actions**.
+    * Go to **GitHub -> Settings -> Secrets and variables -> Actions**.
     * Add the secret as `PYPI_API_TOKEN`.
 
 16. **Release your first version**
-    Run:
-
     ```bash
     make release
     ```
-    
+
 ---
 
 ## Feature overview
 
-* 📦 **Package Management:** Utilizes [uv](https://docs.astral.sh/uv/getting-started/), an extremely fast Python package manager, with dependencies managed in `pyproject.toml`.
-* ✅ **Code Formatting and Linting:** Pre-commit hook with the [RUFF auto-formatter](https://docs.astral.sh/ruff/) to ensure consistent code style.
-* 🧪 **Testing:** Unit testing framework with [pytest](https://docs.pytest.org/en/latest/).
-* 📊 **Code coverage reports** using [codecov](https://about.codecov.io/sign-up/)
-* 🔄 **CI/CD:**  [GitHub Actions](https://github.com/features/actions) for Linux checks on every push, with opt-in Windows and macOS runs via `--all`.
-* 💾 **Automated Builds:** GitHub pipeline for a Linux executable, plus opt-in Windows and macOS builds via `--all`.
-* 💬 **Parameter-Driven Automation:**
-    * Automatic generation of a configuration file from parameter definitions.
-    * Automatic generation of a Command-Line Interface (CLI) from the same parameters.
-    * Automatic generation of CLI API documentation.
-    * Automatic generation of change log using **gitchangelog** to keep a HISTORY.md file up to date.
-* 📃 **Documentation:** Configuration for publishing documentation on [Read the Docs](https://about.readthedocs.com/) using [mkdocs](https://www.mkdocs.org/) .
-* 🖼️ **Minimalist GUI:** Comes with a basic GUI based on [tkinker](https://tkdocs.com/tutorial/index.html) that includes an auto-generated settings menu based on your defined parameters.
-* 🖥️ **Workflow Automation:** A `Makefile` is included to simplify and automate common development tasks.
-* 🧭 **Agentic Workflows:** Context-sparing OpenCode workflows (task, feature, autopilot, mission planning) — see [docs/workflows.md](workflows.md).
-* 🛳️ **Release pipeline:** Automated releases unsing the Makefile `make release` command, which creates a new tag and pushes it to the remote repo. The `release` pipeline will automatically create a new release on GitHub and trigger a release on  [PyPI](https://pypi.org.
-    * **[setuptools](https://pypi.org/project/setuptools/)** is used to package the project and manage dependencies.
-    * **[setuptools-scm](https://pypi.org/project/setuptools-scm/)** is used to automatically generate the `_version.py` file from the `pyproject.toml` file.
+* **Package Management:** Uses [uv](https://docs.astral.sh/uv/getting-started/), an extremely fast Python package manager, with dependencies managed in `pyproject.toml`.
+* **Code Formatting and Linting:** Ruff auto-formatter and linter for consistent code style.
+* **Testing:** Unit testing framework with [pytest](https://docs.pytest.org/en/latest/).
+* **Code coverage reports** using [coverage.py](https://coverage.readthedocs.io/).
+* **CI/CD:** [GitHub Actions](https://github.com/features/actions) Linux checks on every push and pull request.
+* **Automated Builds:** GitHub pipeline for a single-file Linux executable with PyInstaller.
+* **Parameter-Driven Automation:**
+  * A self-contained configuration layer (no external config framework).
+  * A stdlib `argparse` CLI with `gui`, `export` and `config` subcommands.
+  * CLI and configuration documentation generated from the live parser and config definitions.
+  * Automatic change log using **gitchangelog** to keep a `HISTORY.md` file up to date.
+* **Documentation:** Publishing on [Read the Docs](https://about.readthedocs.com/) using [mkdocs](https://www.mkdocs.org/).
+* **Local Web UI:** A lightweight, local-first browser UI served by the standard library `http.server`, using Pillow for thumbnails and export. No native desktop GUI and no client framework.
+* **Workflow Automation:** A `Makefile` simplifies and automates common development tasks.
+* **Agentic Workflows:** Context-sparing OpenCode workflows (task, feature, autopilot, mission planning) — see [docs/workflows.md](workflows.md).
+* **Release pipeline:** `make release` validates the tag, creates it and pushes it. The `release` workflow then creates a GitHub release and publishes to [PyPI](https://pypi.org).
+  * **[setuptools](https://pypi.org/project/setuptools/)** is used to package the project and manage dependencies.
+  * **[setuptools-scm](https://pypi.org/project/setuptools-scm/)** automatically generates `_version.py` from the Git tag.
 
 ---
 
 ## Installation
 
-Get an impression of how your own project could be installed and look like.
+Get an impression of how your own project could be installed and used.
 
 Download from [PyPI](https://pypi.org/).
 
-💾 For more installation options see [install](getting-started/install.md).
+For more installation options see [install](getting-started/install.md).
 
 ```bash
 pip install python-template-project
 ```
 
-Run GUI from command line
+Open the web UI (also the default when the installed command is run without arguments):
 
 ```bash
-python-template-project-gui
+python-template-project
 ```
 
-Run application from command line using CLI
+Run the CLI directly:
 
 ```bash
-python -m python_template_project.cli [OPTIONS] path/to/file
+python-template-project export --source ./photos --output ~/Pictures --format jpg
+python-template-project config --show
 ```
 
+From a source checkout the module equivalents are:
+
 ```bash
-python-template-project-cli [OPTIONS] path/to/file
+python -m python_template_project --help
+python -m python_template_project export --source ./photos
 ```
 
 ---
@@ -167,4 +160,3 @@ You have to run these commands in your IDE Terminal or the git bash and then pus
 ```bash
 git update-index --chmod=+x ./.github/release_message.sh
 ```
-

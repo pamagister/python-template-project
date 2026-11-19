@@ -34,7 +34,7 @@ precommit: ## Format, test and check dependencies.
 	$(MAKE) deptry
 
 .PHONY: fmt
-fmt:              ## Format code using black & isort.
+fmt:              ## Format code using Ruff.
 	uv run ruff format src/
 	uv run ruff format tests/
 	uv run ruff check src/ --fix
@@ -42,7 +42,7 @@ fmt:              ## Format code using black & isort.
 	$(MAKE) syncdocs
 
 .PHONY: lint
-lint:             ## Run pep8, black, mypy linters.
+lint:             ## Run the Ruff linter and format check.
 	uv run ruff check src/
 	uv run ruff check tests/
 	uv run ruff format --check src/
@@ -55,20 +55,16 @@ test: lint        ## Run tests and generate coverage report.
 	uv run coverage xml
 	uv run coverage html
 
-.PHONY: build-win
-build-win:    ## Build the Windows executable.
-	echo "Building unified CLI/GUI application"
-	uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml;." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
-	rm -rf release
-	mkdir release
-	cp dist/python-template-project.exe release
-	cp config.yaml release
-	cp README.md release
-
 .PHONY: build-linux
-build-linux:    ## Build the Linux executable.
+build-linux:    ## Build the Linux executable (includes the web UI assets and Pillow).
 	## Build the Linux executable.
-	uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml:." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
+	uv run pyinstaller --onefile --noconfirm src/main.py \
+		--name python-template-project \
+		--add-data "config.yaml:." \
+		--add-data "src/python_template_project/web/assets:python_template_project/web/assets" \
+		--collect-submodules PIL \
+		--hidden-import python_template_project.cli.cli \
+		--hidden-import python_template_project.web.server
 
 	rm -rf release
 	mkdir release
@@ -76,28 +72,6 @@ build-linux:    ## Build the Linux executable.
 	cp config.yaml release
 	cp README.md release
 
-
-.PHONY: build-macos
-build-macos:    ## Build the macOS executable.
-	echo "Building unified CLI/GUI application as executable"
-	uv run pyinstaller --onefile src/main.py --name python-template-project --add-data "config.yaml:." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
-
-	echo "Building unified CLI/GUI application as .app bundle"
-	# --windowed is important to hide the console for GUI mode
-	# The name "TemplateApp" becomes the name of the .app
-	uv run pyinstaller --windowed --name "TemplateApp" src/main.py --add-data "config.yaml:." --hidden-import python_template_project.cli.cli --hidden-import python_template_project.gui.gui
-
-	# Prepare ZIP file for release
-	rm -rf release
-	mkdir release
-	echo "Copy the CLI/GUI executable"
-	cp dist/python-template-project release/
-	echo "Copy the .app bundle (directory) recursively"
-	cp -R "dist/TemplateApp.app" release/
-	echo "Copy configuration and documentation"
-	cp config.yaml release/
-	cp README.md release/
-	echo "Create usage instructions"
 
 .PHONY: watch
 watch:            ## Run tests on every change.
@@ -130,9 +104,16 @@ virtualenv:       ## Create a virtual environment.
 	uv venv
 
 .PHONY: release
-release:          ## Create a new tag for release. Use ALL=1 to also build Windows and macOS.
+release:          ## Create a new, validated release tag (Linux-only release).
 	$(MAKE) precommit
 	@echo "WARNING: This operation will create a version tag and push to GitHub"
+
+	# Reject a dirty working tree. HISTORY.md churn from gitchangelog is allowed.
+	@if [ -n "$$(git status --porcelain | grep -v '^.. HISTORY.md$$')" ]; then \
+		echo "ERROR: working tree is not clean (only HISTORY.md changes are allowed)"; \
+		git status --short; \
+		exit 1; \
+	fi
 
 	# Get the latest Git tag if it exists, otherwise default to 0.0.0 for calculations
 	# 'git describe --tags --abbrev=0' gets the most recent tag
@@ -147,22 +128,33 @@ release:          ## Create a new tag for release. Use ALL=1 to also build Windo
 	# Prompt the user for the new tag, suggesting the next patch version by default
 	read -e -i "$$NEXT_PATCH_VERSION" -p "Enter the new release tag (e.g., 1.0.0, 1.1.0, 1.1.1): " NEW_TAG
 
-	# Append --all when ALL=1 so the release workflow also builds Windows and
-	# macOS. The flag must be part of the tagged commit message; the workflow
-	# reads it with `git log -1` in the `flags` job.
-	@if [ "$${ALL}" = "1" ]; then ALL_SUFFIX=" --all"; else ALL_SUFFIX=""; fi
+	# Validate the semver format (X.Y.Z)
+	@echo "$$NEW_TAG" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$$' || { echo "ERROR: tag '$$NEW_TAG' is not X.Y.Z"; exit 1; }
+
+	# Reject duplicate tags
+	@if git rev-parse -q --verify "refs/tags/$${NEW_TAG}" >/dev/null; then \
+		echo "ERROR: tag '$${NEW_TAG}' already exists"; \
+		exit 1; \
+	fi
+
+	# Ensure the new version is greater than the current tag
+	@NEW_KEY=$$(echo "$${NEW_TAG}" | awk -F. '{print $$1*1000000+$$2*1000+$$3}')
+	@CUR_KEY=$$(echo "$${CURRENT_TAG}" | awk -F. '{print $$1*1000000+$$2*1000+$$3}')
+	@if [ "$$NEW_KEY" -le "$$CUR_KEY" ]; then \
+		echo "ERROR: new tag '$${NEW_TAG}' is not greater than '$${CURRENT_TAG}'"; \
+		exit 1; \
+	fi
 
 	# Generate changelog *before* tagging, based on existing history up to the new tag point
 	uv run gitchangelog > HISTORY.md
 	git add HISTORY.md
-	git commit -m "docs: Update HISTORY.md for release $${NEW_TAG}$${ALL_SUFFIX}"
+	git commit -m "docs: Update HISTORY.md for release $${NEW_TAG}"
 
 	echo "Creating git tag : $${NEW_TAG}"
 	git tag "$${NEW_TAG}"
 	git push -u origin HEAD --tags
 
-	echo "GitHub Actions will detect the new tag and trigger the release workflows."
-	echo "Add modified files to commit and push them to main"
+	echo "GitHub Actions will detect the new tag and trigger the release workflow."
 
 .PHONY: syncdocs
 syncdocs:         ## Sync the documentation.
@@ -181,7 +173,7 @@ docs:             ## Build and sync the documentation.
 
 .PHONY: tree
 tree:            ## Show project tree (excluding ignored folders)
-	@uv run fs-tool --plain inspect tree . --ignore-dir .github --ignore-dir htmlcov --ignore-dir __main__ --ignore-dir site --ignore-dir .ruff --ignore-pattern '*.pyc'
+	@uv run ./scripts/show_tree.py --details
 
 .PHONY: pytree
 pytree:            ## Show project tree (excluding ignored folders)

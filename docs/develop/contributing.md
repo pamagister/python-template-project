@@ -84,15 +84,17 @@ help:             ## Displays the help.
 show:             ## Show the current environment.
 install:          ## Install the project in dev mode.
 lock:             ## Builds the uv.lock file and syncs the packages.
-fmt:              ## Format code using black & isort.
-lint:             ## Run pep8, black, mypy linters.
+fmt:              ## Format code using Ruff.
+lint:             ## Run the Ruff linter and format check.
 test: lint        ## Run tests and generate coverage report.
 watch:            ## Run tests on every change.
 clean:            ## Clean unused files. 
 deptry:           ## Check for unused dependencies.
 virtualenv:       ## Create a virtual environment.
-release:          ## Create a new tag for release.
+release:          ## Create a new, validated release tag (Linux-only release).
 docs:             ## Build the documentation using mkdocs.
+build-linux:      ## Build the Linux executable (includes the web UI assets and Pillow).
+tree:             ## Show project tree (excluding ignored folders).
 init:             ## Initialize the project based on an application template.
 ```
 
